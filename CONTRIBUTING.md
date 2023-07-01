@@ -21,6 +21,64 @@ reported the issue. Please try to include as much information as you can. Detail
 
 
 ## Contributing via Pull Requests
+
+This is mostly the same as [GitHub's guide on creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
+
+First, create a _fork_ of `clickstream-js`. Clone it, and make changes to this _fork_.
+
+```shell
+git clone git@github.com:your_username/clickstream-js.git 
+```
+
+After you have tested your feature/fix, by adding sufficient test coverage, and
+validating Checkstyle, lint, and the existing test suites, you're ready to
+publish your change.
+
+The commit message should look like below. It started with a prefix like feat/fix or
+chore. After a paragraph describing what you've done, include links to useful resources. These might
+include design documents, StackOverflow implementation notes, GitHub issues,
+etc. All links must be publicly accessible.
+
+```console
+feat: add new preset event for screen view.
+
+Resolves: https://github.com/awslabs/clickstream-js/issues/222
+See also: https://stackoverflow.com/a/58662077/695787
+```
+
+Now, save your work to a new branch:
+
+```shell
+git checkout -b feature_page_view
+```
+
+To publish it:
+
+```shell
+git push -u origin feature_page_view
+```
+
+This last step will give you a URL to view a GitHub page in your browser.
+Copy-paste this, and complete the workflow in the UI. It will invite you to
+"create a PR" from your newly published branch.
+
+### Pull Request Guidelines
+- The title of your PR must be descriptive to the specific change.
+- The title of your PR must be of below format since next release version is determined from PR titles in the commit history.
+    - For a bugfix: `fix: description of changes`
+    - For a feature: `feat: add awesome feature`
+    - Everything else: `chore: fix build script`
+- No period at the end of the title.
+- Pull Request message should indicate which issues are fixed: `fixes #<issue>` or `closes #<issue>`.
+- If not obvious (i.e. from unit tests), describe how you verified that your change works.
+- If this PR includes breaking changes, they must be listed at the top of the changelog as described above in the Pull Request Checklist.
+- PR must be reviewed by at least one repository maintainer, in order
+  to be considered for inclusion.
+- PR must also pass the Actions like Checkstyle, Lint, and Unit tests.
+- Usually all these are going to be **squashed** when you merge to main.
+- Make sure to update the PR title/description if things change.
+- Rebase with the `main` branch if it has commits ahead of your fork.
+
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
 1. You are working against the latest source on the *main* branch.

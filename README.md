@@ -1,92 +1,70 @@
-# Clickstream Web SDK
+# AWS Solution Clickstream Analytics SDK for Web
 
+## Introduction
 
+Clickstream Web SDK can help you easily collect and report events from browser to AWS. This SDK is part of an AWS solution - Clickstream Analytics on AWS, which provisions data pipeline to ingest and process event data into AWS services such as S3, Redshift.
 
-## Getting started
+The SDK relies on the Amplify for JS SDK Core Library and is developed according to the Amplify AnalyticsProvider interface. In addition, we've added features that automatically collect common user events and attributes (e.g., page view, first open) to simplify data collection for users.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Integrate SDK
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.aws.dev/aws-gcr-solutions/incubator/web-analytics-on-aws/clickstream-web-sdk.git
-git branch -M main
-git push -uf origin main
+**1.Include SDK**
+```bash
+npm install @aws-soluton/clickstream-js
 ```
 
-## Integrate with your tools
+**2.Initialize the SDK**
+You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the config code will as follows:
 
-- [ ] [Set up project integrations](https://gitlab.aws.dev/aws-gcr-solutions/incubator/web-analytics-on-aws/clickstream-web-sdk/-/settings/integrations)
+```typescript
+import { ClickstreamAnalytics } from '@aws-soluton/clickstream-js';
 
-## Collaborate with your team
+ClickstreamAnalytics.configure({
+   appId: "your appId",
+   endpoint: "https://example.com/collect",
+   sendMode: EventMode.Batch,
+   sendEventsInterval: 5000,
+   isTrackPageViewEvents: true,
+   pageType: PageType.SPA,
+   isLogEvents: false,
+   authCookie: "your auth cookie",
+   sessionTimeoutDuration: 1800000
+)}
+```
+Your `appId` and `endpoint` are already set up in it, here's an explanation of each property:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+- **appId**: the app id of your project in control plane.
+- **endpoint**: the endpoint path you will upload the event to AWS server.
+- **sendMode**: EventMode.Immediate, EventMode.Batch, EventMode.Beacon, default is Immediate mode.
+- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
+- **isTrackPageViewEvents**: whether auto page view events in browser, default is `true`
+- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multipule page application, default is multiPageApp. This attribute works only when the attribute `isTrackPageViewEvents`'s value ' is `true`.
+- **isLogEvents**: whether log event in debug mode, default is false.
+- **authCookie**: your auth cookie for AWS application load balancer auth cookie.
+- **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
 
-## Test and Deploy
+You can refer this [guide]("https://awslabs.github.io/clickstream-analytics-on-aws/en/sdk-manual/web.html") to explore more usages.
 
-Use the built-in continuous integration in GitLab.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Start using
+#### Record event.
 
-***
+Add the following code where you need to report event.
 
-# Editing this README
+```typescript
+import { ClickstreamAnalytics } from '@aws-soluton/clickstream-js';
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+ClickstreamAnalytics.record({ name: 'albumVisit' });
+ClickstreamAnalytics.record({
+  name: 'buttonClick',
+  attributes: { _channel: 'SMS', Successful: true }
+});
+```
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Security
 
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This library is licensed under the [Apache 2.0 License](./LICENSE).
