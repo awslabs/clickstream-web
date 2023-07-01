@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2019"
+    ],
+    "downlevelIteration": true,
+    "target": "es5",
+    "moduleResolution": "node",
+    "declaration": true,
+    "noEmitOnError": false,
+    "incremental": true,
+    "importHelpers": true,
+    "outDir": "dist",
+    "types": [
+      "node",
+      "jest"
+    ]
+  },
+  "include": [
+    "src"
+  ]
+}
