@@ -15,6 +15,7 @@
     "incremental": true,
     "importHelpers": true,
     "outDir": "dist",
+    "resolveJsonModule": true,
     "types": [
       "node",
       "jest"

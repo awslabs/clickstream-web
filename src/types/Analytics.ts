@@ -14,11 +14,68 @@
 export interface ClickstreamConfiguration {
 	readonly appId: string;
 	readonly endpoint: string;
-	readonly sendMode?: 'Immediate' | 'Batch' | 'Beacon';
+	readonly sendMode?: SendMode;
 	readonly sendEventsInterval?: number;
 	readonly isTrackPageViewEvents?: boolean;
-	readonly pageType?: 'SPA' | 'multiPageApp';
+	readonly pageType?: PageType;
 	isLogEvents?: boolean;
 	authCookie?: string;
 	readonly sessionTimeoutDuration?: number;
+}
+
+export enum SendMode {
+	Immediate = 'Immediate',
+	Batch = 'Batch',
+	Beacon = 'Beacon',
+}
+
+export enum PageType {
+	SPA = 'SPA',
+	multiPageApp = 'multiPageApp',
+}
+
+export interface ClickstreamAttribute {
+	[key: string]: string | number | boolean | null;
+}
+
+export interface UserAttributeObject {
+	value: string | number | boolean;
+	set_timestamp: number;
+}
+
+export interface UserAttribute {
+	[key: string]: UserAttributeObject;
+}
+
+export interface ClickstreamEvent {
+	name: string;
+	attributes?: ClickstreamAttribute;
+}
+
+export interface AnalyticsEvent {
+	hashCode?: string;
+	unique_id: string;
+	event_type: string;
+	event_id: string;
+	timestamp: number;
+	device_id: string;
+	platform: string;
+	make: string;
+	locale: string;
+	screen_height: number;
+	screen_width: number;
+	zone_offset: number;
+	system_language: string;
+	country_code: string;
+	sdk_version: string;
+	sdk_name: string;
+	host_name: string;
+	app_id: string;
+	user: UserAttribute;
+	attributes: ClickstreamAttribute;
+}
+
+export interface EventError {
+	error_code: number;
+	error_message?: string;
 }

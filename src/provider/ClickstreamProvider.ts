@@ -11,21 +11,38 @@
  *  and limitations under the License.
  */
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
-import { AnalyticsProvider, ClickstreamConfiguration } from '../types';
+import { AnalyticsEventBuilder } from './AnalyticsEventBuilder';
+import { ClickstreamContext } from './ClickstreamContext';
+import { Event } from './Event';
+import { EventRecorder } from './EventRecorder';
+import { BrowserInfo } from '../browser';
+import {
+	AnalyticsProvider,
+	ClickstreamAttribute,
+	ClickstreamConfiguration,
+	ClickstreamEvent,
+	PageType,
+	SendMode,
+	UserAttribute,
+} from '../types';
+import { StorageUtil } from '../util/StorageUtil';
 
 const logger = new Logger('ClickstreamProvider');
 
 export class ClickstreamProvider implements AnalyticsProvider {
 	configuration: ClickstreamConfiguration;
+	eventRecorder: EventRecorder;
+	userAttribute: UserAttribute;
+	clickstream: ClickstreamContext;
 
 	constructor() {
 		this.configuration = {
 			appId: '',
 			endpoint: '',
-			sendMode: 'Immediate',
+			sendMode: SendMode.Immediate,
 			sendEventsInterval: 5000,
 			isTrackPageViewEvents: true,
-			pageType: 'multiPageApp',
+			pageType: PageType.multiPageApp,
 			isLogEvents: false,
 			sessionTimeoutDuration: 1800000,
 		};
@@ -37,11 +54,18 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			return configuration;
 		}
 		Object.assign(this.configuration, configuration);
+		this.clickstream = new ClickstreamContext(
+			new BrowserInfo(),
+			this.configuration
+		);
+		this.eventRecorder = new EventRecorder(this.clickstream);
+		this.userAttribute = StorageUtil.getUserAttributes();
 		logger.debug(
 			'Initialize the SDK successfully, configuration is:\n' +
 				JSON.stringify(this.configuration)
 		);
-		return configuration;
+		this.eventRecorder.sendFailedEvents();
+		return this.configuration;
 	}
 
 	getCategory(): string {
@@ -52,7 +76,65 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		return 'ClickstreamProvider';
 	}
 
-	record(params: object): void {
-		logger.debug('params: ' + JSON.stringify(params));
+	record(event: ClickstreamEvent) {
+		const result = Event.checkEventName(event.name);
+		if (result.error_code > 0) {
+			logger.error(result.error_message);
+			return;
+		}
+		AnalyticsEventBuilder.createEvent(
+			event,
+			this.userAttribute,
+			this.clickstream
+		)
+			.then(event => {
+				logger.debug('params: ' + JSON.stringify(event));
+				this.eventRecorder.record(event);
+			})
+			.catch(error => {
+				logger.error(`Create event fail with ${error}`);
+			});
+	}
+
+	setUserId(userId: string | null) {
+		if (userId === null) {
+			delete this.userAttribute[Event.ReservedAttribute.USER_ID];
+		} else {
+			this.userAttribute[Event.ReservedAttribute.USER_ID] = {
+				value: userId,
+				set_timestamp: new Date().getTime(),
+			};
+		}
+		StorageUtil.updateUserAttributes(this.userAttribute);
+	}
+
+	setUserAttributes(attributes: ClickstreamAttribute) {
+		const timestamp = new Date().getTime();
+		for (const key in attributes) {
+			const value = attributes[key];
+			if (value === null) {
+				delete this.userAttribute[key];
+			} else {
+				const currentNumber = Object.keys(this.userAttribute).length;
+				const { checkUserAttribute } = Event;
+				const result = checkUserAttribute(currentNumber, key, value);
+				if (result.error_code > 0) {
+					const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
+					this.record({
+						name: Event.PresetEvent.CLICKSTREAM_ERROR,
+						attributes: {
+							[ERROR_CODE]: result.error_code,
+							[ERROR_MESSAGE]: result.error_message,
+						},
+					});
+				} else {
+					this.userAttribute[key] = {
+						value: value,
+						set_timestamp: timestamp,
+					};
+				}
+			}
+		}
+		StorageUtil.updateUserAttributes(this.userAttribute);
 	}
 }
