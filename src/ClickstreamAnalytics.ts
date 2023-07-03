@@ -11,8 +11,12 @@
  *  and limitations under the License.
  */
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
-import { ClickstreamProvider } from './provider/ClickstreamProvider';
-import { ClickstreamConfiguration } from './types';
+import { ClickstreamProvider } from './provider';
+import {
+	ClickstreamAttribute,
+	ClickstreamConfiguration,
+	ClickstreamEvent,
+} from './types';
 
 export class ClickstreamAnalytics {
 	private static provider: ClickstreamProvider;
@@ -33,7 +37,15 @@ export class ClickstreamAnalytics {
 		return true;
 	}
 
-	public static record(params: object) {
-		this.provider.record(params);
+	public static record(event: ClickstreamEvent) {
+		this.provider.record(event);
+	}
+
+	public static setUserId(userId: string | null) {
+		this.provider.setUserId(userId);
+	}
+
+	public static setUserAttributes(attributes: ClickstreamAttribute) {
+		this.provider.setUserAttributes(attributes);
 	}
 }
