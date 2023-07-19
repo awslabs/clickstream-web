@@ -10,7 +10,8 @@
     "format": "npx prettier --check 'src/**/*.{js,ts}'",
     "lint": "npx eslint src",
     "test": "npx jest -w 1 --coverage",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "pack": "npm pack"
   },
   "dependencies": {
     "@aws-amplify/core": "^5.5.1",

@@ -17,13 +17,16 @@ const logger = new Logger('NetRequest');
 
 export class NetRequest {
 	static readonly REQUEST_TIMEOUT = 3000;
+	static readonly BATCH_REQUEST_TIMEOUT = 15000;
 	static readonly REQUEST_RETRY_TIMES = 3;
+	static readonly BATCH_REQUEST_RETRY_TIMES = 1;
 
 	static async sendRequest(
 		eventsJson: string,
 		clickstream: ClickstreamContext,
 		bundleSequenceId: number,
-		retryTimes = NetRequest.REQUEST_RETRY_TIMES
+		retryTimes = NetRequest.REQUEST_RETRY_TIMES,
+		timeout = NetRequest.REQUEST_TIMEOUT
 	): Promise<boolean> {
 		const { configuration, browserInfo } = clickstream;
 		const queryParams = new URLSearchParams({
@@ -36,10 +39,11 @@ export class NetRequest {
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => {
 			controller.abort();
-		}, NetRequest.REQUEST_TIMEOUT);
+		}, timeout);
 
 		const requestOptions: RequestInit = {
 			method: 'POST',
+			mode: 'cors',
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',
 				cookie: configuration.authCookie,

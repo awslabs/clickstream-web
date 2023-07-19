@@ -89,6 +89,20 @@ describe('ClickstreamProvider test', () => {
 		expect(configuration.authCookie).toBe('your auth cookie');
 	});
 
+	test('test config batch mode with timer', async () => {
+		const startTimerMock = jest.spyOn(provider, 'startTimer');
+		const flushEventsMock = jest.spyOn(provider, 'flushEvents');
+		provider.configure({
+			appId: 'testAppId',
+			endpoint: 'https://example.com/collect',
+			sendMode: SendMode.Batch,
+			sendEventsInterval: 10,
+		});
+		await sleep(100);
+		expect(startTimerMock).toBeCalled();
+		expect(flushEventsMock).toBeCalled();
+	});
+
 	test('test get category and provider name', () => {
 		expect(provider.getCategory()).toBe('Analytics');
 		expect(provider.getProviderName()).toBe('ClickstreamProvider');
@@ -180,4 +194,27 @@ describe('ClickstreamProvider test', () => {
 			})
 		);
 	});
+
+	test('test delete user attribute', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {
+			testAttribute: 'testValue',
+		};
+		provider.setUserAttributes(clickstreamAttribute);
+		provider.setUserAttributes({
+			testAttribute: null,
+		});
+		expect('testAttribute' in provider.userAttribute).toBeFalsy();
+	});
+
+	test('test set userId null', () => {
+		provider.setUserId('232121');
+		provider.setUserId(null);
+		expect(
+			Event.ReservedAttribute.USER_ID in provider.userAttribute
+		).toBeFalsy();
+	});
+
+	function sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 });

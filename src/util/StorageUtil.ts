@@ -18,7 +18,9 @@ import { AnalyticsEvent, UserAttribute } from '../types';
 const logger = new Logger('StorageUtil');
 
 export class StorageUtil {
-	static readonly MAX_FAILED_EVENTS_SIZE = 1024 * 512;
+	static readonly MAX_REQUEST_EVENTS_SIZE = 1024 * 512;
+	static readonly MAX_FAILED_EVENTS_SIZE = this.MAX_REQUEST_EVENTS_SIZE;
+	static readonly MAX_BATCH_EVENTS_SIZE = 1024 * 1024;
 
 	static readonly prefix = 'aws-solution/clickstream-js/';
 	static readonly deviceIdKey = this.prefix + 'deviceIdKey';
@@ -28,6 +30,7 @@ export class StorageUtil {
 	static readonly userFirstTouchTimestampKey =
 		this.prefix + 'userFirstTouchTimestampKey';
 	static readonly failedEventsKey = this.prefix + 'failedEventsKey';
+	static readonly eventsKey = this.prefix + 'eventsKey';
 
 	static getDeviceId(): string {
 		let deviceId = localStorage.getItem(StorageUtil.deviceIdKey) ?? '';
@@ -88,17 +91,19 @@ export class StorageUtil {
 		return JSON.parse(userAttributes);
 	}
 
-	static getFailedEvents(): AnalyticsEvent[] {
-		const failedEvents =
-			localStorage.getItem(StorageUtil.failedEventsKey) ?? '[]';
-		return JSON.parse(failedEvents);
+	static getFailedEvents(): string {
+		return localStorage.getItem(StorageUtil.failedEventsKey) ?? '';
 	}
 
 	static saveFailedEvent(event: AnalyticsEvent) {
 		const { MAX_FAILED_EVENTS_SIZE } = StorageUtil;
 		const allEvents = StorageUtil.getFailedEvents();
-		allEvents.push(event);
-		const eventsStr = JSON.stringify(allEvents);
+		let eventsStr = '';
+		if (allEvents === '') {
+			eventsStr = Event.Constants.PREFIX + JSON.stringify(event);
+		} else {
+			eventsStr = allEvents + ',' + JSON.stringify(event);
+		}
 		if (eventsStr.length <= MAX_FAILED_EVENTS_SIZE) {
 			localStorage.setItem(StorageUtil.failedEventsKey, eventsStr);
 		} else {
@@ -109,5 +114,41 @@ export class StorageUtil {
 
 	static clearFailedEvents() {
 		localStorage.removeItem(StorageUtil.failedEventsKey);
+	}
+
+	static getAllEvents(): string {
+		return localStorage.getItem(StorageUtil.eventsKey) ?? '';
+	}
+
+	static saveEvent(event: AnalyticsEvent): boolean {
+		const { MAX_BATCH_EVENTS_SIZE } = StorageUtil;
+		const allEvents = StorageUtil.getAllEvents();
+		let eventsStr = '';
+		if (allEvents === '') {
+			eventsStr = Event.Constants.PREFIX + JSON.stringify(event);
+		} else {
+			eventsStr = allEvents + ',' + JSON.stringify(event);
+		}
+		if (eventsStr.length <= MAX_BATCH_EVENTS_SIZE) {
+			localStorage.setItem(StorageUtil.eventsKey, eventsStr);
+			return true;
+		} else {
+			const maxSize = MAX_BATCH_EVENTS_SIZE / 1024;
+			logger.warn(`Events reached max cache size of ${maxSize}kb`);
+			return false;
+		}
+	}
+
+	static clearEvents(eventsJson: string) {
+		const deletedEvents = JSON.parse(eventsJson);
+		const allEvents = JSON.parse(this.getAllEvents() + Event.Constants.SUFFIX);
+		if (allEvents.length > deletedEvents.length) {
+			const leftEvents = allEvents.splice(deletedEvents.length);
+			let leftEventsStr = JSON.stringify(leftEvents);
+			leftEventsStr = leftEventsStr.substring(0, leftEventsStr.length - 1);
+			localStorage.setItem(StorageUtil.eventsKey, leftEventsStr);
+		} else {
+			localStorage.removeItem(StorageUtil.eventsKey);
+		}
 	}
 }
