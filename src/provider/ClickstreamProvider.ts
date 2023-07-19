@@ -60,6 +60,9 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		);
 		this.eventRecorder = new EventRecorder(this.clickstream);
 		this.userAttribute = StorageUtil.getUserAttributes();
+		if (configuration.sendMode === SendMode.Batch) {
+			this.startTimer();
+		}
 		logger.debug(
 			'Initialize the SDK successfully, configuration is:\n' +
 				JSON.stringify(this.configuration)
@@ -136,5 +139,16 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			}
 		}
 		StorageUtil.updateUserAttributes(this.userAttribute);
+	}
+
+	startTimer() {
+		setInterval(
+			this.flushEvents.bind(this, this.eventRecorder),
+			this.configuration.sendEventsInterval
+		);
+	}
+
+	flushEvents(eventRecorder: EventRecorder) {
+		eventRecorder.flushEvents();
 	}
 }

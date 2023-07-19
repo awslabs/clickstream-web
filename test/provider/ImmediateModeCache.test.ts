@@ -12,6 +12,7 @@
  */
 import { ClickstreamAnalytics } from '../../src';
 import { NetRequest } from '../../src/network/NetRequest';
+import {Event} from "../../src/provider";
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('ImmediateModeCache test', () => {
@@ -43,8 +44,8 @@ describe('ImmediateModeCache test', () => {
 		});
 		await sleep(100);
 		expect(sendRequestMock).toBeCalled();
-		expect(StorageUtil.getFailedEvents().length).toBe(1);
-
+		const failedEvents = JSON.parse(StorageUtil.getFailedEvents() + Event.Constants.SUFFIX);
+		expect(failedEvents.length).toBe(1);
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementationOnce(mockSendRequestSuccess);

@@ -20,10 +20,6 @@ describe('ClickstreamAnalytics test', () => {
 	let clickstream: ClickstreamContext;
 	let eventJson: string;
 	beforeEach(async () => {
-		fetchMock.post('begin:https://localhost:8080/collect', {
-			status: 200,
-			body: [],
-		});
 		clickstream = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
@@ -42,6 +38,10 @@ describe('ClickstreamAnalytics test', () => {
 	});
 
 	test('test request success', async () => {
+		fetchMock.post('begin:https://localhost:8080/collect', {
+			status: 200,
+			body: [],
+		});
 		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
 		expect(result).toBeTruthy();
 	});
@@ -52,6 +52,41 @@ describe('ClickstreamAnalytics test', () => {
 			endpoint: 'https://localhost:8080/failed',
 		});
 		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
+		expect(result).toBeFalsy();
+	});
+
+	test('test request fail with code 404', async () => {
+		fetchMock.post('begin:https://localhost:8080/collectFail', 404);
+		clickstream = new ClickstreamContext(new BrowserInfo(), {
+			appId: 'testApp',
+			endpoint: 'https://localhost:8080/collectFail',
+		});
+		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
+		expect(result).toBeFalsy();
+	});
+
+	test('test request timeout', async () => {
+		fetchMock.post(
+			'begin:https://localhost:8080/collect',
+			{
+				status: 200,
+				body: [],
+			},
+			{
+				delay: 1000,
+			}
+		);
+		clickstream = new ClickstreamContext(new BrowserInfo(), {
+			appId: 'testApp',
+			endpoint: 'https://localhost:8080/collect',
+		});
+		const result = await NetRequest.sendRequest(
+			eventJson,
+			clickstream,
+			1,
+			1,
+			200
+		);
 		expect(result).toBeFalsy();
 	});
 });

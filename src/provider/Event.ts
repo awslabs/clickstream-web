@@ -221,4 +221,10 @@ export class Event {
 		PROFILE_SET: '_profile_set',
 		CLICKSTREAM_ERROR: '_clickstream_error',
 	};
+
+	static readonly Constants = {
+		PREFIX: '[',
+		SUFFIX: ']',
+		LAST_EVENT_IDENTIFIER: '},{"hashCode":',
+	};
 }

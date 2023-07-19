@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
+import { LOG_TYPE } from '@aws-amplify/core/lib/Logger';
 import { ClickstreamContext } from './ClickstreamContext';
+import { Event } from './Event';
 import { NetRequest } from '../network/NetRequest';
 import { AnalyticsEvent, SendMode } from '../types';
 import { StorageUtil } from '../util/StorageUtil';
@@ -21,6 +23,7 @@ const logger = new Logger('EventRecorder');
 export class EventRecorder {
 	clickstream: ClickstreamContext;
 	bundleSequenceId: number;
+	isFlushingEvents: boolean;
 
 	constructor(clickstream: ClickstreamContext) {
 		this.clickstream = clickstream;
@@ -29,33 +32,43 @@ export class EventRecorder {
 
 	record(event: AnalyticsEvent) {
 		if (this.clickstream.configuration.isLogEvents) {
-			logger.level = Logger.LOG_LEVEL.DEBUG;
+			logger.level = LOG_TYPE.DEBUG;
 			logger.debug(
 				`Logged event ${event.event_type}, event attributes:\n
 				${JSON.stringify(event.attributes)}`
 			);
 		}
-		if (this.clickstream.configuration.sendMode === SendMode.Immediate) {
-			const eventsJson = JSON.stringify([event]);
-			NetRequest.sendRequest(
-				eventsJson,
-				this.clickstream,
-				this.bundleSequenceId
-			).then(result => {
-				if (result) {
-					logger.debug('Event send success');
-				} else {
-					StorageUtil.saveFailedEvent(event);
+		switch (this.clickstream.configuration.sendMode) {
+			case SendMode.Immediate:
+				this.sendEventImmediate(event);
+				break;
+			case SendMode.Batch:
+				if (!StorageUtil.saveEvent(event)) {
+					this.sendEventImmediate(event);
 				}
-			});
-			this.plusSequenceId();
 		}
+	}
+
+	sendEventImmediate(event: AnalyticsEvent) {
+		const eventsJson = JSON.stringify([event]);
+		NetRequest.sendRequest(
+			eventsJson,
+			this.clickstream,
+			this.bundleSequenceId
+		).then(result => {
+			if (result) {
+				logger.debug('Event send success');
+			} else {
+				StorageUtil.saveFailedEvent(event);
+			}
+		});
+		this.plusSequenceId();
 	}
 
 	sendFailedEvents() {
 		const failedEvents = StorageUtil.getFailedEvents();
 		if (failedEvents.length > 0) {
-			const eventsJson = JSON.stringify(failedEvents);
+			const eventsJson = failedEvents + Event.Constants.SUFFIX;
 			NetRequest.sendRequest(
 				eventsJson,
 				this.clickstream,
@@ -67,6 +80,66 @@ export class EventRecorder {
 				}
 			});
 			this.plusSequenceId();
+		}
+	}
+
+	flushEvents() {
+		if (this.isFlushingEvents) {
+			return;
+		}
+		const [eventsJson, needsFlushTwice] = this.getBatchEvents();
+		if (eventsJson === '') {
+			return;
+		}
+		this.isFlushingEvents = true;
+		NetRequest.sendRequest(
+			eventsJson,
+			this.clickstream,
+			this.bundleSequenceId,
+			NetRequest.BATCH_REQUEST_RETRY_TIMES,
+			NetRequest.BATCH_REQUEST_TIMEOUT
+		).then(result => {
+			if (result) {
+				StorageUtil.clearEvents(eventsJson);
+			}
+			this.isFlushingEvents = false;
+			if (needsFlushTwice) {
+				this.flushEvents();
+			}
+		});
+		this.plusSequenceId();
+	}
+
+	getBatchEvents(): [string, boolean] {
+		let allEventsStr = StorageUtil.getAllEvents();
+		if (allEventsStr === '') {
+			return [allEventsStr, false];
+		} else if (allEventsStr.length <= StorageUtil.MAX_REQUEST_EVENTS_SIZE) {
+			return [allEventsStr + Event.Constants.SUFFIX, false];
+		} else {
+			const isOnlyOneEvent =
+				allEventsStr.lastIndexOf(Event.Constants.LAST_EVENT_IDENTIFIER) < 0;
+			const firstEventSize = allEventsStr.indexOf(
+				Event.Constants.LAST_EVENT_IDENTIFIER
+			);
+			if (isOnlyOneEvent) {
+				return [allEventsStr + Event.Constants.SUFFIX, false];
+			} else if (firstEventSize > StorageUtil.MAX_REQUEST_EVENTS_SIZE) {
+				allEventsStr = allEventsStr.substring(0, firstEventSize + 1);
+				return [allEventsStr + Event.Constants.SUFFIX, true];
+			} else {
+				allEventsStr = allEventsStr.substring(
+					0,
+					StorageUtil.MAX_REQUEST_EVENTS_SIZE
+				);
+				const endIndex = allEventsStr.lastIndexOf(
+					Event.Constants.LAST_EVENT_IDENTIFIER
+				);
+				return [
+					allEventsStr.substring(0, endIndex + 1) + Event.Constants.SUFFIX,
+					true,
+				];
+			}
 		}
 	}
 
