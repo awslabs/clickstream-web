@@ -1,23 +1,31 @@
 {
-  "name": "clickstream-js",
+  "name": "clickstream-web",
   "version": "0.1.0",
-  "private": true,
   "description": "ClickstreamAnalytics Web SDK",
   "license": "Apache-2.0",
+  "main": "./lib/index.ts",
+  "module": "./lib-esm/index.js",
+  "typings": "./lib-esm/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "npm run clean && npx tsc && npx webpack --config webpack.config.js",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "build-dev": "npm run clean && npx tsc && npx webpack --config webpack.config.dev.js",
+    "build:cjs": "npx tsc --module commonjs && webpack && webpack --config webpack.config.dev.js",
+    "build:esm": "npx tsc --module esnext --outDir lib-esm",
     "format": "npx prettier --check 'src/**/*.{js,ts}'",
     "lint": "npx eslint src",
     "test": "npx jest -w 1 --coverage",
-    "clean": "rimraf dist",
+    "clean": "rimraf lib-esm lib dist",
     "pack": "npm pack"
   },
   "dependencies": {
     "@aws-amplify/core": "^5.5.1",
     "uuid": "^9.0.0",
     "@types/uuid": "^9.0.0",
-    "@aws-crypto/sha256-browser": "^4.0.0"
+    "@aws-crypto/sha256-browser": "^4.0.0",
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.60.0",
@@ -34,6 +42,11 @@
     "jest-environment-jsdom": "29.5.0",
     "fetch-mock": "^9.11.0"
   },
+  "files": [
+    "lib",
+    "lib-esm",
+    "src"
+  ],
   "engines": {
     "node": ">=16.19.0"
   }

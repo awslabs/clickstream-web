@@ -21,6 +21,7 @@ export class BrowserInfo {
 	hostName: string;
 
 	constructor() {
+		if (!BrowserInfo.isBrowser()) return;
 		const { product, vendor, userAgent, language } = window.navigator;
 		this.locale = language;
 		this.initLocalInfo(language);
@@ -38,5 +39,21 @@ export class BrowserInfo {
 			this.system_language = locale;
 			this.country_code = '';
 		}
+	}
+
+	static isBrowser(): boolean {
+		return (
+			typeof window !== 'undefined' && typeof window.document !== 'undefined'
+		);
+	}
+
+	static getCurrentPageUrl(): string {
+		if (!BrowserInfo.isBrowser()) return '';
+		else return window.location.href;
+	}
+
+	static getCurrentPageTitle(): string {
+		if (!BrowserInfo.isBrowser()) return '';
+		return window.document.title ?? '';
 	}
 }

@@ -14,7 +14,7 @@
     "noEmitOnError": false,
     "incremental": true,
     "importHelpers": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "resolveJsonModule": true,
     "types": [
       "node",

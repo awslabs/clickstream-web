@@ -16,6 +16,7 @@ import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
 import { EventRecorder } from './EventRecorder';
 import { BrowserInfo } from '../browser';
+import { PageViewTracker, SessionTracker } from '../tracker';
 import {
 	AnalyticsProvider,
 	ClickstreamAttribute,
@@ -33,7 +34,9 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	configuration: ClickstreamConfiguration;
 	eventRecorder: EventRecorder;
 	userAttribute: UserAttribute;
-	clickstream: ClickstreamContext;
+	context: ClickstreamContext;
+	sessionTracker: SessionTracker;
+	pageViewTracker: PageViewTracker;
 
 	constructor() {
 		this.configuration = {
@@ -54,11 +57,15 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			return configuration;
 		}
 		Object.assign(this.configuration, configuration);
-		this.clickstream = new ClickstreamContext(
+		this.context = new ClickstreamContext(
 			new BrowserInfo(),
 			this.configuration
 		);
-		this.eventRecorder = new EventRecorder(this.clickstream);
+		this.eventRecorder = new EventRecorder(this.context);
+		this.sessionTracker = new SessionTracker(this, this.context);
+		this.sessionTracker.setUp();
+		this.pageViewTracker = new PageViewTracker(this, this.context);
+		this.pageViewTracker.setUp();
 		this.userAttribute = StorageUtil.getUserAttributes();
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
@@ -86,12 +93,12 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			return;
 		}
 		AnalyticsEventBuilder.createEvent(
+			this.context,
 			event,
 			this.userAttribute,
-			this.clickstream
+			this.sessionTracker.session
 		)
 			.then(event => {
-				logger.debug('params: ' + JSON.stringify(event));
 				this.eventRecorder.record(event);
 			})
 			.catch(error => {
@@ -100,13 +107,23 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	}
 
 	setUserId(userId: string | null) {
+		let previousUserId = '';
+		if (Event.ReservedAttribute.USER_ID in this.userAttribute) {
+			previousUserId =
+				this.userAttribute[Event.ReservedAttribute.USER_ID].value.toString();
+		}
 		if (userId === null) {
 			delete this.userAttribute[Event.ReservedAttribute.USER_ID];
-		} else {
-			this.userAttribute[Event.ReservedAttribute.USER_ID] = {
+		} else if (userId !== previousUserId) {
+			const userInfo = StorageUtil.getUserInfoFromMapping(userId);
+			const newUserAttribute: UserAttribute = {};
+			userInfo[Event.ReservedAttribute.USER_ID] = {
 				value: userId,
 				set_timestamp: new Date().getTime(),
 			};
+			Object.assign(newUserAttribute, userInfo);
+			this.userAttribute = newUserAttribute;
+			this.context.userUniqueId = StorageUtil.getCurrentUserUniqueId();
 		}
 		StorageUtil.updateUserAttributes(this.userAttribute);
 	}

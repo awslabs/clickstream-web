@@ -10,14 +10,14 @@ The SDK relies on the Amplify for JS SDK Core Library and is developed according
 
 **1.Include SDK**
 ```bash
-npm install @aws-soluton/clickstream-js
+npm install @awslabs/clickstream-web
 ```
 
 **2.Initialize the SDK**
 You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the config code will as follows:
 
 ```typescript
-import { ClickstreamAnalytics } from '@aws-soluton/clickstream-js';
+import { ClickstreamAnalytics } from '@awslabs/clickstream-web';
 
 ClickstreamAnalytics.configure({
    appId: "your appId",
@@ -52,7 +52,7 @@ You can refer this [guide]("https://awslabs.github.io/clickstream-analytics-on-a
 Add the following code where you need to report event.
 
 ```typescript
-import { ClickstreamAnalytics } from '@aws-soluton/clickstream-js';
+import { ClickstreamAnalytics } from 'clickstream-web';
 
 ClickstreamAnalytics.record({ name: 'albumVisit' });
 ClickstreamAnalytics.record({

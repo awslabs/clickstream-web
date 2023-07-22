@@ -18,21 +18,22 @@ import {
 	ClickstreamContext,
 	EventRecorder,
 } from '../../src/provider';
+import { Session } from '../../src/tracker';
 import { AnalyticsEvent, SendMode } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('EventRecorder test', () => {
 	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	let eventRecorder: EventRecorder;
-	let clickstream: ClickstreamContext;
+	let context: ClickstreamContext;
 	beforeEach(() => {
 		localStorage.clear();
-		clickstream = new ClickstreamContext(new BrowserInfo(), {
+		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
 			sendMode: SendMode.Batch,
 		});
-		eventRecorder = new EventRecorder(clickstream);
+		eventRecorder = new EventRecorder(context);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
@@ -81,7 +82,7 @@ describe('EventRecorder test', () => {
 	});
 
 	test('test flush one events', async () => {
-		eventRecorder.clickstream.configuration.isLogEvents = true;
+		eventRecorder.context.configuration.isLogEvents = true;
 		const sendRequestMock = jest.spyOn(NetRequest, 'sendRequest');
 		const event = await getTestEvent();
 		eventRecorder.record(event);
@@ -174,9 +175,10 @@ describe('EventRecorder test', () => {
 		eventName = 'testEvent'
 	): Promise<AnalyticsEvent> {
 		return await AnalyticsEventBuilder.createEvent(
+			context,
 			{ name: eventName },
 			{},
-			clickstream
+			Session.getCurrentSession(context)
 		);
 	}
 

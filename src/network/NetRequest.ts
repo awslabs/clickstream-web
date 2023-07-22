@@ -23,12 +23,12 @@ export class NetRequest {
 
 	static async sendRequest(
 		eventsJson: string,
-		clickstream: ClickstreamContext,
+		context: ClickstreamContext,
 		bundleSequenceId: number,
 		retryTimes = NetRequest.REQUEST_RETRY_TIMES,
 		timeout = NetRequest.REQUEST_TIMEOUT
 	): Promise<boolean> {
-		const { configuration, browserInfo } = clickstream;
+		const { configuration, browserInfo } = context;
 		const queryParams = new URLSearchParams({
 			platform: 'Web',
 			appId: configuration.appId,

@@ -12,3 +12,4 @@
  */
 
 export { ClickstreamAnalytics } from './ClickstreamAnalytics';
+export { PageType, SendMode } from './types';

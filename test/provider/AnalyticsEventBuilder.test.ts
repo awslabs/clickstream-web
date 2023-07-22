@@ -17,18 +17,20 @@ import {
 	ClickstreamContext,
 	Event,
 } from '../../src/provider';
+import { Session } from '../../src/tracker';
 import { ClickstreamAttribute } from '../../src/types';
 
 describe('AnalyticsEventBuilder test', () => {
 	test('test create event with common attributes', async () => {
-		const clickstream = new ClickstreamContext(new BrowserInfo(), {
+		const context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
 		});
 		const event = await AnalyticsEventBuilder.createEvent(
+			context,
 			{ name: 'testEvent' },
 			{},
-			clickstream
+			Session.getCurrentSession(context)
 		);
 		expect(event.hashCode.length).toBe(8);
 		expect(event.event_type).toBe('testEvent');
@@ -47,7 +49,12 @@ describe('AnalyticsEventBuilder test', () => {
 		expect(event.screen_width > 0).toBeTruthy();
 		expect(event.sdk_version).toBe('');
 		expect(event.user).toStrictEqual({});
-		expect(event.attributes).toStrictEqual({});
+		expect(Event.ReservedAttribute.PAGE_TITLE in event.attributes);
+		expect(Event.ReservedAttribute.PAGE_URL in event.attributes);
+		expect(Event.ReservedAttribute.SESSION_ID in event.attributes);
+		expect(Event.ReservedAttribute.SESSION_DURATION in event.attributes);
+		expect(Event.ReservedAttribute.SESSION_NUMBER in event.attributes);
+		expect(Event.ReservedAttribute.SESSION_START_TIMESTAMP in event.attributes);
 	});
 
 	test('test check event attribute reached max attribute number limit', () => {

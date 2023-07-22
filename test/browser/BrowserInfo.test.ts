@@ -37,4 +37,12 @@ describe('BrowserInfo test', () => {
 		expect(browserInfo.system_language).toBe('fr');
 		expect(browserInfo.country_code).toBe('FR');
 	});
+
+	test('test get current page url', () => {
+		jest.spyOn(BrowserInfo, 'isBrowser').mockReturnValue(false);
+		const url = BrowserInfo.getCurrentPageUrl();
+		expect(url).toBe('');
+		const title = BrowserInfo.getCurrentPageTitle();
+		expect(title).toBe('');
+	});
 });

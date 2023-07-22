@@ -15,19 +15,21 @@ import { ClickstreamAnalytics } from '../../src';
 import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
 import { AnalyticsEventBuilder, ClickstreamContext } from '../../src/provider';
+import {Session} from "../../src/tracker";
 
 describe('ClickstreamAnalytics test', () => {
-	let clickstream: ClickstreamContext;
+	let context: ClickstreamContext;
 	let eventJson: string;
 	beforeEach(async () => {
-		clickstream = new ClickstreamContext(new BrowserInfo(), {
+		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
 		});
 		const event = await AnalyticsEventBuilder.createEvent(
+			context,
 			{ name: 'testEvent' },
 			{},
-			clickstream
+			Session.getCurrentSession(context)
 		);
 		eventJson = JSON.stringify([event]);
 	});
@@ -42,26 +44,26 @@ describe('ClickstreamAnalytics test', () => {
 			status: 200,
 			body: [],
 		});
-		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
+		const result = await NetRequest.sendRequest(eventJson, context, 1);
 		expect(result).toBeTruthy();
 	});
 
 	test('test request fail', async () => {
-		clickstream = new ClickstreamContext(new BrowserInfo(), {
+		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/failed',
 		});
-		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
+		const result = await NetRequest.sendRequest(eventJson, context, 1);
 		expect(result).toBeFalsy();
 	});
 
 	test('test request fail with code 404', async () => {
 		fetchMock.post('begin:https://localhost:8080/collectFail', 404);
-		clickstream = new ClickstreamContext(new BrowserInfo(), {
+		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collectFail',
 		});
-		const result = await NetRequest.sendRequest(eventJson, clickstream, 1);
+		const result = await NetRequest.sendRequest(eventJson, context, 1);
 		expect(result).toBeFalsy();
 	});
 
@@ -76,13 +78,13 @@ describe('ClickstreamAnalytics test', () => {
 				delay: 1000,
 			}
 		);
-		clickstream = new ClickstreamContext(new BrowserInfo(), {
+		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
 		});
 		const result = await NetRequest.sendRequest(
 			eventJson,
-			clickstream,
+			context,
 			1,
 			1,
 			200
