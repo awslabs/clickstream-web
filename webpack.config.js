@@ -14,7 +14,7 @@ const packageJson = require('./package.json');
 const { DefinePlugin } = require('webpack');
 
 module.exports = {
-	entry: { 'clickstream-js.min': './dist/index.js' },
+	entry: { 'clickstream-web.min': './lib-esm/index.js' },
 	mode: 'production',
 	output: {
 		filename: '[name].js',

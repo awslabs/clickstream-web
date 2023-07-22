@@ -214,12 +214,27 @@ export class Event {
 		USER_FIRST_TOUCH_TIMESTAMP: '_user_first_touch_timestamp',
 		ERROR_CODE: '_error_code',
 		ERROR_MESSAGE: '_error_message',
+		IS_FIRST_TIME: '_is_first_time',
+		ENGAGEMENT_TIMESTAMP: '_engagement_time_msec',
+		PAGE_URL: '_page_url',
+		PAGE_TITLE: '_page_title',
+		PAGE_REFERRER: '_page_referrer',
+		PAGE_REFERRER_TITLE: '_page_referrer_title',
+		ENTRANCES: '_entrances',
+		SESSION_ID: '_session_id',
+		SESSION_DURATION: '_session_duration',
+		SESSION_NUMBER: '_session_number',
+		SESSION_START_TIMESTAMP: '_session_start_timestamp',
 	};
 
 	static readonly PresetEvent = {
 		FIRST_OPEN: '_first_open',
+		APP_START: '_app_start',
 		PROFILE_SET: '_profile_set',
 		CLICKSTREAM_ERROR: '_clickstream_error',
+		SESSION_START: '_session_start',
+		USER_ENGAGEMENT: '_user_engagement',
+		PAGE_VIEW: '_page_view',
 	};
 
 	static readonly Constants = {

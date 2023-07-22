@@ -24,10 +24,10 @@ reported the issue. Please try to include as much information as you can. Detail
 
 This is mostly the same as [GitHub's guide on creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
-First, create a _fork_ of `clickstream-js`. Clone it, and make changes to this _fork_.
+First, create a _fork_ of `clickstream-web`. Clone it, and make changes to this _fork_.
 
 ```shell
-git clone git@github.com:your_username/clickstream-js.git 
+git clone git@github.com:your_username/clickstream-web.git 
 ```
 
 After you have tested your feature/fix, by adding sufficient test coverage, and
@@ -42,7 +42,7 @@ etc. All links must be publicly accessible.
 ```console
 feat: add new preset event for screen view.
 
-Resolves: https://github.com/awslabs/clickstream-js/issues/222
+Resolves: https://github.com/awslabs/clickstream-web/issues/222
 See also: https://stackoverflow.com/a/58662077/695787
 ```
 

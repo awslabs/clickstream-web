@@ -21,24 +21,24 @@ import { StorageUtil } from '../util/StorageUtil';
 const logger = new Logger('EventRecorder');
 
 export class EventRecorder {
-	clickstream: ClickstreamContext;
+	context: ClickstreamContext;
 	bundleSequenceId: number;
 	isFlushingEvents: boolean;
 
-	constructor(clickstream: ClickstreamContext) {
-		this.clickstream = clickstream;
+	constructor(context: ClickstreamContext) {
+		this.context = context;
 		this.bundleSequenceId = StorageUtil.getBundleSequenceId();
 	}
 
 	record(event: AnalyticsEvent) {
-		if (this.clickstream.configuration.isLogEvents) {
+		if (this.context.configuration.isLogEvents) {
 			logger.level = LOG_TYPE.DEBUG;
 			logger.debug(
 				`Logged event ${event.event_type}, event attributes:\n
-				${JSON.stringify(event.attributes)}`
+				${JSON.stringify(event)}`
 			);
 		}
-		switch (this.clickstream.configuration.sendMode) {
+		switch (this.context.configuration.sendMode) {
 			case SendMode.Immediate:
 				this.sendEventImmediate(event);
 				break;
@@ -53,7 +53,7 @@ export class EventRecorder {
 		const eventsJson = JSON.stringify([event]);
 		NetRequest.sendRequest(
 			eventsJson,
-			this.clickstream,
+			this.context,
 			this.bundleSequenceId
 		).then(result => {
 			if (result) {
@@ -71,7 +71,7 @@ export class EventRecorder {
 			const eventsJson = failedEvents + Event.Constants.SUFFIX;
 			NetRequest.sendRequest(
 				eventsJson,
-				this.clickstream,
+				this.context,
 				this.bundleSequenceId
 			).then(result => {
 				if (result) {
@@ -94,7 +94,7 @@ export class EventRecorder {
 		this.isFlushingEvents = true;
 		NetRequest.sendRequest(
 			eventsJson,
-			this.clickstream,
+			this.context,
 			this.bundleSequenceId,
 			NetRequest.BATCH_REQUEST_RETRY_TIMES,
 			NetRequest.BATCH_REQUEST_TIMEOUT

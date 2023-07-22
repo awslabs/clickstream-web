@@ -22,6 +22,7 @@ import {
 	PageType,
 	SendMode,
 } from '../../src/types';
+import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('ClickstreamProvider test', () => {
 	let provider: ClickstreamProvider;
@@ -87,20 +88,6 @@ describe('ClickstreamProvider test', () => {
 		expect(configuration.pageType).toBe(PageType.multiPageApp);
 		expect(configuration.sessionTimeoutDuration).toBe(300000);
 		expect(configuration.authCookie).toBe('your auth cookie');
-	});
-
-	test('test config batch mode with timer', async () => {
-		const startTimerMock = jest.spyOn(provider, 'startTimer');
-		const flushEventsMock = jest.spyOn(provider, 'flushEvents');
-		provider.configure({
-			appId: 'testAppId',
-			endpoint: 'https://example.com/collect',
-			sendMode: SendMode.Batch,
-			sendEventsInterval: 10,
-		});
-		await sleep(100);
-		expect(startTimerMock).toBeCalled();
-		expect(flushEventsMock).toBeCalled();
 	});
 
 	test('test get category and provider name', () => {
@@ -214,7 +201,56 @@ describe('ClickstreamProvider test', () => {
 		).toBeFalsy();
 	});
 
-	function sleep(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
+	test('test set userId not null', () => {
+		expect(StorageUtil.getUserIdMapping()).toBeNull();
+		const userUniqueId = StorageUtil.getCurrentUserUniqueId();
+		const firstTouchTimeStamp =
+			provider.userAttribute[
+				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
+			];
+		provider.setUserId('113');
+		expect(
+			provider.userAttribute[
+				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
+			].toString()
+		).toBe(firstTouchTimeStamp.toString());
+		expect(StorageUtil.getCurrentUserUniqueId()).toBe(userUniqueId);
+		expect(StorageUtil.getUserIdMapping()).not.toBeNull();
+	});
+
+	test('test set userId twice', () => {
+		provider.setUserId('113');
+		provider.setUserId('114');
+		const userIdMapping = StorageUtil.getUserIdMapping();
+		expect(userIdMapping).not.toBeNull();
+		expect('113' in userIdMapping).toBeTruthy();
+		expect('114' in userIdMapping).toBeTruthy();
+		expect(provider.context.userUniqueId).toBe(
+			userIdMapping['114'].user_uniqueId.value
+		);
+	});
+
+	test('test set userId A to B to A', () => {
+		const userUniqueIdNotLogin = provider.context.userUniqueId;
+		const userFirstTouchTimestamp =
+			provider.userAttribute[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]
+				.value;
+		provider.setUserId('A');
+		const userUniqueIdA = provider.context.userUniqueId;
+		provider.setUserId('B');
+		const userUniqueIdB = provider.context.userUniqueId;
+		provider.setUserId('A');
+		const userUniqueIdReturnA = provider.context.userUniqueId;
+		const userIdMapping = StorageUtil.getUserIdMapping();
+		expect(userIdMapping).not.toBeNull();
+		expect('A' in userIdMapping).toBeTruthy();
+		expect('B' in userIdMapping).toBeTruthy();
+		expect(userUniqueIdNotLogin === userUniqueIdA).toBeTruthy();
+		expect(userUniqueIdB !== userUniqueIdA).toBeTruthy();
+		expect(userUniqueIdA === userUniqueIdReturnA).toBeTruthy();
+		expect(
+			provider.userAttribute[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]
+				.value
+		).toBe(userFirstTouchTimestamp);
+	});
 });

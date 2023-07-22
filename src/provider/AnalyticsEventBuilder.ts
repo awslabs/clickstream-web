@@ -13,6 +13,8 @@
 import { v4 as uuidV4 } from 'uuid';
 import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
+import { BrowserInfo } from '../browser';
+import { Session } from '../tracker';
 import {
 	AnalyticsEvent,
 	ClickstreamAttribute,
@@ -24,18 +26,32 @@ import { StorageUtil } from '../util/StorageUtil';
 
 export class AnalyticsEventBuilder {
 	static async createEvent(
+		context: ClickstreamContext,
 		event: ClickstreamEvent,
 		userAttributes: UserAttribute,
-		clickstream: ClickstreamContext
+		session?: Session
 	): Promise<AnalyticsEvent> {
-		const { browserInfo, configuration } = clickstream;
+		const { browserInfo, configuration } = context;
 		const attributes = this.getEventAttributesWithCheck(event.attributes);
+		if (session !== undefined) {
+			attributes[Event.ReservedAttribute.SESSION_ID] = session.sessionId;
+			attributes[Event.ReservedAttribute.SESSION_START_TIMESTAMP] =
+				session.startTime;
+			attributes[Event.ReservedAttribute.SESSION_DURATION] =
+				session.getDuration();
+			attributes[Event.ReservedAttribute.SESSION_NUMBER] = session.sessionIndex;
+		}
+		attributes[Event.ReservedAttribute.PAGE_TITLE] =
+			BrowserInfo.getCurrentPageTitle();
+		attributes[Event.ReservedAttribute.PAGE_URL] =
+			BrowserInfo.getCurrentPageUrl();
+
 		const analyticEvent = {
 			hashCode: '',
 			event_type: event.name,
 			event_id: uuidV4(),
 			device_id: StorageUtil.getDeviceId(),
-			unique_id: clickstream.userUniqueId,
+			unique_id: context.userUniqueId,
 			app_id: configuration.appId,
 			timestamp: new Date().getTime(),
 			host_name: browserInfo.hostName,

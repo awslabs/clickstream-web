@@ -16,6 +16,7 @@ import {
 	ClickstreamContext,
 	Event,
 } from '../../src/provider';
+import { Session } from '../../src/tracker';
 import { AnalyticsEvent } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
@@ -165,14 +166,15 @@ describe('StorageUtil test', () => {
 	async function getTestEvent(
 		eventName = 'testEvent'
 	): Promise<AnalyticsEvent> {
-		const clickstream = new ClickstreamContext(new BrowserInfo(), {
+		const context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
 		});
 		return await AnalyticsEventBuilder.createEvent(
+			context,
 			{ name: eventName },
 			{},
-			clickstream
+			Session.getCurrentSession(context)
 		);
 	}
 });

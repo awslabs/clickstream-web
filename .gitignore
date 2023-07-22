@@ -5,6 +5,8 @@
 
 # production
 /dist
+/lib
+/lib-esm
 
 # misc
 .DS_Store
@@ -15,5 +17,6 @@ yarn-error.log
 .idea
 yarn.lock
 *.tsbuildinfo
+*.tgz
 
 build

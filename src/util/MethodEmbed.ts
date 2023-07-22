@@ -10,7 +10,26 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-const config = require('./webpack.config.js');
 
-const entry = { 'clickstream-web': './lib-esm/index.js' };
-module.exports = Object.assign(config, { entry, mode: 'development' });
+export class MethodEmbed {
+	public context;
+	public methodName;
+	private readonly originalMethod;
+
+	static add(context: any, methodName: string, methodOverride: any) {
+		new MethodEmbed(context, methodName).set(methodOverride);
+	}
+
+	constructor(context: any, methodName: string) {
+		this.context = context;
+		this.methodName = methodName;
+
+		this.originalMethod = context[methodName].bind(context);
+	}
+
+	public set(methodOverride: any) {
+		this.context[this.methodName] = (...args: any) => {
+			return methodOverride(this.originalMethod(...args));
+		};
+	}
+}
