@@ -47,10 +47,7 @@ describe('SessionTracker test', () => {
 			endpoint: 'https://example.com/collect',
 			sendMode: SendMode.Batch,
 		});
-		context = new ClickstreamContext(
-			new BrowserInfo(),
-			provider.configuration
-		);
+		context = new ClickstreamContext(new BrowserInfo(), provider.configuration);
 
 		eventRecorder = new EventRecorder(context);
 		sessionTracker = new SessionTracker(provider, context);
@@ -178,10 +175,12 @@ describe('SessionTracker test', () => {
 
 	describe('Browser environment test', () => {
 		beforeEach(() => {
-			const { document } = new JSDOM(
-				'<!doctype html><html><body></body></html>'
-			).window;
-			(global as any).document = document;
+			if (!(global as any).document) {
+				const { document } = new JSDOM(
+					'<!doctype html><html><body></body></html>'
+				).window;
+				(global as any).document = document;
+			}
 		});
 
 		afterEach(() => {

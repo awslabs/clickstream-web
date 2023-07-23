@@ -1,0 +1,19 @@
+name: Web SDK Lint
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  code-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run npm install
+        run: npm i
+      - name: Run code format
+        run: npm run format
+      - name: Run code lint
+        run: npm run lint
