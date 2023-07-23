@@ -18,6 +18,7 @@ export class ClickstreamContext {
 	browserInfo: BrowserInfo;
 	configuration: ClickstreamConfiguration;
 	userUniqueId: string;
+	sdkVersion = '0.1.0';
 
 	constructor(
 		browserInfo: BrowserInfo,

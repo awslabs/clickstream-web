@@ -64,7 +64,7 @@ export class AnalyticsEventBuilder {
 			screen_height: window.innerHeight,
 			screen_width: window.innerWidth,
 			sdk_name: 'aws-solution-clickstream-sdk',
-			sdk_version: process.env.VERSION ?? '',
+			sdk_version: context.sdkVersion,
 			user: userAttributes ?? {},
 			attributes: attributes ?? {},
 		};
