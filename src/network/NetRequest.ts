@@ -16,7 +16,7 @@ import { ClickstreamContext } from '../provider';
 const logger = new Logger('NetRequest');
 
 export class NetRequest {
-	static readonly REQUEST_TIMEOUT = 3000;
+	static readonly REQUEST_TIMEOUT = 10000;
 	static readonly BATCH_REQUEST_TIMEOUT = 15000;
 	static readonly REQUEST_RETRY_TIMES = 3;
 	static readonly BATCH_REQUEST_RETRY_TIMES = 1;

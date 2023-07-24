@@ -37,6 +37,7 @@ export class PageViewTracker {
 		} else {
 			this.trackPageView();
 		}
+		return this;
 	}
 
 	trackPageViewForSPA() {
@@ -90,6 +91,33 @@ export class PageViewTracker {
 				StorageUtil.savePreviousPageUrl(currentPageUrl);
 				StorageUtil.savePreviousPageTitle(currentPageTitle);
 				StorageUtil.savePreviousPageStartTime(currentPageStartTime);
+				if (this.context.configuration.isTrackSearchEvents) {
+					this.trackSearchEvents();
+				}
+			}
+		}
+	}
+
+	trackSearchEvents() {
+		const searchStr = window.location.search;
+		if (!searchStr || searchStr.length === 0) return;
+		const urlParams = new URLSearchParams(searchStr);
+		const searchKeywords = ['q', 's', 'search', 'query', 'keyword'];
+		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
+		if (configuredSearchKeywords !== undefined) {
+			Object.assign(searchKeywords, configuredSearchKeywords);
+		}
+		for (const keyword of searchKeywords) {
+			if (urlParams.has(keyword)) {
+				const searchTerm = urlParams.get(keyword);
+				this.provider.record({
+					name: Event.PresetEvent.SEARCH,
+					attributes: {
+						[Event.ReservedAttribute.SEARCH_KEY]: keyword,
+						[Event.ReservedAttribute.SEARCH_TERM]: searchTerm,
+					},
+				});
+				break;
 			}
 		}
 	}

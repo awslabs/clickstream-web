@@ -225,6 +225,13 @@ export class Event {
 		SESSION_DURATION: '_session_duration',
 		SESSION_NUMBER: '_session_number',
 		SESSION_START_TIMESTAMP: '_session_start_timestamp',
+		LINK_CLASSES: '_link_classes',
+		LINK_DOMAIN: '_link_domain',
+		LINK_ID: '_link_id',
+		LINK_URL: '_link_url',
+		OUTBOUND: '_outbound',
+		SEARCH_KEY: '_search_key',
+		SEARCH_TERM: '_search_term',
 	};
 
 	static readonly PresetEvent = {
@@ -235,6 +242,9 @@ export class Event {
 		SESSION_START: '_session_start',
 		USER_ENGAGEMENT: '_user_engagement',
 		PAGE_VIEW: '_page_view',
+		CLICK: '_click',
+		SEARCH: '_search',
+		SCROLL: '_scroll',
 	};
 
 	static readonly Constants = {

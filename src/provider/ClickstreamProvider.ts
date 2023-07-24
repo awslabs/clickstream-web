@@ -17,6 +17,8 @@ import { Event } from './Event';
 import { EventRecorder } from './EventRecorder';
 import { BrowserInfo } from '../browser';
 import { PageViewTracker, SessionTracker } from '../tracker';
+import { ClickTracker } from '../tracker/ClickTracker';
+import { ScrollTracker } from '../tracker/ScrollTracker';
 import {
 	AnalyticsProvider,
 	ClickstreamAttribute,
@@ -37,6 +39,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	context: ClickstreamContext;
 	sessionTracker: SessionTracker;
 	pageViewTracker: PageViewTracker;
+	clickTracker: ClickTracker;
+	scrollTracker: ScrollTracker;
 
 	constructor() {
 		this.configuration = {
@@ -45,7 +49,10 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			sendMode: SendMode.Immediate,
 			sendEventsInterval: 5000,
 			isTrackPageViewEvents: true,
-			pageType: PageType.multiPageApp,
+			isTrackClickEvents: true,
+			isTrackSearchEvents: true,
+			isTrackScrollEvents: true,
+			pageType: PageType.SPA,
 			isLogEvents: false,
 			sessionTimeoutDuration: 1800000,
 		};
@@ -64,8 +71,9 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.eventRecorder = new EventRecorder(this.context);
 		this.sessionTracker = new SessionTracker(this, this.context);
 		this.sessionTracker.setUp();
-		this.pageViewTracker = new PageViewTracker(this, this.context);
-		this.pageViewTracker.setUp();
+		this.pageViewTracker = new PageViewTracker(this, this.context).setUp();
+		this.clickTracker = new ClickTracker(this, this.context).setUp();
+		this.scrollTracker = new ScrollTracker(this, this.context).setUp();
 		this.userAttribute = StorageUtil.getUserAttributes();
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();

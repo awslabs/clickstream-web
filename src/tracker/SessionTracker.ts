@@ -36,14 +36,15 @@ export class SessionTracker {
 		this.handleInit();
 		if (!this.checkEnv()) {
 			logger.warn('not supported env');
-			return;
+		} else {
+			document.addEventListener(
+				this.visibilityChange,
+				this.onVisibilityChange,
+				false
+			);
+			window.addEventListener('beforeunload', this.onBeforeUnload, false);
 		}
-		document.addEventListener(
-			this.visibilityChange,
-			this.onVisibilityChange,
-			false
-		);
-		window.addEventListener('beforeunload', this.onBeforeUnload, false);
+		return this;
 	}
 
 	onVisibilityChange() {

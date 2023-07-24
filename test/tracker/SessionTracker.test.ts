@@ -17,6 +17,7 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
 import { JSDOM } from 'jsdom';
+import { SendMode } from '../../src';
 import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
 import {
@@ -26,7 +27,6 @@ import {
 	EventRecorder,
 } from '../../src/provider';
 import { SessionTracker } from '../../src/tracker';
-import { SendMode } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('SessionTracker test', () => {
