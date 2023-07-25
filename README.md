@@ -19,7 +19,7 @@ npm install @awslabs/clickstream-web
 For GitHub repository:
 
 ```bash
-npm install github:awslabs/clickstream-web
+npm install github:awslabs/clickstream-web#0.1.0
 ```
 
 Note: for beta version we use GitHub repository to distribute our SDK.
