@@ -56,21 +56,19 @@ describe('ScrollTracker test', () => {
 	test('test setup not in the browser env', () => {
 		jest.spyOn(BrowserInfo, 'isBrowser').mockReturnValue(false);
 		scrollTracker.setUp();
-		expect(scrollTracker.currentPageUrl).toBeUndefined();
 	});
 
 	test('test setup', () => {
 		scrollTracker.setUp();
-		expect(scrollTracker.currentPageUrl).not.toBeUndefined();
 		expect(scrollTracker.isFirstTime).toBeTruthy();
 	});
 
 	test('test scroll for not reach ninety percent', () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-		document.body.style.height = '2000px';
+		setScrollHeight(2000);
 		(window as any).innerHeight = 1000;
-		window.scrollTo(0, 100);
+		setScrollY(100)
 		window.document.dispatchEvent(new window.Event('scroll'));
 		expect(recordMethodMock).not.toBeCalled();
 		expect(trackScrollMock).toBeCalled();
@@ -79,16 +77,7 @@ describe('ScrollTracker test', () => {
 	test('test scroll for reached ninety percent', () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-
-		Object.defineProperty(window.document.body, 'scrollHeight', {
-			writable: true,
-			value: 1000,
-		});
-		Object.defineProperty(window, 'scrollY', {
-			writable: true,
-			value: 950,
-		});
-		window.document.dispatchEvent(new window.Event('scroll'));
+		performScrollToBottom()
 		expect(recordMethodMock).toBeCalled();
 		expect(trackScrollMock).toBeCalled();
 		expect(scrollTracker.isFirstTime).toBeFalsy();
@@ -97,19 +86,43 @@ describe('ScrollTracker test', () => {
 	test('test scroll for reached ninety percent twice', () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-
-		Object.defineProperty(window.document.body, 'scrollHeight', {
-			writable: true,
-			value: 1000,
-		});
-		Object.defineProperty(window, 'scrollY', {
-			writable: true,
-			value: 950,
-		});
-		window.document.dispatchEvent(new window.Event('scroll'));
+		performScrollToBottom()
 		window.document.dispatchEvent(new window.Event('scroll'));
 		expect(recordMethodMock).toBeCalledTimes(1);
 		expect(trackScrollMock).toBeCalledTimes(2);
 		expect(scrollTracker.isFirstTime).toBeFalsy();
 	});
+
+	test('test scroll for enter new page', () => {
+		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
+		scrollTracker.setUp();
+		performScrollToBottom()
+		scrollTracker.enterNewPage()
+		expect(scrollTracker.isFirstTime).toBeTruthy();
+		window.document.dispatchEvent(new window.Event('scroll'));
+		expect(recordMethodMock).toBeCalledTimes(2);
+		expect(trackScrollMock).toBeCalledTimes(2);
+		expect(scrollTracker.isFirstTime).toBeFalsy();
+	});
+
+	function performScrollToBottom(){
+		setScrollHeight(1000);
+		(window as any).innerHeight = 800;
+		setScrollY(150)
+		window.document.dispatchEvent(new window.Event('scroll'));
+	}
+
+	function setScrollHeight(height: number) {
+		Object.defineProperty(window.document.body, 'scrollHeight', {
+			writable: true,
+			value: height,
+		});
+	}
+
+	function setScrollY(height: number) {
+		Object.defineProperty(window, 'scrollY', {
+			writable: true,
+			value: height,
+		});
+	}
 });

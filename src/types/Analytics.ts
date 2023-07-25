@@ -11,13 +11,16 @@
  *  and limitations under the License.
  */
 
-export interface ClickstreamConfiguration {
+export interface ClickstreamConfiguration extends Configuration {
 	readonly appId: string;
 	readonly endpoint: string;
 	readonly sendMode?: SendMode;
 	readonly sendEventsInterval?: number;
 	readonly pageType?: PageType;
 	readonly sessionTimeoutDuration?: number;
+}
+
+export interface Configuration {
 	isLogEvents?: boolean;
 	authCookie?: string;
 	isTrackPageViewEvents?: boolean;

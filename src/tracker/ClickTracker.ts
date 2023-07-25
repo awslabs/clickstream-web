@@ -11,29 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Logger } from '@aws-amplify/core';
-import { BrowserInfo } from '../browser';
-import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
+import { BaseTracker } from './BaseTracker';
+import { Event } from '../provider';
 
-const logger = new Logger('ClickTracker');
-
-export class ClickTracker {
-	provider: ClickstreamProvider;
-	context: ClickstreamContext;
-
-	constructor(provider: ClickstreamProvider, context: ClickstreamContext) {
-		this.provider = provider;
-		this.context = context;
+export class ClickTracker extends BaseTracker {
+	init() {
 		this.trackClick = this.trackClick.bind(this);
-	}
-
-	setUp() {
-		if (!BrowserInfo.isBrowser() || !document.addEventListener) {
-			logger.debug('not in the supported web environment');
-		} else {
-			document.addEventListener('click', this.trackClick);
-		}
-		return this;
+		document.addEventListener('click', this.trackClick);
 	}
 
 	trackClick(event: MouseEvent) {
@@ -41,6 +25,7 @@ export class ClickTracker {
 		const targetElement = event.target as Element;
 		if (targetElement.tagName === 'A') {
 			const linkUrl = targetElement.getAttribute('href');
+			if (linkUrl === null || linkUrl.length === 0) return;
 			const linkDomain = new URL(linkUrl).host;
 			const linkClasses = targetElement.getAttribute('class');
 			const linkId = targetElement.getAttribute('id');

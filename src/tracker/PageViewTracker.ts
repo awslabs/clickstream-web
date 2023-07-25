@@ -12,43 +12,30 @@
  */
 
 import { Logger } from '@aws-amplify/core';
+import { BaseTracker } from './BaseTracker';
 import { BrowserInfo } from '../browser';
 import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
 import { PageType } from '../types';
 import { MethodEmbed } from '../util/MethodEmbed';
 import { StorageUtil } from '../util/StorageUtil';
 
-const logger = new Logger('SessionTracker');
+const logger = new Logger('PageViewTracker');
 
-export class PageViewTracker {
+export class PageViewTracker extends BaseTracker {
 	provider: ClickstreamProvider;
 	context: ClickstreamContext;
 	isEntrances = false;
 
-	constructor(provider: ClickstreamProvider, context: ClickstreamContext) {
-		this.provider = provider;
-		this.context = context;
+	init() {
 		this.trackPageView = this.trackPageView.bind(this);
-	}
-
-	setUp() {
 		if (this.context.configuration.pageType === PageType.SPA) {
 			this.trackPageViewForSPA();
 		} else {
 			this.trackPageView();
 		}
-		return this;
 	}
 
 	trackPageViewForSPA() {
-		if (
-			!BrowserInfo.isBrowser() ||
-			!window.addEventListener ||
-			!history.pushState
-		) {
-			logger.warn('unsupported web environment');
-			return;
-		}
 		MethodEmbed.add(history, 'pushState', this.trackPageView);
 		MethodEmbed.add(history, 'replaceState', this.trackPageView);
 		window.addEventListener('popstate', this.trackPageView);
@@ -56,8 +43,8 @@ export class PageViewTracker {
 	}
 
 	trackPageView() {
-		if (!BrowserInfo.isBrowser() || !window.sessionStorage) {
-			logger.warn('unsupported web environment');
+		if (!window.sessionStorage) {
+			logger.warn('unsupported web environment for sessionStorage');
 			return;
 		}
 		if (this.context.configuration.isTrackPageViewEvents) {
@@ -75,6 +62,7 @@ export class PageViewTracker {
 				engagementTime = currentPageStartTime - previousPageStartTime;
 			}
 			if (previousPageUrl !== currentPageUrl) {
+				this.provider.scrollTracker?.enterNewPage();
 				const eventAttributes = {
 					[Event.ReservedAttribute.PAGE_REFERRER]: previousPageUrl,
 					[Event.ReservedAttribute.PAGE_REFERRER_TITLE]: previousPageTitle,

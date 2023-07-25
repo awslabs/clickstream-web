@@ -113,6 +113,20 @@ describe('PageViewTracker test', () => {
 		(global as any).window.addEventListener = addEventListener;
 	});
 
+	test('test environment is not supported for sessionStorage', () => {
+		const sessionStorage = window.sessionStorage;
+		Object.defineProperty(window, 'sessionStorage', {
+			writable: true,
+			value: undefined,
+		});
+		pageViewTracker.setUp();
+		expect(recordMethodMock).not.toBeCalled();
+		Object.defineProperty(window, 'sessionStorage', {
+			writable: true,
+			value: sessionStorage,
+		});
+	});
+
 	test('test page view in SPA mode', async () => {
 		const pageAppearMock = jest.spyOn(pageViewTracker, 'trackPageView');
 		(context.configuration as any).pageType = PageType.SPA;

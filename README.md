@@ -114,6 +114,22 @@ Here is an explanation of each property:
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
 - **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
 
+#### Configuration update
+You can update the default configuration after initializing the SDK. We now support updating the following parameters:
+
+```typescript
+import { ClickstreamAnalytics } from 'clickstream-web';
+
+ClickstreamAnalytics.updateConfigure({
+  isLogEvents: true,
+  authCookie: 'your auth cookie',
+  isTrackPageViewEvents: false,
+  isTrackClickEvents: false,
+  isTrackScrollEvents: false,
+  isTrackSearchEvents: false,
+  searchKeyWords: ['product', 'class'],
+});
+```
 
 ## How to build&test locally
 

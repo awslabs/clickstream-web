@@ -11,44 +11,29 @@
  *  and limitations under the License.
  */
 
-import { Logger } from '@aws-amplify/core';
-import { BrowserInfo } from '../browser';
-import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
+import { BaseTracker } from './BaseTracker';
+import { Event } from '../provider';
 import { StorageUtil } from '../util/StorageUtil';
 
-const logger = new Logger('ScrollTracker');
-
-export class ScrollTracker {
-	provider: ClickstreamProvider;
-	context: ClickstreamContext;
-	currentPageUrl: string;
+export class ScrollTracker extends BaseTracker {
 	isFirstTime: boolean;
 
-	constructor(provider: ClickstreamProvider, context: ClickstreamContext) {
-		this.provider = provider;
-		this.context = context;
+	init() {
 		this.trackScroll = this.trackScroll.bind(this);
+		document.addEventListener('scroll', this.trackScroll);
+		this.isFirstTime = true;
 	}
 
-	setUp() {
-		if (!BrowserInfo.isBrowser() || !document.addEventListener) {
-			logger.debug('not in the supported web environment');
-		} else {
-			document.addEventListener('scroll', this.trackScroll);
-			this.currentPageUrl = BrowserInfo.getCurrentPageUrl();
-			this.isFirstTime = true;
-		}
-		return this;
+	enterNewPage() {
+		this.isFirstTime = true;
 	}
 
 	trackScroll() {
 		if (!this.context.configuration.isTrackScrollEvents) return;
 		const scrollY = window.scrollY || document.documentElement.scrollTop;
 		const ninetyPercentHeight = document.body.scrollHeight * 0.9;
-		if (BrowserInfo.getCurrentPageUrl() !== this.currentPageUrl) {
-			this.isFirstTime = true;
-		}
-		if (scrollY > ninetyPercentHeight && this.isFirstTime) {
+		const viewedHeight = scrollY + window.innerHeight;
+		if (scrollY > 0 && viewedHeight > ninetyPercentHeight && this.isFirstTime) {
 			const engagementTime =
 				new Date().getTime() - StorageUtil.getPreviousPageStartTime();
 			this.provider.record({

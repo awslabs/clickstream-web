@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
+import { LOG_TYPE } from '@aws-amplify/core/lib/Logger';
 import { AnalyticsEventBuilder } from './AnalyticsEventBuilder';
 import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
@@ -24,6 +25,7 @@ import {
 	ClickstreamAttribute,
 	ClickstreamConfiguration,
 	ClickstreamEvent,
+	Configuration,
 	PageType,
 	SendMode,
 	UserAttribute,
@@ -70,13 +72,19 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		);
 		this.eventRecorder = new EventRecorder(this.context);
 		this.sessionTracker = new SessionTracker(this, this.context);
+		this.pageViewTracker = new PageViewTracker(this, this.context);
+		this.clickTracker = new ClickTracker(this, this.context);
+		this.scrollTracker = new ScrollTracker(this, this.context);
 		this.sessionTracker.setUp();
-		this.pageViewTracker = new PageViewTracker(this, this.context).setUp();
-		this.clickTracker = new ClickTracker(this, this.context).setUp();
-		this.scrollTracker = new ScrollTracker(this, this.context).setUp();
+		this.pageViewTracker.setUp();
+		this.clickTracker.setUp();
+		this.scrollTracker.setUp();
 		this.userAttribute = StorageUtil.getUserAttributes();
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
+		}
+		if (this.context.configuration.isLogEvents) {
+			logger.level = LOG_TYPE.DEBUG;
 		}
 		logger.debug(
 			'Initialize the SDK successfully, configuration is:\n' +
@@ -84,6 +92,10 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		);
 		this.eventRecorder.sendFailedEvents();
 		return this.configuration;
+	}
+
+	updateConfigure(configuration: Configuration) {
+		Object.assign(this.configuration, configuration);
 	}
 
 	getCategory(): string {
