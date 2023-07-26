@@ -23,16 +23,16 @@ Clone this repository locally.
 git clone https://github.com/awslabs/clickstream-web.git
 ```
 
-Execute the following script to Generate `clickstream-web-0.1.0.tgz` zip package, which will be located in the project root folder.
+Execute the following script to Generate `clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
 ```bash
 cd clickstream-web && npm run build && npm run pack
 ```
 
-Copy the `clickstream-web-0.1.0.tgz` into your project, then execute the following script in your project root folder to install the SDK.
+Copy the `clickstream-web-x.x.x.tgz` into your project, then execute the following script in your project root folder to install the SDK.
 ```bash
-npm install ./clickstream-web-0.1.0.tgz
+npm install ./clickstream-web-x.x.x.tgz
 ```
-Note: Please change the path to where the `clickstream-web-0.1.0.tgz` file is located.
+Note: Please correct the SDK version and change the path to where the `clickstream-web-x.x.x.tgz` file is located.
 
 ### Initialize the SDK
 You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
