@@ -19,13 +19,16 @@ npm install @awslabs/clickstream-web
 **Using source code**
 
 1.Clone this repository locally.
-> git clone https://github.com/awslabs/clickstream-web.git
+```bash
+git clone https://github.com/awslabs/clickstream-web.git
+```
 
 2.Execute the following script to Generate `clickstream-web-0.1.0.tgz` zip package, which will be located in the project root folder.
-> cd clickstream-web && npm run build && npm run pack
+```bash
+cd clickstream-web && npm run build && npm run pack
+```
 
 3.Copy the `clickstream-web-0.1.0.tgz` into your project, then execute the following script to install the SDK.
-
 ```bash
 npm install ./clickstream-web-0.1.0.tgz
 ```
