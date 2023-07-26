@@ -11,8 +11,11 @@
  *  and limitations under the License.
  */
 
+import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
 import { Event } from '../provider';
+
+const logger = new Logger('ClickTracker');
 
 export class ClickTracker extends BaseTracker {
 	init() {
@@ -26,7 +29,13 @@ export class ClickTracker extends BaseTracker {
 		if (targetElement.tagName === 'A') {
 			const linkUrl = targetElement.getAttribute('href');
 			if (linkUrl === null || linkUrl.length === 0) return;
-			const linkDomain = new URL(linkUrl).host;
+			let linkDomain = '';
+			try {
+				const url = new URL(linkUrl);
+				linkDomain = url.host;
+			} catch (error) {
+				logger.debug('parse link domain failed: ' + error);
+			}
 			const linkClasses = targetElement.getAttribute('class');
 			const linkId = targetElement.getAttribute('id');
 			const outbound = window.location.host !== linkDomain;

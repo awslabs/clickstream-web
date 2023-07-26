@@ -67,7 +67,7 @@ describe('ClickTracker test', () => {
 		expect(trackClickMock).toBeCalled();
 	});
 
-	test('test scroll for reached ninety percent', () => {
+	test('test click a element will full attribute', () => {
 		const clickEvent = getMockMouseEvent(
 			'A',
 			'https://example.com',
@@ -80,6 +80,37 @@ describe('ClickTracker test', () => {
 			attributes: {
 				[Event.ReservedAttribute.LINK_URL]: 'https://example.com',
 				[Event.ReservedAttribute.LINK_DOMAIN]: 'example.com',
+				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
+				[Event.ReservedAttribute.LINK_ID]: 'link-id',
+				[Event.ReservedAttribute.OUTBOUND]: true,
+			},
+		});
+	});
+
+	test('test click a element without link', () => {
+		const clickEvent = getMockMouseEvent(
+			'A',
+			'',
+			'link-class',
+			'link-id'
+		);
+		clickTracker.trackClick(clickEvent);
+		expect(recordMethodMock).not.toBeCalled()
+	});
+
+	test('test click a element without host', () => {
+		const clickEvent = getMockMouseEvent(
+			'A',
+			'/products',
+			'link-class',
+			'link-id'
+		);
+		clickTracker.trackClick(clickEvent);
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.CLICK,
+			attributes: {
+				[Event.ReservedAttribute.LINK_URL]: '/products',
+				[Event.ReservedAttribute.LINK_DOMAIN]: '',
 				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
 				[Event.ReservedAttribute.LINK_ID]: 'link-id',
 				[Event.ReservedAttribute.OUTBOUND]: true,

@@ -251,5 +251,6 @@ export class Event {
 		PREFIX: '[',
 		SUFFIX: ']',
 		LAST_EVENT_IDENTIFIER: '},{"hashCode":',
+		KEYWORDS: ['q', 's', 'search', 'query', 'keyword'],
 	};
 }

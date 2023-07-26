@@ -90,7 +90,7 @@ export class PageViewTracker extends BaseTracker {
 		const searchStr = window.location.search;
 		if (!searchStr || searchStr.length === 0) return;
 		const urlParams = new URLSearchParams(searchStr);
-		const searchKeywords = ['q', 's', 'search', 'query', 'keyword'];
+		const searchKeywords = Event.Constants.KEYWORDS;
 		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
 		if (configuredSearchKeywords !== undefined) {
 			Object.assign(searchKeywords, configuredSearchKeywords);

@@ -14,6 +14,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
 import { BrowserInfo } from '../browser';
+import config from '../config';
 import { Session } from '../tracker';
 import {
 	AnalyticsEvent,
@@ -23,6 +24,8 @@ import {
 } from '../types';
 import { HashUtil } from '../util/HashUtil';
 import { StorageUtil } from '../util/StorageUtil';
+
+const sdkVersion = config.sdkVersion;
 
 export class AnalyticsEventBuilder {
 	static async createEvent(
@@ -64,7 +67,7 @@ export class AnalyticsEventBuilder {
 			screen_height: window.innerHeight,
 			screen_width: window.innerWidth,
 			sdk_name: 'aws-solution-clickstream-sdk',
-			sdk_version: context.sdkVersion,
+			sdk_version: sdkVersion,
 			user: userAttributes ?? {},
 			attributes: attributes ?? {},
 		};

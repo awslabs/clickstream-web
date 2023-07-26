@@ -10,15 +10,16 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "prebuild": "ts-node scripts/GenerateConfig.ts",
+    "build": "npm run prebuild && npm run clean && npm run build:esm && npm run build:cjs",
     "build-dev": "npm run clean && npx tsc && npx webpack --config webpack.config.dev.js",
     "build:cjs": "npx tsc --module commonjs && webpack && webpack --config webpack.config.dev.js",
     "build:esm": "npx tsc --module esnext --outDir lib-esm",
     "format": "npx prettier --check 'src/**/*.{js,ts}'",
     "lint": "npx eslint src",
-    "test": "npx jest -w 1 --coverage",
+    "test": "npm run prebuild && npx jest -w 1 --coverage",
     "clean": "rimraf lib-esm lib dist",
-    "pack": "npm pack"
+    "pack": "npm run prebuild && npm pack"
   },
   "dependencies": {
     "@aws-amplify/core": "^5.5.1",

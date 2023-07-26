@@ -10,21 +10,12 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { BrowserInfo } from '../browser';
-import { ClickstreamConfiguration } from '../types';
-import { StorageUtil } from '../util/StorageUtil';
+import fs from 'fs';
+import { version } from '../package.json';
 
-export class ClickstreamContext {
-	browserInfo: BrowserInfo;
-	configuration: ClickstreamConfiguration;
-	userUniqueId: string;
-
-	constructor(
-		browserInfo: BrowserInfo,
-		configuration: ClickstreamConfiguration
-	) {
-		this.browserInfo = browserInfo;
-		this.configuration = configuration;
-		this.userUniqueId = StorageUtil.getCurrentUserUniqueId();
-	}
-}
+const config = `{
+	sdkVersion: '${version}',
+};
+`;
+fs.writeFileSync('./src/config.ts', `export default ${config}`);
+console.log(`Version ${version} written to .env file.`);
