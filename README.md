@@ -8,24 +8,34 @@ The SDK relies on the Amplify for JS SDK Core Library and is developed according
 
 ## Integrate SDK
 
-**1.Include SDK**
+### Include SDK
 
-For NPM repository:
+**1. Using NPM repository** (The package is pending release)
 
 ```bash
 npm install @awslabs/clickstream-web
 ```
 
-For GitHub repository:
+**2. Using source code**
 
+Clone this repository locally.
 ```bash
-npm install github:awslabs/clickstream-web#0.1.0
+git clone https://github.com/awslabs/clickstream-web.git
 ```
 
-Note: for beta version we use GitHub repository to distribute our SDK.
+Execute the following script to Generate `clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
+```bash
+cd clickstream-web && npm run build && npm run pack
+```
 
-**2.Initialize the SDK**
-You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code will as follows:
+Copy the `clickstream-web-x.x.x.tgz` into your project, then execute the following script in your project root folder to install the SDK.
+```bash
+npm install ./clickstream-web-x.x.x.tgz
+```
+Note: Please correct the SDK version and change the path to where the `clickstream-web-x.x.x.tgz` file is located.
+
+### Initialize the SDK
+You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
 
 ```typescript
 import { ClickstreamAnalytics, EventMode, PageType } from 'clickstream-web';
@@ -40,7 +50,7 @@ Your `appId` and `endpoint` are already set up in it.
 
 ### Start using
 
-#### Record event.
+#### Record event
 
 Add the following code where you need to record event.
 
@@ -69,15 +79,15 @@ ClickstreamAnalytics.setUserId(null);
 #### Add user attribute
 
 ```typescript
-ClickstreamAnalytics.setUserAttribute({
+ClickstreamAnalytics.setUserAttributes({
   userName:"carl",
   userAge: 22
 });
 ```
 
-Current login user‘s attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can update the current user's attribute when it changes.
+Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
-#### Other configuration
+#### Other configurations
 In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage:
 
 ```typescript
@@ -110,12 +120,12 @@ Here is an explanation of each property:
 - **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
 - **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
 - **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`.
-- **isLogEvents**: whether log events json, default is false.
+- **isLogEvents**: whether to print out event json for debugging, default is false.
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
 - **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
 
 #### Configuration update
-You can update the default configuration after initializing the SDK. We now support updating the following parameters:
+You can update the default configuration after initializing the SDK, below are the additional configuration options you can customize.
 
 ```typescript
 import { ClickstreamAnalytics } from 'clickstream-web';
