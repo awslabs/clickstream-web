@@ -28,7 +28,7 @@ Execute the following script to Generate `clickstream-web-0.1.0.tgz` zip package
 cd clickstream-web && npm run build && npm run pack
 ```
 
-Copy the `clickstream-web-0.1.0.tgz` into your project, then execute the following script to install the SDK.
+Copy the `clickstream-web-0.1.0.tgz` into your project, then execute the following script in your project root folder to install the SDK.
 ```bash
 npm install ./clickstream-web-0.1.0.tgz
 ```
