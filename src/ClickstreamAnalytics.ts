@@ -16,6 +16,7 @@ import {
 	ClickstreamAttribute,
 	ClickstreamConfiguration,
 	ClickstreamEvent,
+	Configuration,
 } from './types';
 
 export class ClickstreamAnalytics {
@@ -47,5 +48,9 @@ export class ClickstreamAnalytics {
 
 	public static setUserAttributes(attributes: ClickstreamAttribute) {
 		this.provider.setUserAttributes(attributes);
+	}
+
+	public static updateConfigure(configure: Configuration) {
+		this.provider.updateConfigure(configure);
 	}
 }

@@ -25,7 +25,7 @@ import {
 	Event,
 	EventRecorder,
 } from '../../src/provider';
-import {PageViewTracker, Session, SessionTracker} from '../../src/tracker';
+import { PageViewTracker, Session, SessionTracker } from '../../src/tracker';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 global.TextEncoder = TextEncoder;
@@ -52,23 +52,20 @@ describe('PageViewTracker test', () => {
 			appId: 'testAppId',
 			endpoint: 'https://example.com/collect',
 			sendMode: SendMode.Batch,
+			searchKeyWords: ['country'],
 		});
-		context = new ClickstreamContext(
-			new BrowserInfo(),
-			provider.configuration
-		);
+		context = new ClickstreamContext(new BrowserInfo(), provider.configuration);
 
 		eventRecorder = new EventRecorder(context);
 		pageViewTracker = new PageViewTracker(provider, context);
 		sessionTracker = new SessionTracker(provider, context);
-		sessionTracker.session = Session.getCurrentSession(context)
+		sessionTracker.session = Session.getCurrentSession(context);
 		provider.context = context;
 		provider.pageViewTracker = pageViewTracker;
 		provider.eventRecorder = eventRecorder;
 		provider.sessionTracker = sessionTracker;
 		recordMethodMock = jest.spyOn(provider, 'record');
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
-
 		originalLocation = window.location;
 		setDomUrl('https://example.com/index');
 		Object.defineProperty(window.document, 'title', {
@@ -114,6 +111,20 @@ describe('PageViewTracker test', () => {
 		pageViewTracker.setUp();
 		expect(recordMethodMock).not.toBeCalled();
 		(global as any).window.addEventListener = addEventListener;
+	});
+
+	test('test environment is not supported for sessionStorage', () => {
+		const sessionStorage = window.sessionStorage;
+		Object.defineProperty(window, 'sessionStorage', {
+			writable: true,
+			value: undefined,
+		});
+		pageViewTracker.setUp();
+		expect(recordMethodMock).not.toBeCalled();
+		Object.defineProperty(window, 'sessionStorage', {
+			writable: true,
+			value: sessionStorage,
+		});
 	});
 
 	test('test page view in SPA mode', async () => {
@@ -168,6 +179,32 @@ describe('PageViewTracker test', () => {
 		expect(allEvents.length).toBe(2);
 	});
 
+	test('test open search result page', async () => {
+		(context.configuration as any).pageType = PageType.SPA;
+		pageViewTracker.setUp();
+		openSearchResultPage();
+		await sleep(100);
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		expect(allEvents.length).toBe(3);
+		expect(allEvents[0].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
+		expect(allEvents[1].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
+		expect(allEvents[2].event_type).toBe(Event.PresetEvent.SEARCH);
+		expect(allEvents[2].attributes._search_key).toBe('keyword');
+		expect(allEvents[2].attributes._search_term).toBe('shose');
+	});
+
+	test('test open custom search result page', async () => {
+		(context.configuration as any).pageType = PageType.SPA;
+		pageViewTracker.setUp();
+		openCustomSearchResultPage();
+		await sleep(100);
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		expect(allEvents.length).toBe(3);
+		expect(allEvents[2].event_type).toBe(Event.PresetEvent.SEARCH);
+		expect(allEvents[2].attributes._search_key).toBe('country');
+		expect(allEvents[2].attributes._search_term).toBe('zh');
+	});
+
 	function openPageA() {
 		Object.defineProperty(window.document, 'title', {
 			writable: true,
@@ -183,6 +220,36 @@ describe('PageViewTracker test', () => {
 			value: 'pageB',
 		});
 		setDomUrl('https://example.com/pageB');
+		const popStateEvent = new PopStateEvent('popstate', {
+			state: null,
+		});
+		Object.defineProperty(popStateEvent, 'target', {
+			value: window,
+		});
+		window.dispatchEvent(popStateEvent);
+	}
+
+	function openSearchResultPage() {
+		Object.defineProperty(window.document, 'title', {
+			writable: true,
+			value: 'searchResult',
+		});
+		setDomUrl('https://example.com/searchResult?keyword=shose&isNew=true');
+		const popStateEvent = new PopStateEvent('popstate', {
+			state: null,
+		});
+		Object.defineProperty(popStateEvent, 'target', {
+			value: window,
+		});
+		window.dispatchEvent(popStateEvent);
+	}
+
+	function openCustomSearchResultPage() {
+		Object.defineProperty(window.document, 'title', {
+			writable: true,
+			value: 'customSearchResult',
+		});
+		setDomUrl('https://example.com/customSearchResult?country=zh');
 		const popStateEvent = new PopStateEvent('popstate', {
 			state: null,
 		});

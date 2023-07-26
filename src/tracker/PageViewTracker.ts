@@ -12,26 +12,22 @@
  */
 
 import { Logger } from '@aws-amplify/core';
+import { BaseTracker } from './BaseTracker';
 import { BrowserInfo } from '../browser';
 import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
 import { PageType } from '../types';
 import { MethodEmbed } from '../util/MethodEmbed';
 import { StorageUtil } from '../util/StorageUtil';
 
-const logger = new Logger('SessionTracker');
+const logger = new Logger('PageViewTracker');
 
-export class PageViewTracker {
+export class PageViewTracker extends BaseTracker {
 	provider: ClickstreamProvider;
 	context: ClickstreamContext;
 	isEntrances = false;
 
-	constructor(provider: ClickstreamProvider, context: ClickstreamContext) {
-		this.provider = provider;
-		this.context = context;
+	init() {
 		this.trackPageView = this.trackPageView.bind(this);
-	}
-
-	setUp() {
 		if (this.context.configuration.pageType === PageType.SPA) {
 			this.trackPageViewForSPA();
 		} else {
@@ -40,14 +36,6 @@ export class PageViewTracker {
 	}
 
 	trackPageViewForSPA() {
-		if (
-			!BrowserInfo.isBrowser() ||
-			!window.addEventListener ||
-			!history.pushState
-		) {
-			logger.warn('unsupported web environment');
-			return;
-		}
 		MethodEmbed.add(history, 'pushState', this.trackPageView);
 		MethodEmbed.add(history, 'replaceState', this.trackPageView);
 		window.addEventListener('popstate', this.trackPageView);
@@ -55,8 +43,8 @@ export class PageViewTracker {
 	}
 
 	trackPageView() {
-		if (!BrowserInfo.isBrowser() || !window.sessionStorage) {
-			logger.warn('unsupported web environment');
+		if (!window.sessionStorage) {
+			logger.warn('unsupported web environment for sessionStorage');
 			return;
 		}
 		if (this.context.configuration.isTrackPageViewEvents) {
@@ -74,6 +62,7 @@ export class PageViewTracker {
 				engagementTime = currentPageStartTime - previousPageStartTime;
 			}
 			if (previousPageUrl !== currentPageUrl) {
+				this.provider.scrollTracker?.enterNewPage();
 				const eventAttributes = {
 					[Event.ReservedAttribute.PAGE_REFERRER]: previousPageUrl,
 					[Event.ReservedAttribute.PAGE_REFERRER_TITLE]: previousPageTitle,
@@ -90,6 +79,33 @@ export class PageViewTracker {
 				StorageUtil.savePreviousPageUrl(currentPageUrl);
 				StorageUtil.savePreviousPageTitle(currentPageTitle);
 				StorageUtil.savePreviousPageStartTime(currentPageStartTime);
+				if (this.context.configuration.isTrackSearchEvents) {
+					this.trackSearchEvents();
+				}
+			}
+		}
+	}
+
+	trackSearchEvents() {
+		const searchStr = window.location.search;
+		if (!searchStr || searchStr.length === 0) return;
+		const urlParams = new URLSearchParams(searchStr);
+		const searchKeywords = Event.Constants.KEYWORDS;
+		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
+		if (configuredSearchKeywords !== undefined) {
+			Object.assign(searchKeywords, configuredSearchKeywords);
+		}
+		for (const keyword of searchKeywords) {
+			if (urlParams.has(keyword)) {
+				const searchTerm = urlParams.get(keyword);
+				this.provider.record({
+					name: Event.PresetEvent.SEARCH,
+					attributes: {
+						[Event.ReservedAttribute.SEARCH_KEY]: keyword,
+						[Event.ReservedAttribute.SEARCH_TERM]: searchTerm,
+					},
+				});
+				break;
 			}
 		}
 	}

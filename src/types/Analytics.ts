@@ -11,22 +11,28 @@
  *  and limitations under the License.
  */
 
-export interface ClickstreamConfiguration {
+export interface ClickstreamConfiguration extends Configuration {
 	readonly appId: string;
 	readonly endpoint: string;
 	readonly sendMode?: SendMode;
 	readonly sendEventsInterval?: number;
-	readonly isTrackPageViewEvents?: boolean;
 	readonly pageType?: PageType;
+	readonly sessionTimeoutDuration?: number;
+}
+
+export interface Configuration {
 	isLogEvents?: boolean;
 	authCookie?: string;
-	readonly sessionTimeoutDuration?: number;
+	isTrackPageViewEvents?: boolean;
+	isTrackClickEvents?: boolean;
+	isTrackScrollEvents?: boolean;
+	isTrackSearchEvents?: boolean;
+	searchKeyWords?: string[];
 }
 
 export enum SendMode {
 	Immediate = 'Immediate',
 	Batch = 'Batch',
-	Beacon = 'Beacon',
 }
 
 export enum PageType {

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { version } from '../../package.json';
 import { BrowserInfo } from '../../src/browser';
 import {
 	AnalyticsEventBuilder,
@@ -47,7 +48,7 @@ describe('AnalyticsEventBuilder test', () => {
 		expect(event.sdk_name).toBe('aws-solution-clickstream-sdk');
 		expect(event.screen_height > 0).toBeTruthy();
 		expect(event.screen_width > 0).toBeTruthy();
-		expect(event.sdk_version).toBe('');
+		expect(event.sdk_version).toBe(version);
 		expect(event.user).toStrictEqual({});
 		expect(Event.ReservedAttribute.PAGE_TITLE in event.attributes);
 		expect(Event.ReservedAttribute.PAGE_URL in event.attributes);

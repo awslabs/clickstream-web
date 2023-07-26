@@ -19,7 +19,7 @@ npm install @awslabs/clickstream-web
 For GitHub repository:
 
 ```bash
-npm install github:awslabs/clickstream-web
+npm install github:awslabs/clickstream-web#0.1.0
 ```
 
 Note: for beta version we use GitHub repository to distribute our SDK.
@@ -33,27 +33,10 @@ import { ClickstreamAnalytics, EventMode, PageType } from 'clickstream-web';
 ClickstreamAnalytics.configure({
    appId: "your appId",
    endpoint: "https://example.com/collect",
-   sendMode: EventMode.Batch,
-   sendEventsInterval: 5000,
-   isTrackPageViewEvents: true,
-   pageType: PageType.SPA,
-   isLogEvents: false,
-   authCookie: "your auth cookie",
-   sessionTimeoutDuration: 1800000
-)}
+)};
 ```
 
-Your `appId` and `endpoint` are already set up in it, here's an explanation of each property:
-
-- **appId (Required)**: the app id of your project in control plane. 
-- **endpoint (Required)**: the endpoint path you will upload the event to AWS server.
-- **sendMode**: EventMode.Immediate, EventMode.Batch, default is Immediate mode.
-- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
-- **isTrackPageViewEvents**: whether auto page view events in browser, default is `true`
-- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multipule page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value ' is `true`.
-- **isLogEvents**: whether log events json, default is false.
-- **authCookie**: your auth cookie for AWS application load balancer auth cookie.
-- **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
+Your `appId` and `endpoint` are already set up in it.
 
 ### Start using
 
@@ -93,6 +76,60 @@ ClickstreamAnalytics.setUserAttribute({
 ```
 
 Current login user‘s attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can update the current user's attribute when it changes.
+
+#### Other configuration
+In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage:
+
+```typescript
+import { ClickstreamAnalytics, EventMode, PageType } from 'clickstream-web';
+
+ClickstreamAnalytics.configure({
+   appId: "your appId",
+   endpoint: "https://example.com/collect",
+   sendMode: EventMode.Batch,
+   sendEventsInterval: 5000,
+   isTrackPageViewEvents: true,
+   isTrackClickEvents: true,
+   isTrackSearchEvents: true,
+   isTrackScrollEvents: true,
+   pageType: PageType.SPA,
+   isLogEvents: false,
+   authCookie: "your auth cookie",
+   sessionTimeoutDuration: 1800000,
+)};
+```
+
+Here is an explanation of each property:
+
+- **appId (Required)**: the app id of your project in control plane.
+- **endpoint (Required)**: the endpoint path you will upload the event to AWS server.
+- **sendMode**: EventMode.Immediate, EventMode.Batch, default is Immediate mode.
+- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
+- **isTrackPageViewEvents**: whether auto record page view events in browser, default is `true`
+- **isTrackClickEvents**: whether auto record link click events in browser, default is `true`
+- **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
+- **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
+- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`.
+- **isLogEvents**: whether log events json, default is false.
+- **authCookie**: your auth cookie for AWS application load balancer auth cookie.
+- **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
+
+#### Configuration update
+You can update the default configuration after initializing the SDK. We now support updating the following parameters:
+
+```typescript
+import { ClickstreamAnalytics } from 'clickstream-web';
+
+ClickstreamAnalytics.updateConfigure({
+  isLogEvents: true,
+  authCookie: 'your auth cookie',
+  isTrackPageViewEvents: false,
+  isTrackClickEvents: false,
+  isTrackScrollEvents: false,
+  isTrackSearchEvents: false,
+  searchKeyWords: ['product', 'class'],
+});
+```
 
 ## How to build&test locally
 

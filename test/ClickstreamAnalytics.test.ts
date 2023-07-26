@@ -80,6 +80,30 @@ describe('ClickstreamAnalytics test', () => {
 		expect(StorageUtil.getFailedEvents().length).toBe(0);
 	});
 
+	test('test update configuration', () => {
+		ClickstreamAnalytics.init({
+			appId: 'testApp',
+			endpoint: 'https://localhost:8080/collect',
+		});
+		ClickstreamAnalytics.updateConfigure({
+			isLogEvents: true,
+			authCookie: 'testCookie',
+			isTrackPageViewEvents: false,
+			isTrackClickEvents: false,
+			isTrackScrollEvents: false,
+			isTrackSearchEvents: false,
+			searchKeyWords: ['video', 'product', 'class'],
+		});
+		const newConfigure = ClickstreamAnalytics['provider'].configuration;
+		expect(newConfigure.isLogEvents).toBeTruthy();
+		expect(newConfigure.authCookie).toBe('testCookie');
+		expect(newConfigure.isTrackPageViewEvents).toBeFalsy();
+		expect(newConfigure.isTrackClickEvents).toBeFalsy();
+		expect(newConfigure.isTrackScrollEvents).toBeFalsy();
+		expect(newConfigure.isTrackSearchEvents).toBeFalsy();
+		expect(newConfigure.searchKeyWords.length).toBe(3);
+	});
+
 	function sleep(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}

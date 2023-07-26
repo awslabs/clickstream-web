@@ -10,13 +10,12 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import fs from 'fs';
+import { version } from '../package.json';
 
-module.exports = {
-	entry: { 'clickstream-web.min': './lib-esm/index.js' },
-	mode: 'production',
-	output: {
-		filename: '[name].js',
-		path: __dirname + '/dist',
-	},
-	devtool: 'source-map'
+const config = `{
+	sdkVersion: '${version}',
 };
+`;
+fs.writeFileSync('./src/config.ts', `export default ${config}`);
+console.log(`Version ${version} written to .env file.`);

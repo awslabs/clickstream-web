@@ -18,5 +18,6 @@ yarn-error.log
 yarn.lock
 *.tsbuildinfo
 *.tgz
+/src/config.ts
 
 build

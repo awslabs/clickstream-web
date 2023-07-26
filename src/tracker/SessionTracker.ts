@@ -11,39 +11,34 @@
  *  and limitations under the License.
  */
 import { Logger } from '@aws-amplify/core';
+import { BaseTracker } from './BaseTracker';
 import { Session } from './Session';
-import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
+import { Event } from '../provider';
 import { StorageUtil } from '../util/StorageUtil';
 
 const logger = new Logger('SessionTracker');
 
-export class SessionTracker {
-	provider: ClickstreamProvider;
-	context: ClickstreamContext;
+export class SessionTracker extends BaseTracker {
 	hiddenStr: string;
 	visibilityChange: string;
 	session: Session;
 	startEngageTimestamp: number;
 
-	constructor(provider: ClickstreamProvider, context: ClickstreamContext) {
-		this.provider = provider;
-		this.context = context;
+	init() {
 		this.onVisibilityChange = this.onVisibilityChange.bind(this);
 		this.onBeforeUnload = this.onBeforeUnload.bind(this);
-	}
 
-	setUp() {
 		this.handleInit();
 		if (!this.checkEnv()) {
 			logger.warn('not supported env');
-			return;
+		} else {
+			document.addEventListener(
+				this.visibilityChange,
+				this.onVisibilityChange,
+				false
+			);
+			window.addEventListener('beforeunload', this.onBeforeUnload, false);
 		}
-		document.addEventListener(
-			this.visibilityChange,
-			this.onVisibilityChange,
-			false
-		);
-		window.addEventListener('beforeunload', this.onBeforeUnload, false);
 	}
 
 	onVisibilityChange() {
