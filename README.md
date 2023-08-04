@@ -124,15 +124,26 @@ ClickstreamAnalytics.updateConfigure({
 });
 ```
 
-## How to build&test locally
+## How to Integrate&test locally
 
-**Build**
+**Integrate**
 
-Open your terminal window, at the root project folder to execute: 
+Clone this repository locally.
 
 ```bash
-npm run build
+git clone https://github.com/awslabs/clickstream-web.git
 ```
+
+Execute the following script to Generate `aws-clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
+```bash
+cd clickstream-web && npm run pack
+```
+
+Copy the `aws-clickstream-web-x.x.x.tgz` into your project, then execute the following script in your project root folder to install the SDK.
+```bash
+npm install ./aws-clickstream-web-x.x.x.tgz
+```
+Note: Please correct the SDK version and change the path to where the `aws-clickstream-web-x.x.x.tgz` file is located.
 
 **Test**
 
