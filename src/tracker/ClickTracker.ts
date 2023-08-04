@@ -21,6 +21,11 @@ export class ClickTracker extends BaseTracker {
 	init() {
 		this.trackClick = this.trackClick.bind(this);
 		document.addEventListener('click', this.trackClick);
+		const currentDomain = window.location.host;
+		const domainList = this.context.configuration.domainList;
+		if (!domainList.includes(currentDomain)) {
+			domainList.push(currentDomain);
+		}
 	}
 
 	trackClick(event: MouseEvent) {
@@ -36,9 +41,11 @@ export class ClickTracker extends BaseTracker {
 			} catch (error) {
 				logger.debug('parse link domain failed: ' + error);
 			}
+			if (linkDomain === '') return;
 			const linkClasses = targetElement.getAttribute('class');
 			const linkId = targetElement.getAttribute('id');
-			const outbound = window.location.host !== linkDomain;
+			const outbound =
+				!this.context.configuration.domainList.includes(linkDomain);
 			this.provider.record({
 				name: Event.PresetEvent.CLICK,
 				attributes: {

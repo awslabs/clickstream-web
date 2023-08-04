@@ -18,6 +18,8 @@ export interface ClickstreamConfiguration extends Configuration {
 	readonly sendEventsInterval?: number;
 	readonly pageType?: PageType;
 	readonly sessionTimeoutDuration?: number;
+	readonly searchKeyWords?: string[];
+	readonly domainList?: string[];
 }
 
 export interface Configuration {
@@ -27,7 +29,6 @@ export interface Configuration {
 	isTrackClickEvents?: boolean;
 	isTrackScrollEvents?: boolean;
 	isTrackSearchEvents?: boolean;
-	searchKeyWords?: string[];
 }
 
 export enum SendMode {

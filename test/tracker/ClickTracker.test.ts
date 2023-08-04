@@ -35,6 +35,7 @@ describe('ClickTracker test', () => {
 			appId: 'testAppId',
 			endpoint: 'https://example.com/click',
 			sendMode: SendMode.Batch,
+			domainList: ['example1.com', 'example2.com'],
 		});
 		context = new ClickstreamContext(new BrowserInfo(), provider.configuration);
 		const sessionTracker = new SessionTracker(provider, context);
@@ -67,35 +68,53 @@ describe('ClickTracker test', () => {
 		expect(trackClickMock).toBeCalled();
 	});
 
-	test('test click a element will full attribute', () => {
+	test('test click a element with current domain', () => {
 		const clickEvent = getMockMouseEvent(
 			'A',
-			'https://example.com',
+			'https://localhost/collect',
 			'link-class',
 			'link-id'
 		);
+		clickTracker.setUp()
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.CLICK,
 			attributes: {
-				[Event.ReservedAttribute.LINK_URL]: 'https://example.com',
-				[Event.ReservedAttribute.LINK_DOMAIN]: 'example.com',
+				[Event.ReservedAttribute.LINK_URL]: 'https://localhost/collect',
+				[Event.ReservedAttribute.LINK_DOMAIN]: 'localhost',
 				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
 				[Event.ReservedAttribute.LINK_ID]: 'link-id',
-				[Event.ReservedAttribute.OUTBOUND]: true,
+				[Event.ReservedAttribute.OUTBOUND]: false,
+			},
+		});
+	});
+
+	test('test click a element in configured domain', () => {
+		const clickEvent = getMockMouseEvent(
+			'A',
+			'https://example1.com/collect',
+			'link-class',
+			'link-id'
+		);
+		clickTracker.setUp()
+		clickTracker.trackClick(clickEvent);
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.CLICK,
+			attributes: {
+				[Event.ReservedAttribute.LINK_URL]: 'https://example1.com/collect',
+				[Event.ReservedAttribute.LINK_DOMAIN]: 'example1.com',
+				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
+				[Event.ReservedAttribute.LINK_ID]: 'link-id',
+				[Event.ReservedAttribute.OUTBOUND]: false,
 			},
 		});
 	});
 
 	test('test click a element without link', () => {
-		const clickEvent = getMockMouseEvent(
-			'A',
-			'',
-			'link-class',
-			'link-id'
-		);
+		const clickEvent = getMockMouseEvent('A', '', 'link-class', 'link-id');
+		clickTracker.setUp()
 		clickTracker.trackClick(clickEvent);
-		expect(recordMethodMock).not.toBeCalled()
+		expect(recordMethodMock).not.toBeCalled();
 	});
 
 	test('test click a element without host', () => {
@@ -105,12 +124,25 @@ describe('ClickTracker test', () => {
 			'link-class',
 			'link-id'
 		);
+		clickTracker.setUp()
+		clickTracker.trackClick(clickEvent);
+		expect(recordMethodMock).not.toBeCalled();
+	});
+
+	test('test click a element with outbound', () => {
+		const clickEvent = getMockMouseEvent(
+			'A',
+			'https://example3.com',
+			'link-class',
+			'link-id'
+		);
+		clickTracker.setUp()
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.CLICK,
 			attributes: {
-				[Event.ReservedAttribute.LINK_URL]: '/products',
-				[Event.ReservedAttribute.LINK_DOMAIN]: '',
+				[Event.ReservedAttribute.LINK_URL]: 'https://example3.com',
+				[Event.ReservedAttribute.LINK_DOMAIN]: 'example3.com',
 				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
 				[Event.ReservedAttribute.LINK_ID]: 'link-id',
 				[Event.ReservedAttribute.OUTBOUND]: true,
