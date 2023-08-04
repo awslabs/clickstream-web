@@ -124,7 +124,7 @@ ClickstreamAnalytics.updateConfigure({
 });
 ```
 
-## How to Integrate&test locally
+## How to integrate and test locally
 
 **Integrate**
 
