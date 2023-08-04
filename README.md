@@ -128,7 +128,7 @@ ClickstreamAnalytics.updateConfigure({
 
 **Integrate**
 
-Clone this repository locally, execute the following script to Generate `aws-clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
+Clone this repository locally, execute the following script to generate `aws-clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
 ```bash
 cd clickstream-web && npm run pack
 ```
