@@ -18,7 +18,7 @@ npm install @aws/clickstream-web
 You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
 
 ```typescript
-import { ClickstreamAnalytics, EventMode, PageType } from '@aws/clickstream-web';
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.configure({
    appId: "your appId",
