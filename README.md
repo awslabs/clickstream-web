@@ -20,7 +20,7 @@ You need to configure the SDK with default information before using it. Copy you
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
-ClickstreamAnalytics.configure({
+ClickstreamAnalytics.init({
    appId: "your appId",
    endpoint: "https://example.com/collect",
 });
