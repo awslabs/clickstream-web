@@ -10,8 +10,6 @@ The SDK relies on the Amplify for JS SDK Core Library and is developed according
 
 ### Include SDK
 
-**1. Using NPM repository**
-
 ```bash
 npm install @aws/clickstream-web
 ```
