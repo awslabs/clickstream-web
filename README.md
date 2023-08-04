@@ -23,7 +23,7 @@ import { ClickstreamAnalytics } from '@aws/clickstream-web';
 ClickstreamAnalytics.configure({
    appId: "your appId",
    endpoint: "https://example.com/collect",
-)};
+});
 ```
 
 Your `appId` and `endpoint` are already set up in it.
@@ -88,7 +88,7 @@ ClickstreamAnalytics.configure({
    sessionTimeoutDuration: 1800000,
    searchKeyWords: ['product', 'class'],
    domainList: ['example1.com', 'example2.com'],
-)};
+});
 ```
 
 Here is an explanation of each property:
