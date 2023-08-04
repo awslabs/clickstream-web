@@ -92,7 +92,6 @@ describe('ClickstreamAnalytics test', () => {
 			isTrackClickEvents: false,
 			isTrackScrollEvents: false,
 			isTrackSearchEvents: false,
-			searchKeyWords: ['video', 'product', 'class'],
 		});
 		const newConfigure = ClickstreamAnalytics['provider'].configuration;
 		expect(newConfigure.isLogEvents).toBeTruthy();
@@ -101,7 +100,7 @@ describe('ClickstreamAnalytics test', () => {
 		expect(newConfigure.isTrackClickEvents).toBeFalsy();
 		expect(newConfigure.isTrackScrollEvents).toBeFalsy();
 		expect(newConfigure.isTrackSearchEvents).toBeFalsy();
-		expect(newConfigure.searchKeyWords.length).toBe(3);
+		expect(newConfigure.searchKeyWords.length).toBe(0);
 	});
 
 	function sleep(ms: number): Promise<void> {

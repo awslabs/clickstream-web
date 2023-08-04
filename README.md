@@ -10,40 +10,20 @@ The SDK relies on the Amplify for JS SDK Core Library and is developed according
 
 ### Include SDK
 
-**1. Using NPM repository** (The package is pending release)
-
 ```bash
-npm install @awslabs/clickstream-web
+npm install @aws/clickstream-web
 ```
-
-**2. Using source code**
-
-Clone this repository locally.
-```bash
-git clone https://github.com/awslabs/clickstream-web.git
-```
-
-Execute the following script to Generate `clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
-```bash
-cd clickstream-web && npm run build && npm run pack
-```
-
-Copy the `clickstream-web-x.x.x.tgz` into your project, then execute the following script in your project root folder to install the SDK.
-```bash
-npm install ./clickstream-web-x.x.x.tgz
-```
-Note: Please correct the SDK version and change the path to where the `clickstream-web-x.x.x.tgz` file is located.
 
 ### Initialize the SDK
 You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
 
 ```typescript
-import { ClickstreamAnalytics, EventMode, PageType } from 'clickstream-web';
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.configure({
    appId: "your appId",
    endpoint: "https://example.com/collect",
-)};
+});
 ```
 
 Your `appId` and `endpoint` are already set up in it.
@@ -55,7 +35,7 @@ Your `appId` and `endpoint` are already set up in it.
 Add the following code where you need to record event.
 
 ```typescript
-import { ClickstreamAnalytics } from 'clickstream-web';
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.record({ name: 'albumVisit' });
 ClickstreamAnalytics.record({
@@ -67,7 +47,7 @@ ClickstreamAnalytics.record({
 #### Login and logout
 
 ```typescript
-import { ClickstreamAnalytics } from 'clickstream-web';
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 // when user login success.
 ClickstreamAnalytics.setUserId("UserId");
@@ -91,7 +71,7 @@ Current login user's attributes will be cached in localStorage, so the next time
 In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage:
 
 ```typescript
-import { ClickstreamAnalytics, EventMode, PageType } from 'clickstream-web';
+import { ClickstreamAnalytics, EventMode, PageType } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.configure({
    appId: "your appId",
@@ -106,7 +86,9 @@ ClickstreamAnalytics.configure({
    isLogEvents: false,
    authCookie: "your auth cookie",
    sessionTimeoutDuration: 1800000,
-)};
+   searchKeyWords: ['product', 'class'],
+   domainList: ['example1.com', 'example2.com'],
+});
 ```
 
 Here is an explanation of each property:
@@ -123,12 +105,14 @@ Here is an explanation of each property:
 - **isLogEvents**: whether to print out event json for debugging, default is false.
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
 - **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
+- **searchKeyWords**: the customized Keywords for trigger the `_search` event, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters.
+- **domainList**: if your website cross multiple domain, you can customize the domain list. The `_outbound` attribute of the `_click` event will be true when a link leads to a website that's not a part of your configured domain.  
 
 #### Configuration update
 You can update the default configuration after initializing the SDK, below are the additional configuration options you can customize.
 
 ```typescript
-import { ClickstreamAnalytics } from 'clickstream-web';
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.updateConfigure({
   isLogEvents: true,
@@ -137,19 +121,23 @@ ClickstreamAnalytics.updateConfigure({
   isTrackClickEvents: false,
   isTrackScrollEvents: false,
   isTrackSearchEvents: false,
-  searchKeyWords: ['product', 'class'],
 });
 ```
 
-## How to build&test locally
+## How to integrate and test locally
 
-**Build**
+**Integrate**
 
-Open your terminal window, at the root project folder to execute: 
-
+Clone this repository locally, execute the following script to generate `aws-clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
 ```bash
-npm run build
+cd clickstream-web && npm run pack
 ```
+
+Copy the `aws-clickstream-web-x.x.x.tgz` into your project, then execute the following script in your project root folder to install the SDK.
+```bash
+npm install ./aws-clickstream-web-x.x.x.tgz
+```
+Note: Please correct the SDK version and change the path to where the `aws-clickstream-web-x.x.x.tgz` file is located.
 
 **Test**
 

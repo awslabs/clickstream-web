@@ -57,6 +57,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			pageType: PageType.SPA,
 			isLogEvents: false,
 			sessionTimeoutDuration: 1800000,
+			searchKeyWords: [],
+			domainList: [],
 		};
 	}
 

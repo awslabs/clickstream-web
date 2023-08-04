@@ -1,6 +1,6 @@
 {
-  "name": "clickstream-web",
-  "version": "0.1.0",
+  "name": "@aws/clickstream-web",
+  "version": "0.1.1",
   "description": "ClickstreamAnalytics Web SDK",
   "license": "Apache-2.0",
   "main": "./lib/index.ts",
@@ -19,8 +19,13 @@
     "lint": "npx eslint src",
     "test": "npm run prebuild && npx jest -w 1 --coverage",
     "clean": "rimraf lib-esm lib dist",
-    "pack": "npm run prebuild && npm pack"
+    "pack": "npm run build && npm pack"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awslabs/clickstream-web.git"
+  },
+  "author": "AWS GCR Solutions Team",
   "dependencies": {
     "@aws-amplify/core": "^5.5.1",
     "uuid": "^9.0.0",

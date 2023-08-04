@@ -25,8 +25,11 @@ export class PageViewTracker extends BaseTracker {
 	provider: ClickstreamProvider;
 	context: ClickstreamContext;
 	isEntrances = false;
+	searchKeywords = Event.Constants.KEYWORDS;
 
 	init() {
+		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
+		Object.assign(this.searchKeywords, configuredSearchKeywords);
 		this.trackPageView = this.trackPageView.bind(this);
 		if (this.context.configuration.pageType === PageType.SPA) {
 			this.trackPageViewForSPA();
@@ -90,12 +93,7 @@ export class PageViewTracker extends BaseTracker {
 		const searchStr = window.location.search;
 		if (!searchStr || searchStr.length === 0) return;
 		const urlParams = new URLSearchParams(searchStr);
-		const searchKeywords = Event.Constants.KEYWORDS;
-		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
-		if (configuredSearchKeywords !== undefined) {
-			Object.assign(searchKeywords, configuredSearchKeywords);
-		}
-		for (const keyword of searchKeywords) {
+		for (const keyword of this.searchKeywords) {
 			if (urlParams.has(keyword)) {
 				const searchTerm = urlParams.get(keyword);
 				this.provider.record({
