@@ -69,6 +69,6 @@ export class ClickTracker extends BaseTracker {
 				return this.findTagA(element.parentElement, depth);
 			}
 		}
-		return null
+		return null;
 	}
 }

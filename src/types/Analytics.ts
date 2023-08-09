@@ -97,7 +97,7 @@ export interface AnalyticsEvent {
 	sdk_name: string;
 	host_name: string;
 	app_id: string;
-	items:Item[];
+	items: Item[];
 	user: UserAttribute;
 	attributes: ClickstreamAttribute;
 }
