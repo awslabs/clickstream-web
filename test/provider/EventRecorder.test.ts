@@ -19,7 +19,7 @@ import {
 	EventRecorder,
 } from '../../src/provider';
 import { Session } from '../../src/tracker';
-import { AnalyticsEvent, SendMode } from '../../src/types';
+import { AnalyticsEvent, Item, SendMode } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('EventRecorder test', () => {
@@ -65,6 +65,35 @@ describe('EventRecorder test', () => {
 
 	test('test getBatchEvents for only one large event', async () => {
 		const event = await getLargeEventExceed512k();
+		StorageUtil.saveEvent(event);
+		const [eventsJson, needsFlush] = eventRecorder.getBatchEvents();
+		expect(JSON.parse(eventsJson).length).toBe(1);
+		expect(needsFlush).toBeFalsy();
+	});
+
+	test('test getBatchEvents for only one large event with large items', async () => {
+		const event = await getLargeEventExceed512k();
+		const items: Item[] = [];
+		const longValue = 'a'.repeat(255);
+		const item: Item = {
+			id: longValue,
+			name: longValue,
+			brand: longValue,
+			category: longValue,
+			category2: longValue,
+			category3: longValue,
+			category4: longValue,
+			category5: longValue,
+			creative_name: longValue,
+			creative_slot: longValue,
+			location_id: longValue,
+			price: longValue,
+			quantity: 1000000,
+		};
+		for (let i = 0; i < 100; i++) {
+			items.push(item);
+		}
+		event.items = items;
 		StorageUtil.saveEvent(event);
 		const [eventsJson, needsFlush] = eventRecorder.getBatchEvents();
 		expect(JSON.parse(eventsJson).length).toBe(1);

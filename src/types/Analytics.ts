@@ -54,9 +54,28 @@ export interface UserAttribute {
 	[key: string]: UserAttributeObject;
 }
 
+export interface Item {
+	brand?: string;
+	category?: string;
+	category2?: string;
+	category3?: string;
+	category4?: string;
+	category5?: string;
+	creative_name?: string;
+	creative_slot?: string;
+	id?: string;
+	location_id?: string;
+	name?: string;
+	price?: Currency;
+	quantity?: number;
+}
+
+type Currency = string | number;
+
 export interface ClickstreamEvent {
 	name: string;
 	attributes?: ClickstreamAttribute;
+	items?: Item[];
 }
 
 export interface AnalyticsEvent {
@@ -78,6 +97,7 @@ export interface AnalyticsEvent {
 	sdk_name: string;
 	host_name: string;
 	app_id: string;
+	items:Item[];
 	user: UserAttribute;
 	attributes: ClickstreamAttribute;
 }

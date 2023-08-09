@@ -67,6 +67,26 @@ ClickstreamAnalytics.setUserAttributes({
 
 Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
+#### Record event with items
+
+You can add the following code to log an event with an item.
+
+```typescript
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+const item_product = {
+  id: '1',
+  name: 'Nature',
+  category: 'book',
+  price: 56.5,
+};
+ClickstreamAnalytics.record({
+  name: 'buttonClick',
+  attributes: { _channel: 'SMS', Successful: true },
+  items: [item_product],
+});
+```
+
 #### Other configurations
 In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage:
 

@@ -19,7 +19,7 @@ import {
 	Event,
 } from '../../src/provider';
 import { Session } from '../../src/tracker';
-import { ClickstreamAttribute } from '../../src/types';
+import { ClickstreamAttribute, Item } from '../../src/types';
 
 describe('AnalyticsEventBuilder test', () => {
 	test('test create event with common attributes', async () => {
@@ -117,6 +117,56 @@ describe('AnalyticsEventBuilder test', () => {
 		).toBeTruthy();
 		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
 			Event.ErrorCode.ATTRIBUTE_VALUE_LENGTH_EXCEED
+		);
+	});
+
+	test('test check event item reached max item number limit', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		const exceedNumber = Event.Limit.MAX_NUM_OF_ITEMS + 1;
+		for (let i = 0; i < exceedNumber; i++) {
+			const item: Item = {
+				id: String(i),
+				name: 'item' + i,
+			};
+			items.push(item);
+		}
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(Event.Limit.MAX_NUM_OF_ITEMS);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeTruthy();
+		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
+			Event.ErrorCode.ITEM_SIZE_EXCEED
+		);
+	});
+
+	test('test check event item reached max item attribute value length limit', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		let longValue = '';
+		for (let i = 0; i < 26; i++) {
+			longValue += 'abcdeabcde';
+		}
+		const item1: Item = {
+			id: 'invalid1',
+			name: longValue,
+			category: 'category',
+		};
+		items.push(item1);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(1);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeTruthy();
+		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
+			Event.ErrorCode.ITEM_VALUE_LENGTH_EXCEED
 		);
 	});
 });

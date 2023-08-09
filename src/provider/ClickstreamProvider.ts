@@ -15,6 +15,7 @@ import { LOG_TYPE } from '@aws-amplify/core/lib/Logger';
 import { AnalyticsEventBuilder } from './AnalyticsEventBuilder';
 import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
+import { EventChecker } from './EventChecker';
 import { EventRecorder } from './EventRecorder';
 import { BrowserInfo } from '../browser';
 import { PageViewTracker, SessionTracker } from '../tracker';
@@ -109,7 +110,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	}
 
 	record(event: ClickstreamEvent) {
-		const result = Event.checkEventName(event.name);
+		const result = EventChecker.checkEventName(event.name);
 		if (result.error_code > 0) {
 			logger.error(result.error_message);
 			return;
@@ -158,7 +159,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 				delete this.userAttribute[key];
 			} else {
 				const currentNumber = Object.keys(this.userAttribute).length;
-				const { checkUserAttribute } = Event;
+				const { checkUserAttribute } = EventChecker;
 				const result = checkUserAttribute(currentNumber, key, value);
 				if (result.error_code > 0) {
 					const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;

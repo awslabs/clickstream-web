@@ -13,6 +13,7 @@
 import { ClickstreamAnalytics } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { StorageUtil } from '../src/util/StorageUtil';
+import { Item } from '../src/types';
 
 describe('ClickstreamAnalytics test', () => {
 	const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
@@ -66,6 +67,12 @@ describe('ClickstreamAnalytics test', () => {
 			_user_name: 'carl',
 			_user_age: 20,
 		});
+		const item: Item = {
+			id: '1',
+			name: 'Nature',
+			category: 'book',
+			price: 56.5,
+		};
 		ClickstreamAnalytics.record({
 			name: 'testEvent',
 			attributes: {
@@ -74,6 +81,7 @@ describe('ClickstreamAnalytics test', () => {
 				isNew: true,
 				score: 85.22,
 			},
+			items: [item],
 		});
 		await sleep(100);
 		expect(sendRequestMock).toBeCalled();
