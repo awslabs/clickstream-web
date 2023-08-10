@@ -31,8 +31,9 @@ export class ClickTracker extends BaseTracker {
 	trackClick(event: MouseEvent) {
 		if (!this.context.configuration.isTrackClickEvents) return;
 		const targetElement = event.target as Element;
-		if (targetElement.tagName === 'A') {
-			const linkUrl = targetElement.getAttribute('href');
+		const element = this.findTagA(targetElement);
+		if (element !== null) {
+			const linkUrl = element.getAttribute('href');
 			if (linkUrl === null || linkUrl.length === 0) return;
 			let linkDomain = '';
 			try {
@@ -42,8 +43,8 @@ export class ClickTracker extends BaseTracker {
 				logger.debug('parse link domain failed: ' + error);
 			}
 			if (linkDomain === '') return;
-			const linkClasses = targetElement.getAttribute('class');
-			const linkId = targetElement.getAttribute('id');
+			const linkClasses = element.getAttribute('class');
+			const linkId = element.getAttribute('id');
 			const outbound =
 				!this.context.configuration.domainList.includes(linkDomain);
 			this.provider.record({
@@ -57,5 +58,17 @@ export class ClickTracker extends BaseTracker {
 				},
 			});
 		}
+	}
+
+	findTagA(element: Element, depth = 0): Element {
+		if (element && depth < 3) {
+			if (element.tagName === 'A') {
+				return element;
+			} else {
+				depth += 1;
+				return this.findTagA(element.parentElement, depth);
+			}
+		}
+		return null;
 	}
 }

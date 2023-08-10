@@ -13,6 +13,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import { ClickstreamContext } from './ClickstreamContext';
 import { Event } from './Event';
+import { EventChecker } from './EventChecker';
 import { BrowserInfo } from '../browser';
 import config from '../config';
 import { Session } from '../tracker';
@@ -20,6 +21,7 @@ import {
 	AnalyticsEvent,
 	ClickstreamAttribute,
 	ClickstreamEvent,
+	Item,
 	UserAttribute,
 } from '../types';
 import { HashUtil } from '../util/HashUtil';
@@ -49,6 +51,8 @@ export class AnalyticsEventBuilder {
 		attributes[Event.ReservedAttribute.PAGE_URL] =
 			BrowserInfo.getCurrentPageUrl();
 
+		const items = this.getEventItemsWithCheck(event.items, attributes);
+
 		const analyticEvent = {
 			hashCode: '',
 			event_type: event.name,
@@ -68,6 +72,7 @@ export class AnalyticsEventBuilder {
 			screen_width: window.innerWidth,
 			sdk_name: 'aws-solution-clickstream-sdk',
 			sdk_version: sdkVersion,
+			items: items,
 			user: userAttributes ?? {},
 			attributes: attributes ?? {},
 		};
@@ -81,14 +86,14 @@ export class AnalyticsEventBuilder {
 		attributes: ClickstreamAttribute
 	): ClickstreamAttribute {
 		const resultAttributes: ClickstreamAttribute = {};
+		const { checkAttributes } = EventChecker;
 		for (const key in attributes) {
 			const value = attributes[key];
 			if (value !== null) {
 				const currentNumber = Object.keys(resultAttributes).length;
-				const { checkAttributes } = Event;
 				const result = checkAttributes(currentNumber, key, value);
 				const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
-				if (result.error_code > 0 && !(ERROR_CODE in resultAttributes)) {
+				if (result.error_code > 0) {
 					resultAttributes[ERROR_CODE] = result.error_code;
 					resultAttributes[ERROR_MESSAGE] = result.error_message;
 				} else {
@@ -97,5 +102,28 @@ export class AnalyticsEventBuilder {
 			}
 		}
 		return resultAttributes;
+	}
+
+	static getEventItemsWithCheck(
+		items: Item[],
+		attributes: ClickstreamAttribute
+	): Item[] {
+		let resultItems = undefined;
+		if (items !== undefined) {
+			resultItems = [];
+			const { checkItems } = EventChecker;
+			for (const item of items) {
+				const result = checkItems(resultItems.length, item);
+				const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
+				if (result.error_code > 0) {
+					attributes[ERROR_CODE] = result.error_code;
+					attributes[ERROR_MESSAGE] = result.error_message;
+				}
+				if (result.error_code !== Event.ErrorCode.ITEM_SIZE_EXCEED) {
+					resultItems.push(item);
+				}
+			}
+		}
+		return resultItems;
 	}
 }

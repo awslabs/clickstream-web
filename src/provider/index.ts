@@ -16,3 +16,4 @@ export { ClickstreamContext } from './ClickstreamContext';
 export { ClickstreamProvider } from './ClickstreamProvider';
 export { EventRecorder } from './EventRecorder';
 export { Event } from './Event';
+export { EventChecker } from './EventChecker';

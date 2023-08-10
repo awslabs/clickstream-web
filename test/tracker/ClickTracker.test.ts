@@ -75,7 +75,7 @@ describe('ClickTracker test', () => {
 			'link-class',
 			'link-id'
 		);
-		clickTracker.setUp()
+		clickTracker.setUp();
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.CLICK,
@@ -96,7 +96,7 @@ describe('ClickTracker test', () => {
 			'link-class',
 			'link-id'
 		);
-		clickTracker.setUp()
+		clickTracker.setUp();
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.CLICK,
@@ -112,7 +112,7 @@ describe('ClickTracker test', () => {
 
 	test('test click a element without link', () => {
 		const clickEvent = getMockMouseEvent('A', '', 'link-class', 'link-id');
-		clickTracker.setUp()
+		clickTracker.setUp();
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).not.toBeCalled();
 	});
@@ -124,7 +124,7 @@ describe('ClickTracker test', () => {
 			'link-class',
 			'link-id'
 		);
-		clickTracker.setUp()
+		clickTracker.setUp();
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).not.toBeCalled();
 	});
@@ -136,13 +136,37 @@ describe('ClickTracker test', () => {
 			'link-class',
 			'link-id'
 		);
-		clickTracker.setUp()
+		clickTracker.setUp();
 		clickTracker.trackClick(clickEvent);
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.CLICK,
 			attributes: {
 				[Event.ReservedAttribute.LINK_URL]: 'https://example3.com',
 				[Event.ReservedAttribute.LINK_DOMAIN]: 'example3.com',
+				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
+				[Event.ReservedAttribute.LINK_ID]: 'link-id',
+				[Event.ReservedAttribute.OUTBOUND]: true,
+			},
+		});
+	});
+
+	test('test click a element wrapped by a tag', () => {
+		const clickEvent = getMockMouseEvent('SPAN', '', '', '');
+		const targetElement = document.createElement('A');
+		targetElement.setAttribute('href', 'https://example.com');
+		targetElement.setAttribute('class', 'link-class');
+		targetElement.setAttribute('id', 'link-id');
+		Object.defineProperty(clickEvent.target, 'parentElement', {
+			writable: true,
+			value: targetElement,
+		});
+		clickTracker.setUp();
+		clickTracker.trackClick(clickEvent);
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.CLICK,
+			attributes: {
+				[Event.ReservedAttribute.LINK_URL]: 'https://example.com',
+				[Event.ReservedAttribute.LINK_DOMAIN]: 'example.com',
 				[Event.ReservedAttribute.LINK_CLASSES]: 'link-class',
 				[Event.ReservedAttribute.LINK_ID]: 'link-id',
 				[Event.ReservedAttribute.OUTBOUND]: true,
