@@ -1,3 +1,5 @@
+import { Logger } from '@aws-amplify/core';
+
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -10,6 +12,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+const logger = new Logger('BrowserInfo');
 
 export class BrowserInfo {
 	locale: string;
@@ -19,6 +22,8 @@ export class BrowserInfo {
 	userAgent: string;
 	zoneOffset: number;
 	hostName: string;
+	latestReferrer: string;
+	latestReferrerHost: string;
 
 	constructor() {
 		if (!BrowserInfo.isBrowser()) return;
@@ -29,6 +34,15 @@ export class BrowserInfo {
 		this.userAgent = userAgent;
 		this.zoneOffset = -new Date().getTimezoneOffset() * 60000;
 		this.hostName = window.location.hostname;
+		this.latestReferrer = window.document.referrer;
+		if (this.latestReferrer && this.latestReferrer !== '') {
+			try {
+				const url = new URL(this.latestReferrer);
+				this.latestReferrerHost = url.host;
+			} catch (error) {
+				logger.debug('parse latest referrer domain failed: ' + error);
+			}
+		}
 	}
 
 	initLocalInfo(locale: string) {

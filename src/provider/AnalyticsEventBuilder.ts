@@ -50,6 +50,10 @@ export class AnalyticsEventBuilder {
 			BrowserInfo.getCurrentPageTitle();
 		attributes[Event.ReservedAttribute.PAGE_URL] =
 			BrowserInfo.getCurrentPageUrl();
+		attributes[Event.ReservedAttribute.LATEST_REFERRER] =
+			browserInfo.latestReferrer;
+		attributes[Event.ReservedAttribute.LATEST_REFERRER_HOST] =
+			browserInfo.latestReferrerHost;
 
 		const items = this.getEventItemsWithCheck(event.items, attributes);
 

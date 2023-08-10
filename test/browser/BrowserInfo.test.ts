@@ -14,6 +14,11 @@ import { BrowserInfo } from '../../src/browser';
 
 describe('BrowserInfo test', () => {
 	test('test create BrowserInfo', () => {
+		const referrer = 'https://example.com/collect';
+		Object.defineProperty(window.document, 'referrer', {
+			writable: true,
+			value: referrer,
+		});
 		const browserInfo = new BrowserInfo();
 		expect(browserInfo.userAgent.length > 0).toBeTruthy();
 		expect(browserInfo.hostName.length > 0).toBeTruthy();
@@ -21,6 +26,8 @@ describe('BrowserInfo test', () => {
 		expect(browserInfo.system_language.length > 0).toBeTruthy();
 		expect(browserInfo.zoneOffset).not.toBeUndefined();
 		expect(browserInfo.make.length > 0).toBeTruthy();
+		expect(browserInfo.latestReferrer).toBe(referrer);
+		expect(browserInfo.latestReferrerHost).toBe('example.com');
 	});
 
 	test('test init locale', () => {

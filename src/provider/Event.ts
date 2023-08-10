@@ -51,6 +51,8 @@ export class Event {
 		PAGE_TITLE: '_page_title',
 		PAGE_REFERRER: '_page_referrer',
 		PAGE_REFERRER_TITLE: '_page_referrer_title',
+		LATEST_REFERRER: '_latest_referrer',
+		LATEST_REFERRER_HOST: '_latest_referrer_host',
 		ENTRANCES: '_entrances',
 		SESSION_ID: '_session_id',
 		SESSION_DURATION: '_session_duration',

@@ -23,6 +23,11 @@ import { ClickstreamAttribute, Item } from '../../src/types';
 
 describe('AnalyticsEventBuilder test', () => {
 	test('test create event with common attributes', async () => {
+		const referrer = 'https://example1.com/collect';
+		Object.defineProperty(window.document, 'referrer', {
+			writable: true,
+			value: referrer,
+		});
 		const context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
@@ -56,6 +61,8 @@ describe('AnalyticsEventBuilder test', () => {
 		expect(Event.ReservedAttribute.SESSION_DURATION in event.attributes);
 		expect(Event.ReservedAttribute.SESSION_NUMBER in event.attributes);
 		expect(Event.ReservedAttribute.SESSION_START_TIMESTAMP in event.attributes);
+		expect(Event.ReservedAttribute.LATEST_REFERRER in event.attributes);
+		expect(Event.ReservedAttribute.LATEST_REFERRER_HOST in event.attributes);
 	});
 
 	test('test check event attribute reached max attribute number limit', () => {
