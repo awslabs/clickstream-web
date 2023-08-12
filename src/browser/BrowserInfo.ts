@@ -40,7 +40,7 @@ export class BrowserInfo {
 				const url = new URL(this.latestReferrer);
 				this.latestReferrerHost = url.host;
 			} catch (error) {
-				logger.debug('parse latest referrer domain failed: ' + error);
+				logger.warn('parse latest referrer domain failed: ' + error);
 			}
 		}
 	}
