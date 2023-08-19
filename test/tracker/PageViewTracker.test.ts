@@ -26,6 +26,7 @@ import {
 	EventRecorder,
 } from '../../src/provider';
 import { PageViewTracker, Session, SessionTracker } from '../../src/tracker';
+import { MethodEmbed } from '../../src/util/MethodEmbed';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 global.TextEncoder = TextEncoder;
@@ -203,6 +204,23 @@ describe('PageViewTracker test', () => {
 		expect(allEvents[2].event_type).toBe(Event.PresetEvent.SEARCH);
 		expect(allEvents[2].attributes._search_key).toBe('country');
 		expect(allEvents[2].attributes._search_term).toBe('zh');
+	});
+
+	test('test method embed should override method correctly', () => {
+		const context = {
+			methodName: (value: number) => value + 1,
+		};
+		const methodName = 'methodName';
+		const methodEmbed = new MethodEmbed(context, methodName);
+		const methodOverrideMock = jest.fn(
+			(originalMethod: any) =>
+				(...args: any) =>
+					originalMethod(...args)(2)
+		);
+		methodEmbed.set(methodOverrideMock);
+		context[methodName](3);
+
+		expect(methodOverrideMock).toHaveBeenCalledWith(4);
 	});
 
 	function openPageA() {

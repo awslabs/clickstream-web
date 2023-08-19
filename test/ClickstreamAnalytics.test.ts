@@ -10,15 +10,17 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ClickstreamAnalytics } from '../src';
+import { ClickstreamAnalytics, SendMode } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
-import { StorageUtil } from '../src/util/StorageUtil';
+import { Event } from '../src/provider';
 import { Item } from '../src/types';
+import { StorageUtil } from '../src/util/StorageUtil';
 
 describe('ClickstreamAnalytics test', () => {
 	const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
 
 	beforeEach(() => {
+		localStorage.clear();
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementation(mockSendRequestSuccess);
@@ -56,7 +58,7 @@ describe('ClickstreamAnalytics test', () => {
 		expect(StorageUtil.getFailedEvents().length).toBe(0);
 	});
 
-	test('test record event with name user attributes and event attributes', async () => {
+	test('test record event with all attributes', async () => {
 		const sendRequestMock = jest.spyOn(NetRequest, 'sendRequest');
 		ClickstreamAnalytics.init({
 			appId: 'testApp',
@@ -86,6 +88,28 @@ describe('ClickstreamAnalytics test', () => {
 		await sleep(100);
 		expect(sendRequestMock).toBeCalled();
 		expect(StorageUtil.getFailedEvents().length).toBe(0);
+	});
+
+	test('test send event immediately in batch mode', async () => {
+		const sendRequestMock = jest.spyOn(NetRequest, 'sendRequest');
+		ClickstreamAnalytics.init({
+			appId: 'testApp',
+			endpoint: 'https://localhost:8080/collect',
+			sendMode: SendMode.Batch,
+		});
+		ClickstreamAnalytics.record({
+			name: 'testEvent',
+			isImmediate: true,
+		});
+		await sleep(100);
+		expect(sendRequestMock).toBeCalled();
+		expect(StorageUtil.getFailedEvents().length).toBe(0);
+		const eventList = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
+		for (const event of eventList) {
+			expect(event.event_type).not.toBe('testEvent');
+		}
 	});
 
 	test('test update configuration', () => {

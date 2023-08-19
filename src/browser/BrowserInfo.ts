@@ -61,6 +61,14 @@ export class BrowserInfo {
 		);
 	}
 
+	static isFirefox(): boolean {
+		return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+	}
+
+	static isNetworkOnLine(): boolean {
+		return navigator.onLine;
+	}
+
 	static getCurrentPageUrl(): string {
 		if (!BrowserInfo.isBrowser()) return '';
 		else return window.location.href;

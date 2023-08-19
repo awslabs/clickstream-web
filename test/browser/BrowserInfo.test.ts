@@ -13,6 +13,10 @@
 import { BrowserInfo } from '../../src/browser';
 
 describe('BrowserInfo test', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+		jest.resetAllMocks();
+	});
 	test('test create BrowserInfo', () => {
 		const referrer = 'https://example.com/collect';
 		Object.defineProperty(window.document, 'referrer', {
@@ -28,6 +32,17 @@ describe('BrowserInfo test', () => {
 		expect(browserInfo.make.length > 0).toBeTruthy();
 		expect(browserInfo.latestReferrer).toBe(referrer);
 		expect(browserInfo.latestReferrerHost).toBe('example.com');
+	});
+
+	test('test invalid latest referrer host', () => {
+		const referrer = '/collect';
+		Object.defineProperty(window.document, 'referrer', {
+			writable: true,
+			value: referrer,
+		});
+		const browserInfo = new BrowserInfo();
+		expect(browserInfo.latestReferrer).toBe(referrer);
+		expect(browserInfo.latestReferrerHost).toBeUndefined();
 	});
 
 	test('test init locale', () => {
@@ -51,5 +66,31 @@ describe('BrowserInfo test', () => {
 		expect(url).toBe('');
 		const title = BrowserInfo.getCurrentPageTitle();
 		expect(title).toBe('');
+	});
+
+	test('test get current page title', () => {
+		const originTitle = window.document.title;
+		Object.defineProperty(window.document, 'title', {
+			writable: true,
+			value: undefined,
+		});
+		const title = BrowserInfo.getCurrentPageTitle();
+		expect(title).toBe('');
+		Object.defineProperty(window.document, 'title', {
+			writable: true,
+			value: originTitle,
+		});
+	});
+
+	test('test get make and return vendor', () => {
+		const vendor = window.navigator.vendor;
+		jest.spyOn(window.navigator, 'product', 'get').mockReturnValue(undefined);
+		const browserInfo = new BrowserInfo();
+		expect(browserInfo.make).toBe(vendor);
+	});
+
+	test('test browser type', () => {
+		const isFirefox = BrowserInfo.isFirefox();
+		expect(isFirefox).toBeFalsy();
 	});
 });

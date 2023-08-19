@@ -33,6 +33,11 @@ describe('StorageUtil test', () => {
 		expect(deviceId).toEqual(deviceId1);
 	});
 
+	test('test get user Attributes return null object', () => {
+		const userAttribute = StorageUtil.getUserAttributes();
+		expect(JSON.stringify(userAttribute)).toBe('{}');
+	});
+
 	test('test get current user unique id', () => {
 		const userUniqueId = StorageUtil.getCurrentUserUniqueId();
 		expect(userUniqueId).not.toBeNull();
@@ -105,7 +110,9 @@ describe('StorageUtil test', () => {
 		for (let i = 0; i < 11; i++) {
 			StorageUtil.saveEvent(event);
 		}
-		const events = JSON.parse(StorageUtil.getAllEvents() + Event.Constants.SUFFIX);
+		const events = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
 		expect(events.length < 11).toBeTruthy();
 	});
 
@@ -122,7 +129,9 @@ describe('StorageUtil test', () => {
 		StorageUtil.saveEvent(event1);
 		StorageUtil.saveEvent(event2);
 		StorageUtil.clearEvents(JSON.stringify([event1]));
-		const leftEvents = JSON.parse(StorageUtil.getAllEvents() + Event.Constants.SUFFIX);
+		const leftEvents = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
 		expect(leftEvents.length).toBe(1);
 		expect(leftEvents[0].event_type).toBe('event2');
 	});

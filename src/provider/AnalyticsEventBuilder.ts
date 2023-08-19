@@ -78,7 +78,7 @@ export class AnalyticsEventBuilder {
 			sdk_version: sdkVersion,
 			items: items,
 			user: userAttributes ?? {},
-			attributes: attributes ?? {},
+			attributes: attributes,
 		};
 		analyticEvent.hashCode = await HashUtil.getHashCode(
 			JSON.stringify(analyticEvent)

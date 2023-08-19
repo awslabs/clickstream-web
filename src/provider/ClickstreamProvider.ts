@@ -93,7 +93,10 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			'Initialize the SDK successfully, configuration is:\n' +
 				JSON.stringify(this.configuration)
 		);
-		this.eventRecorder.sendFailedEvents();
+		if (this.eventRecorder.getFailedEventsLength() > 0) {
+			this.eventRecorder.haveFailedEvents = true;
+			this.eventRecorder.sendFailedEvents();
+		}
 		return this.configuration;
 	}
 
@@ -121,8 +124,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			this.userAttribute,
 			this.sessionTracker.session
 		)
-			.then(event => {
-				this.eventRecorder.record(event);
+			.then(resultEvent => {
+				this.eventRecorder.record(resultEvent, event.isImmediate);
 			})
 			.catch(error => {
 				logger.error(`Create event fail with ${error}`);
@@ -190,5 +193,14 @@ export class ClickstreamProvider implements AnalyticsProvider {
 
 	flushEvents(eventRecorder: EventRecorder) {
 		eventRecorder.flushEvents();
+	}
+
+	sendEventsInBackground(isWindowClosing: boolean) {
+		if (
+			!(BrowserInfo.isFirefox() && isWindowClosing) &&
+			BrowserInfo.isNetworkOnLine()
+		) {
+			this.eventRecorder.sendEventsInBackground(isWindowClosing);
+		}
 	}
 }

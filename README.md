@@ -15,7 +15,7 @@ npm install @aws/clickstream-web
 ```
 
 ### Initialize the SDK
-You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution control plane, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
+Copy your configuration code from your clickstream solution web console, we recommended you add the code to your app's root entry point, for example `index.js/app.tsx` in React or `main.ts` in Vue/Angular, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
 
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
@@ -84,6 +84,20 @@ ClickstreamAnalytics.record({
   name: 'buttonClick',
   attributes: { _channel: 'SMS', Successful: true },
   items: [item_product],
+});
+```
+
+#### Send event immediate in batch mode
+
+When you are in batch mode, you can still send an event immediately by setting the `isImmediate` attribute, as in the following code:
+
+```typescript
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+ClickstreamAnalytics.record({
+  name: 'immediateEvent',
+  attributes: { url: 'https://example.com' },
+  isImmediate: true,
 });
 ```
 

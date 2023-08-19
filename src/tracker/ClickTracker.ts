@@ -18,20 +18,22 @@ import { Event } from '../provider';
 const logger = new Logger('ClickTracker');
 
 export class ClickTracker extends BaseTracker {
+	processedElements = new WeakSet();
+
 	init() {
 		this.trackClick = this.trackClick.bind(this);
-		document.addEventListener('click', this.trackClick);
 		const currentDomain = window.location.host;
 		const domainList = this.context.configuration.domainList;
 		if (!domainList.includes(currentDomain)) {
 			domainList.push(currentDomain);
 		}
+		this.addClickListenerForATag();
 	}
 
 	trackClick(event: MouseEvent) {
 		if (!this.context.configuration.isTrackClickEvents) return;
 		const targetElement = event.target as Element;
-		const element = this.findTagA(targetElement);
+		const element = this.findATag(targetElement);
 		if (element !== null) {
 			const linkUrl = element.getAttribute('href');
 			if (linkUrl === null || linkUrl.length === 0) return;
@@ -60,13 +62,33 @@ export class ClickTracker extends BaseTracker {
 		}
 	}
 
-	findTagA(element: Element, depth = 0): Element {
+	addClickListenerForATag() {
+		const observer = new MutationObserver(mutationsList => {
+			for (const mutation of mutationsList) {
+				if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+					const target = mutation.target;
+					if (target instanceof Element) {
+						const aTags = target.querySelectorAll('a');
+						aTags.forEach(aTag => {
+							if (!this.processedElements.has(aTags)) {
+								aTag.addEventListener('click', this.trackClick);
+								this.processedElements.add(aTag);
+							}
+						});
+					}
+				}
+			}
+		});
+		observer.observe(document.body, { childList: true, subtree: true });
+	}
+
+	findATag(element: Element, depth = 0): Element {
 		if (element && depth < 3) {
 			if (element.tagName === 'A') {
 				return element;
 			} else {
 				depth += 1;
-				return this.findTagA(element.parentElement, depth);
+				return this.findATag(element.parentElement, depth);
 			}
 		}
 		return null;
