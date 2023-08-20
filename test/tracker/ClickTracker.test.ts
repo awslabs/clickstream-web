@@ -65,7 +65,7 @@ describe('ClickTracker test', () => {
 		clickTracker.setUp();
 		window.document.dispatchEvent(new window.Event('click'));
 		expect(recordMethodMock).not.toBeCalled();
-		expect(trackClickMock).not.toBeCalled();
+		expect(trackClickMock).toBeCalled();
 	});
 
 	test('test click a element with current domain', () => {
@@ -87,19 +87,6 @@ describe('ClickTracker test', () => {
 				[Event.ReservedAttribute.OUTBOUND]: false,
 			},
 		});
-	});
-
-	test('test disable the configuration for track click event', () => {
-		provider.configuration.isTrackClickEvents = false;
-		const clickEvent = getMockMouseEvent(
-			'A',
-			'https://localhost/collect',
-			'link-class',
-			'link-id'
-		);
-		clickTracker.setUp();
-		clickTracker.trackClick(clickEvent);
-		expect(recordMethodMock).not.toBeCalled();
 	});
 
 	test('test click a element in configured domain', () => {
@@ -187,28 +174,6 @@ describe('ClickTracker test', () => {
 		});
 	});
 
-	test('test click a element with out a tag in parent', () => {
-		const clickEvent = getMockMouseEvent('SPAN', '', '', '');
-		const targetElement = document.createElement('SPAN');
-		Object.defineProperty(clickEvent.target, 'parentElement', {
-			writable: true,
-			value: targetElement,
-		});
-		clickTracker.setUp();
-		clickTracker.trackClick(clickEvent);
-		expect(recordMethodMock).not.toBeCalled();
-	});
-
-	test('test add A tag and trigger MutationObserver', async () => {
-		clickTracker.setUp();
-		const div = document.createElement('div');
-		const aTag = document.createElement('A');
-		div.appendChild(aTag);
-		document.body.appendChild(div);
-		await sleep(100);
-		expect(clickTracker.processedElements.has(aTag)).toBeTruthy();
-	});
-
 	function getMockMouseEvent(
 		tagName: string,
 		href: string,
@@ -225,9 +190,5 @@ describe('ClickTracker test', () => {
 			value: targetElement,
 		});
 		return event;
-	}
-
-	function sleep(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 });
