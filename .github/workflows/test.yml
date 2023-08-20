@@ -19,4 +19,4 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           name: report
-          files: coverage/clover.xml
+          files: coverage/coverage-final.json
