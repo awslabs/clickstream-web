@@ -15,11 +15,7 @@
     "incremental": true,
     "importHelpers": true,
     "outDir": "lib",
-    "resolveJsonModule": true,
-    "types": [
-      "node",
-      "jest"
-    ]
+    "resolveJsonModule": true
   },
   "include": [
     "src"

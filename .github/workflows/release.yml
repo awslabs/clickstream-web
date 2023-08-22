@@ -1,0 +1,29 @@
+name: Release Next Version
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag'
+        required: true
+        type: string
+env:
+  NEW_VERSION: ${{ github.event.inputs.release_tag }}
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+          token : ${{ secrets.PROJECT_TOKEN }}
+      - name: Modify for next release
+        run: |
+          chmod +x release.sh
+          ./release.sh ${{ env.NEW_VERSION }}
+          git diff
+          git config user.name '${{ vars.USER_NAME }}'
+          git config user.email '${{ vars.USER_EMAIL }}'
+          git add .
+          git commit -m 'release: clickstream Web ${{ env.NEW_VERSION }}'
+          git push
