@@ -164,6 +164,39 @@ describe('EventRecorder test', () => {
 		expect(sendEventImmediateMock).toBeCalled();
 	});
 
+	test('test send failed events when window is closing ', async () => {
+		const clearFailedEventsMock = jest.spyOn(StorageUtil, 'clearFailedEvents');
+		StorageUtil.saveFailedEvent(await getTestEvent());
+		eventRecorder.haveFailedEvents = true;
+		eventRecorder.sendEventsInBackground(true);
+		expect(clearFailedEventsMock).toBeCalled();
+	});
+
+	test('test do not send events when window is closing and event size is exceed max keep alive size limit', async () => {
+		const flushEventsMock = jest.spyOn(eventRecorder, 'flushEvents');
+		const clearAllEventsMock = jest.spyOn(StorageUtil, 'clearAllEvents');
+		StorageUtil.saveEvent(await getLargeEvent());
+		eventRecorder.sendEventsInBackground(true);
+		expect(flushEventsMock).not.toBeCalled();
+		expect(clearAllEventsMock).not.toBeCalled();
+	});
+
+	test('test send failed events twice', () => {
+		const getFailedEventsMock = jest.spyOn(StorageUtil, 'getFailedEvents');
+		eventRecorder.sendFailedEvents();
+		eventRecorder.sendFailedEvents();
+		expect(getFailedEventsMock).toBeCalledTimes(1);
+	});
+
+	test('test immediate mode send failure events when an event is sent successfully', async () => {
+		const sendFailedEventsMock = jest.spyOn(eventRecorder, 'sendFailedEvents');
+		const event = await getTestEvent();
+		eventRecorder.haveFailedEvents = true;
+		eventRecorder.sendEventImmediate(event);
+		await sleep(100);
+		expect(sendFailedEventsMock).toBeCalled();
+	});
+
 	async function saveEventsForReachedOneRequestLimit() {
 		const event = await getLargeEvent();
 		for (let i = 0; i < 6; i++) {

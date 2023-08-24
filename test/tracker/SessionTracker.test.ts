@@ -20,6 +20,7 @@ import { JSDOM } from 'jsdom';
 import { SendMode } from '../../src';
 import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
+import { AnalyticsEventBuilder } from '../../src/provider';
 import {
 	ClickstreamContext,
 	ClickstreamProvider,
@@ -58,9 +59,8 @@ describe('SessionTracker test', () => {
 	});
 
 	afterEach(() => {
-		provider = undefined;
-		recordMethodMock.mockClear();
-		jest.restoreAllMocks();
+		jest.clearAllMocks();
+		jest.resetModules();
 	});
 
 	test('test initial state for setUp', () => {
@@ -98,6 +98,21 @@ describe('SessionTracker test', () => {
 		(global as any).document.addEventListener = addEventListener;
 	});
 
+	test('test checkEnv for hidden api is not supported', () => {
+		const addEventListenerMock = jest.spyOn(window, 'addEventListener');
+		const hidden = document.hidden;
+		Object.defineProperty(document, 'hidden', {
+			writable: true,
+			value: undefined,
+		});
+		sessionTracker.init();
+		expect(addEventListenerMock).not.toBeCalled();
+		Object.defineProperty(document, 'hidden', {
+			writable: true,
+			value: hidden,
+		});
+	});
+
 	test('test hide page', () => {
 		const onPageHideMock = jest.spyOn(sessionTracker, 'onPageHide');
 		sessionTracker.setUp();
@@ -126,19 +141,116 @@ describe('SessionTracker test', () => {
 		expect(sessionTracker.session.sessionIndex).toBe(2);
 	});
 
-	test('test close page', async () => {
-		const onBeforeUnloadMock = jest.spyOn(sessionTracker, 'onBeforeUnload');
-		const onPageHideMock = jest.spyOn(sessionTracker, 'onPageHide');
-		sessionTracker.setUp();
-		closePage();
-		expect(onBeforeUnloadMock).toBeCalled();
-		expect(onPageHideMock).toBeCalled();
-	});
-
 	test('test record user engagement event', () => {
 		sessionTracker.startEngageTimestamp = new Date().getTime() - 1900000;
 		sessionTracker.recordUserEngagement();
 		expect(recordMethodMock).toBeCalled();
+	});
+
+	test('test send event in batch mode when hide page', async () => {
+		const sendEventBackgroundMock = jest.spyOn(
+			eventRecorder,
+			'sendEventsInBackground'
+		);
+		const flushEventMock = jest.spyOn(eventRecorder, 'flushEvents');
+		const clearAllEventsMock = jest.spyOn(StorageUtil, 'clearAllEvents');
+		sessionTracker.setUp();
+		provider.record({ name: 'testEvent' });
+		await sleep(100);
+		hidePage();
+		expect(sendEventBackgroundMock).toBeCalledWith(false);
+		expect(flushEventMock).toBeCalled();
+		expect(clearAllEventsMock).not.toBeCalled();
+		flushEventMock.mockClear();
+	});
+
+	test('test send event in batch mode when close window', async () => {
+		const sendEventBackgroundMock = jest.spyOn(
+			eventRecorder,
+			'sendEventsInBackground'
+		);
+		const clearAllEventsMock = jest.spyOn(StorageUtil, 'clearAllEvents');
+		const recordUserEngagementMock = jest.spyOn(
+			sessionTracker,
+			'recordUserEngagement'
+		);
+		sessionTracker.setUp();
+		provider.record({ name: 'testEvent' });
+		await sleep(100);
+		closePage();
+		hidePage();
+		expect(sendEventBackgroundMock).toBeCalledWith(true);
+		expect(clearAllEventsMock).toBeCalled();
+		expect(recordUserEngagementMock).toBeCalledWith(true);
+	});
+
+	test('test send event in batch mode when hide window in firefox', async () => {
+		const sendEventBackgroundMock = jest.spyOn(
+			eventRecorder,
+			'sendEventsInBackground'
+		);
+		const flushEventMock = jest.spyOn(eventRecorder, 'flushEvents');
+		const clearAllEventsMock = jest.spyOn(StorageUtil, 'clearAllEvents');
+		const recordUserEngagementMock = jest.spyOn(
+			sessionTracker,
+			'recordUserEngagement'
+		);
+		Object.defineProperty(navigator, 'userAgent', {
+			writable: true,
+			value: 'firefox',
+		});
+		sessionTracker.setUp();
+		provider.record({ name: 'testEvent' });
+		await sleep(100);
+		hidePage();
+		expect(sendEventBackgroundMock).toBeCalledWith(false);
+		expect(flushEventMock).toBeCalled();
+		expect(clearAllEventsMock).not.toBeCalled();
+		expect(recordUserEngagementMock).toBeCalledWith(true);
+	});
+
+	test('test send event in batch mode when close window in firefox', async () => {
+		const sendEventBackgroundMock = jest.spyOn(
+			eventRecorder,
+			'sendEventsInBackground'
+		);
+		const recordUserEngagementMock = jest.spyOn(
+			sessionTracker,
+			'recordUserEngagement'
+		);
+		Object.defineProperty(navigator, 'userAgent', {
+			writable: true,
+			value: 'firefox',
+		});
+		sessionTracker.setUp();
+		provider.record({ name: 'testEvent' });
+		await sleep(100);
+		closePage();
+		hidePage();
+		expect(sendEventBackgroundMock).not.toBeCalled();
+		expect(recordUserEngagementMock).toBeCalledWith(false);
+	});
+
+	test('test send failed event in immediate mode when hide page', async () => {
+		(provider.configuration as any).sendMode = SendMode.Immediate;
+		const event = await AnalyticsEventBuilder.createEvent(
+			context,
+			{ name: 'testEvent' },
+			{},
+			undefined
+		);
+		StorageUtil.saveFailedEvent(event);
+		const sendFailedEventsMock = jest.spyOn(eventRecorder, 'sendFailedEvents');
+		const clearFailedEventsMock = jest.spyOn(StorageUtil, 'clearFailedEvents');
+		sessionTracker.setUp();
+		await sleep(100);
+		Object.defineProperty(eventRecorder, 'haveFailedEvents', {
+			writable: true,
+			value: true,
+		});
+		hidePage();
+		expect(sendFailedEventsMock).toBeCalledTimes(1);
+		expect(clearFailedEventsMock).not.toBeCalled();
 	});
 
 	function hidePage() {

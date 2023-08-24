@@ -13,6 +13,7 @@
 import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
 import { Session } from './Session';
+import { BrowserInfo } from '../browser';
 import { Event } from '../provider';
 import { StorageUtil } from '../util/StorageUtil';
 
@@ -23,6 +24,7 @@ export class SessionTracker extends BaseTracker {
 	visibilityChange: string;
 	session: Session;
 	startEngageTimestamp: number;
+	isWindowClosing = false;
 
 	init() {
 		this.onVisibilityChange = this.onVisibilityChange.bind(this);
@@ -77,10 +79,13 @@ export class SessionTracker extends BaseTracker {
 	onPageHide() {
 		logger.debug('page hide');
 		this.storeSession();
-		this.recordUserEngagement();
+		this.recordUserEngagement(
+			!(this.isWindowClosing && BrowserInfo.isFirefox())
+		);
+		this.provider.sendEventsInBackground(this.isWindowClosing);
 	}
 
-	recordUserEngagement() {
+	recordUserEngagement(isImmediate = false) {
 		const engagementTime = new Date().getTime() - this.startEngageTimestamp;
 		if (engagementTime > Constants.minEngagementTime) {
 			this.provider.record({
@@ -88,13 +93,14 @@ export class SessionTracker extends BaseTracker {
 				attributes: {
 					[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP]: engagementTime,
 				},
+				isImmediate: isImmediate,
 			});
 		}
 	}
 
 	onBeforeUnload() {
 		logger.debug('onBeforeUnload');
-		this.onPageHide();
+		this.isWindowClosing = true;
 	}
 
 	storeSession() {

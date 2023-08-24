@@ -204,6 +204,8 @@ export class StorageUtil {
 	}
 
 	static clearEvents(eventsJson: string) {
+		const eventsString = this.getAllEvents();
+		if (eventsString === '') return;
 		const deletedEvents = JSON.parse(eventsJson);
 		const allEvents = JSON.parse(this.getAllEvents() + Event.Constants.SUFFIX);
 		if (allEvents.length > deletedEvents.length) {
@@ -214,6 +216,10 @@ export class StorageUtil {
 		} else {
 			localStorage.removeItem(StorageUtil.eventsKey);
 		}
+	}
+
+	static clearAllEvents() {
+		localStorage.removeItem(StorageUtil.eventsKey);
 	}
 
 	static saveSession(session: Session) {

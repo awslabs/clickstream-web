@@ -20,6 +20,7 @@ export class NetRequest {
 	static readonly BATCH_REQUEST_TIMEOUT = 15000;
 	static readonly REQUEST_RETRY_TIMES = 3;
 	static readonly BATCH_REQUEST_RETRY_TIMES = 1;
+	static readonly KEEP_ALIVE_SIZE_LIMIT = 64 * 1024;
 
 	static async sendRequest(
 		eventsJson: string,
@@ -40,7 +41,8 @@ export class NetRequest {
 		const timeoutId = setTimeout(() => {
 			controller.abort();
 		}, timeout);
-
+		const inputSizeInBytes = new Blob([eventsJson]).size;
+		const isKeepAlive = inputSizeInBytes < NetRequest.KEEP_ALIVE_SIZE_LIMIT;
 		const requestOptions: RequestInit = {
 			method: 'POST',
 			mode: 'cors',
@@ -50,6 +52,7 @@ export class NetRequest {
 				'User-Agent': browserInfo.userAgent,
 			},
 			body: eventsJson,
+			keepalive: isKeepAlive,
 		};
 		requestOptions.signal = controller.signal;
 

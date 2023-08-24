@@ -24,13 +24,15 @@ export class EventRecorder {
 	context: ClickstreamContext;
 	bundleSequenceId: number;
 	isFlushingEvents: boolean;
+	isSendingFailedEvents: boolean;
+	haveFailedEvents: boolean;
 
 	constructor(context: ClickstreamContext) {
 		this.context = context;
 		this.bundleSequenceId = StorageUtil.getBundleSequenceId();
 	}
 
-	record(event: AnalyticsEvent) {
+	record(event: AnalyticsEvent, isImmediate = false) {
 		if (this.context.configuration.isLogEvents) {
 			logger.level = LOG_TYPE.DEBUG;
 			logger.debug(
@@ -38,14 +40,13 @@ export class EventRecorder {
 				${JSON.stringify(event)}`
 			);
 		}
-		switch (this.context.configuration.sendMode) {
-			case SendMode.Immediate:
+		const currentMode = this.context.configuration.sendMode;
+		if (currentMode === SendMode.Immediate || isImmediate) {
+			this.sendEventImmediate(event);
+		} else {
+			if (!StorageUtil.saveEvent(event)) {
 				this.sendEventImmediate(event);
-				break;
-			case SendMode.Batch:
-				if (!StorageUtil.saveEvent(event)) {
-					this.sendEventImmediate(event);
-				}
+			}
 		}
 	}
 
@@ -58,14 +59,20 @@ export class EventRecorder {
 		).then(result => {
 			if (result) {
 				logger.debug('Event send success');
+				if (this.haveFailedEvents) {
+					this.sendFailedEvents();
+				}
 			} else {
 				StorageUtil.saveFailedEvent(event);
+				this.haveFailedEvents = true;
 			}
 		});
 		this.plusSequenceId();
 	}
 
 	sendFailedEvents() {
+		if (this.isSendingFailedEvents) return;
+		this.isSendingFailedEvents = true;
 		const failedEvents = StorageUtil.getFailedEvents();
 		if (failedEvents.length > 0) {
 			const eventsJson = failedEvents + Event.Constants.SUFFIX;
@@ -77,7 +84,9 @@ export class EventRecorder {
 				if (result) {
 					logger.debug('Failed events send success');
 					StorageUtil.clearFailedEvents();
+					this.haveFailedEvents = false;
 				}
+				this.isSendingFailedEvents = false;
 			});
 			this.plusSequenceId();
 		}
@@ -103,7 +112,7 @@ export class EventRecorder {
 				StorageUtil.clearEvents(eventsJson);
 			}
 			this.isFlushingEvents = false;
-			if (needsFlushTwice) {
+			if (result && needsFlushTwice) {
 				this.flushEvents();
 			}
 		});
@@ -146,5 +155,36 @@ export class EventRecorder {
 	plusSequenceId() {
 		this.bundleSequenceId += 1;
 		StorageUtil.saveBundleSequenceId(this.bundleSequenceId);
+	}
+
+	sendEventsInBackground(isWindowClosing: boolean) {
+		if (
+			this.haveFailedEvents &&
+			this.getFailedEventsLength() < NetRequest.KEEP_ALIVE_SIZE_LIMIT
+		) {
+			this.sendFailedEvents();
+			if (isWindowClosing) {
+				StorageUtil.clearFailedEvents();
+			}
+		}
+		if (this.context.configuration.sendMode === SendMode.Batch) {
+			const eventLength = this.getEventsLength();
+			if (eventLength > 0 && eventLength < NetRequest.KEEP_ALIVE_SIZE_LIMIT) {
+				this.flushEvents();
+				if (isWindowClosing) {
+					StorageUtil.clearAllEvents();
+				}
+			}
+		}
+	}
+
+	getFailedEventsLength(): number {
+		const failedEvents = StorageUtil.getFailedEvents();
+		return new Blob([failedEvents]).size;
+	}
+
+	getEventsLength(): number {
+		const events = StorageUtil.getAllEvents();
+		return new Blob([events]).size;
 	}
 }

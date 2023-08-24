@@ -76,6 +76,7 @@ export interface ClickstreamEvent {
 	name: string;
 	attributes?: ClickstreamAttribute;
 	items?: Item[];
+	isImmediate?: boolean;
 }
 
 export interface AnalyticsEvent {
