@@ -116,7 +116,10 @@ describe('SessionTracker test', () => {
 
 	test('test hide page', () => {
 		const onPageHideMock = jest.spyOn(sessionTracker, 'onPageHide');
-		const recordUserEngagementMock = jest.spyOn(provider.pageViewTracker, 'recordUserEngagement');
+		const recordUserEngagementMock = jest.spyOn(
+			provider.pageViewTracker,
+			'recordUserEngagement'
+		);
 		sessionTracker.setUp();
 		hidePage();
 		expect(onPageHideMock).toBeCalled();
@@ -171,6 +174,7 @@ describe('SessionTracker test', () => {
 			sessionTracker,
 			'recordUserEngagement'
 		);
+		const recordAppEndMock = jest.spyOn(sessionTracker, 'recordAppEnd');
 		sessionTracker.setUp();
 		provider.record({ name: 'testEvent' });
 		await sleep(100);
@@ -179,6 +183,7 @@ describe('SessionTracker test', () => {
 		expect(sendEventBackgroundMock).toBeCalledWith(true);
 		expect(clearAllEventsMock).toBeCalled();
 		expect(recordUserEngagementMock).toBeCalledWith(true);
+		expect(recordAppEndMock).toBeCalledWith(true);
 	});
 
 	test('test send event in batch mode when hide window in firefox', async () => {
@@ -215,6 +220,7 @@ describe('SessionTracker test', () => {
 			sessionTracker,
 			'recordUserEngagement'
 		);
+		const recordAppEndMock = jest.spyOn(sessionTracker, 'recordAppEnd');
 		Object.defineProperty(navigator, 'userAgent', {
 			writable: true,
 			value: 'firefox',
@@ -226,6 +232,7 @@ describe('SessionTracker test', () => {
 		hidePage();
 		expect(sendEventBackgroundMock).not.toBeCalled();
 		expect(recordUserEngagementMock).toBeCalledWith(false);
+		expect(recordAppEndMock).toBeCalledWith(false);
 	});
 
 	test('test send failed event in immediate mode when hide page', async () => {
