@@ -113,6 +113,7 @@ ClickstreamAnalytics.configure({
    sendMode: EventMode.Batch,
    sendEventsInterval: 5000,
    isTrackPageViewEvents: true,
+   isTrackUserEngagementEvents: true,
    isTrackClickEvents: true,
    isTrackSearchEvents: true,
    isTrackScrollEvents: true,
@@ -132,6 +133,7 @@ Here is an explanation of each property:
 - **sendMode**: EventMode.Immediate, EventMode.Batch, default is Immediate mode.
 - **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
 - **isTrackPageViewEvents**: whether auto record page view events in browser, default is `true`
+- **isTrackUserEngagementEvents**: whether auto record user engagement events in browser, default is `true`
 - **isTrackClickEvents**: whether auto record link click events in browser, default is `true`
 - **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
 - **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
@@ -152,6 +154,7 @@ ClickstreamAnalytics.updateConfigure({
   isLogEvents: true,
   authCookie: 'your auth cookie',
   isTrackPageViewEvents: false,
+  isTrackUserEngagementEvents: false,
   isTrackClickEvents: false,
   isTrackScrollEvents: false,
   isTrackSearchEvents: false,
