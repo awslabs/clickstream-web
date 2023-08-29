@@ -71,6 +71,7 @@ export class Event {
 	static readonly PresetEvent = {
 		FIRST_OPEN: '_first_open',
 		APP_START: '_app_start',
+		APP_END: '_app_end',
 		PROFILE_SET: '_profile_set',
 		CLICKSTREAM_ERROR: '_clickstream_error',
 		SESSION_START: '_session_start',

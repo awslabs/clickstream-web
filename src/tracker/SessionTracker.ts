@@ -80,14 +80,21 @@ export class SessionTracker extends BaseTracker {
 	onPageHide() {
 		logger.debug('page hide');
 		this.storeSession();
-		this.recordUserEngagement(
-			!(this.isWindowClosing && BrowserInfo.isFirefox())
-		);
+		const isImmediate = !(this.isWindowClosing && BrowserInfo.isFirefox());
+		this.recordUserEngagement(isImmediate);
+		this.recordAppEnd(isImmediate);
 		this.provider.sendEventsInBackground(this.isWindowClosing);
 	}
 
-	recordUserEngagement(isImmediate = false) {
+	recordUserEngagement(isImmediate: boolean) {
 		this.provider.pageViewTracker.recordUserEngagement(isImmediate);
+	}
+
+	recordAppEnd(isImmediate: boolean) {
+		this.provider.record({
+			name: Event.PresetEvent.APP_END,
+			isImmediate: isImmediate,
+		});
 	}
 
 	onBeforeUnload() {
