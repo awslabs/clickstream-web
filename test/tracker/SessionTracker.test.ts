@@ -27,7 +27,7 @@ import {
 	Event,
 	EventRecorder,
 } from '../../src/provider';
-import { SessionTracker } from '../../src/tracker';
+import { SessionTracker, PageViewTracker } from '../../src/tracker';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('SessionTracker test', () => {
@@ -52,9 +52,11 @@ describe('SessionTracker test', () => {
 
 		eventRecorder = new EventRecorder(context);
 		sessionTracker = new SessionTracker(provider, context);
+		const pageViewTracker = new PageViewTracker(provider, context);
 		provider.context = context;
 		provider.sessionTracker = sessionTracker;
 		provider.eventRecorder = eventRecorder;
+		provider.pageViewTracker = pageViewTracker;
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
@@ -81,7 +83,6 @@ describe('SessionTracker test', () => {
 				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
 			},
 		});
-		expect(sessionTracker.startEngageTimestamp > 0).toBeTruthy();
 
 		const session = sessionTracker.session;
 		expect(session.sessionIndex).toBe(1);
@@ -115,9 +116,11 @@ describe('SessionTracker test', () => {
 
 	test('test hide page', () => {
 		const onPageHideMock = jest.spyOn(sessionTracker, 'onPageHide');
+		const recordUserEngagementMock = jest.spyOn(provider.pageViewTracker, 'recordUserEngagement');
 		sessionTracker.setUp();
 		hidePage();
 		expect(onPageHideMock).toBeCalled();
+		expect(recordUserEngagementMock).toBeCalled();
 		expect(sessionTracker.session.isNewSession()).toBeFalsy();
 	});
 
@@ -139,12 +142,6 @@ describe('SessionTracker test', () => {
 		await sleep(100);
 		showPage();
 		expect(sessionTracker.session.sessionIndex).toBe(2);
-	});
-
-	test('test record user engagement event', () => {
-		sessionTracker.startEngageTimestamp = new Date().getTime() - 1900000;
-		sessionTracker.recordUserEngagement();
-		expect(recordMethodMock).toBeCalled();
 	});
 
 	test('test send event in batch mode when hide page', async () => {
@@ -233,7 +230,7 @@ describe('SessionTracker test', () => {
 
 	test('test send failed event in immediate mode when hide page', async () => {
 		(provider.configuration as any).sendMode = SendMode.Immediate;
-		const event = await AnalyticsEventBuilder.createEvent(
+		const event = AnalyticsEventBuilder.createEvent(
 			context,
 			{ name: 'testEvent' },
 			{},

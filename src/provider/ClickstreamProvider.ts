@@ -22,6 +22,7 @@ import { PageViewTracker, SessionTracker } from '../tracker';
 import { ClickTracker } from '../tracker/ClickTracker';
 import { ScrollTracker } from '../tracker/ScrollTracker';
 import {
+	AnalyticsEvent,
 	AnalyticsProvider,
 	ClickstreamAttribute,
 	ClickstreamConfiguration,
@@ -31,6 +32,7 @@ import {
 	SendMode,
 	UserAttribute,
 } from '../types';
+import { HashUtil } from '../util/HashUtil';
 import { StorageUtil } from '../util/StorageUtil';
 
 const logger = new Logger('ClickstreamProvider');
@@ -52,6 +54,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			sendMode: SendMode.Immediate,
 			sendEventsInterval: 5000,
 			isTrackPageViewEvents: true,
+			isTrackUserEngagementEvents: true,
 			isTrackClickEvents: true,
 			isTrackSearchEvents: true,
 			isTrackScrollEvents: true,
@@ -118,17 +121,27 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			logger.error(result.error_message);
 			return;
 		}
-		AnalyticsEventBuilder.createEvent(
+		const resultEvent = this.createEvent(event);
+		this.recordEvent(resultEvent, event.isImmediate);
+	}
+
+	createEvent(event: ClickstreamEvent) {
+		return AnalyticsEventBuilder.createEvent(
 			this.context,
 			event,
 			this.userAttribute,
 			this.sessionTracker.session
-		)
-			.then(resultEvent => {
-				this.eventRecorder.record(resultEvent, event.isImmediate);
+		);
+	}
+
+	recordEvent(event: AnalyticsEvent, isImmediate = false) {
+		HashUtil.getHashCode(JSON.stringify(event))
+			.then(hashCode => {
+				event.hashCode = hashCode;
+				this.eventRecorder.record(event, isImmediate);
 			})
 			.catch(error => {
-				logger.error(`Create event fail with ${error}`);
+				logger.error(`Create hash code failed with ${error}`);
 			});
 	}
 

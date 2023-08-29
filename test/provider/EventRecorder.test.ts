@@ -236,7 +236,7 @@ describe('EventRecorder test', () => {
 	async function getTestEvent(
 		eventName = 'testEvent'
 	): Promise<AnalyticsEvent> {
-		return await AnalyticsEventBuilder.createEvent(
+		return AnalyticsEventBuilder.createEvent(
 			context,
 			{ name: eventName },
 			{},

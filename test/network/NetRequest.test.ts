@@ -15,7 +15,7 @@ import { ClickstreamAnalytics } from '../../src';
 import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
 import { AnalyticsEventBuilder, ClickstreamContext } from '../../src/provider';
-import {Session} from "../../src/tracker";
+import { Session } from '../../src/tracker';
 
 describe('ClickstreamAnalytics test', () => {
 	let context: ClickstreamContext;
@@ -25,7 +25,7 @@ describe('ClickstreamAnalytics test', () => {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
 		});
-		const event = await AnalyticsEventBuilder.createEvent(
+		const event = AnalyticsEventBuilder.createEvent(
 			context,
 			{ name: 'testEvent' },
 			{},
@@ -82,13 +82,7 @@ describe('ClickstreamAnalytics test', () => {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',
 		});
-		const result = await NetRequest.sendRequest(
-			eventJson,
-			context,
-			1,
-			1,
-			200
-		);
+		const result = await NetRequest.sendRequest(eventJson, context, 1, 1, 200);
 		expect(result).toBeFalsy();
 	});
 });

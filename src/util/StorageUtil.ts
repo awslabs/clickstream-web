@@ -259,7 +259,7 @@ export class StorageUtil {
 	}
 
 	static getPreviousPageStartTime(): number {
-		const startTime = sessionStorage.getItem(
+		const startTime = localStorage.getItem(
 			StorageUtil.previousPageStartTimeKey
 		);
 		if (startTime === null) {
@@ -270,7 +270,7 @@ export class StorageUtil {
 	}
 
 	static savePreviousPageStartTime(timestamp: number) {
-		sessionStorage.setItem(
+		localStorage.setItem(
 			StorageUtil.previousPageStartTimeKey,
 			timestamp.toString()
 		);

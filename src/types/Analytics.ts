@@ -26,6 +26,7 @@ export interface Configuration {
 	isLogEvents?: boolean;
 	authCookie?: string;
 	isTrackPageViewEvents?: boolean;
+	isTrackUserEngagementEvents?: boolean;
 	isTrackClickEvents?: boolean;
 	isTrackScrollEvents?: boolean;
 	isTrackSearchEvents?: boolean;
