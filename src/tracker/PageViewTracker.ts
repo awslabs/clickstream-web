@@ -26,26 +26,28 @@ export class PageViewTracker extends BaseTracker {
 	context: ClickstreamContext;
 	isEntrances = false;
 	searchKeywords = Event.Constants.KEYWORDS;
+	lastEngageTime = 0;
+	lastScreenStartTimestamp = 0;
 
 	init() {
 		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
 		Object.assign(this.searchKeywords, configuredSearchKeywords);
-		this.trackPageView = this.trackPageView.bind(this);
+		this.onPageChange = this.onPageChange.bind(this);
 		if (this.context.configuration.pageType === PageType.SPA) {
 			this.trackPageViewForSPA();
 		} else {
-			this.trackPageView();
+			this.onPageChange();
 		}
 	}
 
 	trackPageViewForSPA() {
-		MethodEmbed.add(history, 'pushState', this.trackPageView);
-		MethodEmbed.add(history, 'replaceState', this.trackPageView);
-		window.addEventListener('popstate', this.trackPageView);
-		this.trackPageView();
+		MethodEmbed.add(history, 'pushState', this.onPageChange);
+		MethodEmbed.add(history, 'replaceState', this.onPageChange);
+		window.addEventListener('popstate', this.onPageChange);
+		this.onPageChange();
 	}
 
-	trackPageView() {
+	onPageChange() {
 		if (!window.sessionStorage) {
 			logger.warn('unsupported web environment for sessionStorage');
 			return;
@@ -55,41 +57,81 @@ export class PageViewTracker extends BaseTracker {
 			const previousPageTitle = StorageUtil.getPreviousPageTitle();
 			const currentPageUrl = BrowserInfo.getCurrentPageUrl();
 			const currentPageTitle = BrowserInfo.getCurrentPageTitle();
-			const previousPageStartTime = StorageUtil.getPreviousPageStartTime();
-			let engagementTime = 0;
-			this.isEntrances =
-				this.provider.sessionTracker.session.isNewSession() &&
-				previousPageUrl === '';
-			const currentPageStartTime = new Date().getTime();
-			if (previousPageStartTime > 0) {
-				engagementTime = currentPageStartTime - previousPageStartTime;
-			}
-			if (previousPageUrl !== currentPageUrl) {
+			if (
+				previousPageUrl !== currentPageUrl ||
+				previousPageTitle !== currentPageTitle
+			) {
 				this.provider.scrollTracker?.enterNewPage();
-				const eventAttributes = {
-					[Event.ReservedAttribute.PAGE_REFERRER]: previousPageUrl,
-					[Event.ReservedAttribute.PAGE_REFERRER_TITLE]: previousPageTitle,
-					[Event.ReservedAttribute.ENTRANCES]: this.isEntrances ? 1 : 0,
-				};
-				if (!this.isEntrances) {
-					eventAttributes[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP] =
-						engagementTime;
-				}
-				this.provider.record({
-					name: Event.PresetEvent.PAGE_VIEW,
-					attributes: eventAttributes,
-				});
+				this.recordUserEngagement();
+				this.trackPageView(previousPageUrl, previousPageTitle);
+				this.trackSearchEvents();
+
 				StorageUtil.savePreviousPageUrl(currentPageUrl);
 				StorageUtil.savePreviousPageTitle(currentPageTitle);
-				StorageUtil.savePreviousPageStartTime(currentPageStartTime);
-				if (this.context.configuration.isTrackSearchEvents) {
-					this.trackSearchEvents();
-				}
 			}
 		}
 	}
 
+	trackPageView(previousPageUrl: string, previousPageTitle: string) {
+		const previousPageStartTime = StorageUtil.getPreviousPageStartTime();
+		const analyticsEvent = this.provider.createEvent({
+			name: Event.PresetEvent.PAGE_VIEW,
+		});
+		const currentPageStartTime = analyticsEvent.timestamp;
+
+		const eventAttributes = {
+			[Event.ReservedAttribute.PAGE_REFERRER]: previousPageUrl,
+			[Event.ReservedAttribute.PAGE_REFERRER_TITLE]: previousPageTitle,
+			[Event.ReservedAttribute.ENTRANCES]: this.isEntrances ? 1 : 0,
+		};
+		if (previousPageStartTime > 0) {
+			eventAttributes[Event.ReservedAttribute.PREVIOUS_TIMESTAMP] =
+				previousPageStartTime;
+		}
+		if (this.lastEngageTime > 0) {
+			eventAttributes[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP] =
+				this.lastEngageTime;
+		}
+		Object.assign(analyticsEvent.attributes, eventAttributes);
+		this.provider.recordEvent(analyticsEvent);
+
+		this.isEntrances = false;
+
+		StorageUtil.savePreviousPageStartTime(currentPageStartTime);
+		this.lastScreenStartTimestamp = currentPageStartTime;
+	}
+
+	setIsEntrances() {
+		this.isEntrances = true;
+	}
+
+	updateLastScreenStartTimestamp() {
+		this.lastScreenStartTimestamp = new Date().getTime();
+	}
+
+	recordUserEngagement(isImmediate = false) {
+		if (this.lastScreenStartTimestamp === 0) return;
+		this.lastEngageTime = this.getLastEngageTime();
+		if (
+			this.provider.configuration.isTrackUserEngagementEvents &&
+			this.lastEngageTime > Constants.minEngagementTime
+		) {
+			this.provider.record({
+				name: Event.PresetEvent.USER_ENGAGEMENT,
+				attributes: {
+					[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP]: this.lastEngageTime,
+				},
+				isImmediate: isImmediate,
+			});
+		}
+	}
+
+	getLastEngageTime() {
+		return new Date().getTime() - this.lastScreenStartTimestamp;
+	}
+
 	trackSearchEvents() {
+		if (!this.context.configuration.isTrackSearchEvents) return;
 		const searchStr = window.location.search;
 		if (!searchStr || searchStr.length === 0) return;
 		const urlParams = new URLSearchParams(searchStr);
@@ -107,4 +149,8 @@ export class PageViewTracker extends BaseTracker {
 			}
 		}
 	}
+}
+
+enum Constants {
+	minEngagementTime = 1000,
 }

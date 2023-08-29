@@ -32,13 +32,13 @@ describe('AnalyticsEventBuilder test', () => {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
 		});
-		const event = await AnalyticsEventBuilder.createEvent(
+		const event = AnalyticsEventBuilder.createEvent(
 			context,
 			{ name: 'testEvent' },
 			{},
 			Session.getCurrentSession(context)
 		);
-		expect(event.hashCode.length).toBe(8);
+		expect(event.hashCode.length).toBe(0);
 		expect(event.event_type).toBe('testEvent');
 		expect(event.event_id.length > 0).toBeTruthy();
 		expect(event.device_id.length > 0).toBeTruthy();

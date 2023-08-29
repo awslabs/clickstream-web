@@ -24,18 +24,17 @@ import {
 	Item,
 	UserAttribute,
 } from '../types';
-import { HashUtil } from '../util/HashUtil';
 import { StorageUtil } from '../util/StorageUtil';
 
 const sdkVersion = config.sdkVersion;
 
 export class AnalyticsEventBuilder {
-	static async createEvent(
+	static createEvent(
 		context: ClickstreamContext,
 		event: ClickstreamEvent,
 		userAttributes: UserAttribute,
 		session?: Session
-	): Promise<AnalyticsEvent> {
+	): AnalyticsEvent {
 		const { browserInfo, configuration } = context;
 		const attributes = this.getEventAttributesWithCheck(event.attributes);
 		if (session !== undefined) {
@@ -56,8 +55,7 @@ export class AnalyticsEventBuilder {
 			browserInfo.latestReferrerHost;
 
 		const items = this.getEventItemsWithCheck(event.items, attributes);
-
-		const analyticEvent = {
+		return {
 			hashCode: '',
 			event_type: event.name,
 			event_id: uuidV4(),
@@ -80,10 +78,6 @@ export class AnalyticsEventBuilder {
 			user: userAttributes ?? {},
 			attributes: attributes,
 		};
-		analyticEvent.hashCode = await HashUtil.getHashCode(
-			JSON.stringify(analyticEvent)
-		);
-		return analyticEvent;
 	}
 
 	static getEventAttributesWithCheck(

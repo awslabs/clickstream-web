@@ -41,6 +41,7 @@ describe('PageViewTracker test', () => {
 
 	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	let recordMethodMock: any;
+	let recordEventMethodMock: any;
 	let originalLocation: Location;
 	let dom: any;
 
@@ -66,6 +67,7 @@ describe('PageViewTracker test', () => {
 		provider.eventRecorder = eventRecorder;
 		provider.sessionTracker = sessionTracker;
 		recordMethodMock = jest.spyOn(provider, 'record');
+		recordEventMethodMock = jest.spyOn(provider, 'recordEvent');
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		originalLocation = window.location;
 		setDomUrl('https://example.com/index');
@@ -76,8 +78,8 @@ describe('PageViewTracker test', () => {
 	});
 
 	afterEach(() => {
-		recordMethodMock.mockClear();
 		jest.restoreAllMocks();
+		jest.clearAllMocks();
 		provider = undefined;
 		Object.defineProperty(window, 'location', {
 			value: originalLocation,
@@ -86,9 +88,51 @@ describe('PageViewTracker test', () => {
 	});
 
 	test('test multiPageApp page view', () => {
-		const pageAppearMock = jest.spyOn(pageViewTracker, 'trackPageView');
+		const pageAppearMock = jest.spyOn(pageViewTracker, 'onPageChange');
 		pageViewTracker.setUp();
 		expect(pageAppearMock).toBeCalled();
+	});
+
+	test('test environment is not supported', () => {
+		const addEventListener = (global as any).window.addEventListener;
+		(global as any).window.addEventListener = undefined;
+		jest.spyOn(BrowserInfo, 'isBrowser').mockImplementationOnce(() => {
+			return false;
+		});
+		pageViewTracker.setUp();
+		(context.configuration as any).pageType = PageType.SPA;
+		pageViewTracker.setUp();
+		expect(recordEventMethodMock).not.toBeCalled();
+		(global as any).window.addEventListener = addEventListener;
+	});
+
+	test('test page view in SPA mode', async () => {
+		const pageAppearMock = jest.spyOn(pageViewTracker, 'onPageChange');
+		(context.configuration as any).pageType = PageType.SPA;
+		pageViewTracker.setUp();
+		expect(recordEventMethodMock).toBeCalledWith(
+			expect.objectContaining({
+				event_type: Event.PresetEvent.PAGE_VIEW,
+			})
+		);
+		expect(pageAppearMock).toBeCalledTimes(1);
+	});
+
+	test('test two different page view with userEngagement', async () => {
+		pageViewTracker.setUp();
+		jest.spyOn(pageViewTracker, 'getLastEngageTime').mockReturnValue(1100);
+		openPageA();
+		await sleep(100);
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		expect(allEvents.length).toBe(3);
+		expect(allEvents[0].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
+		expect(allEvents[1].event_type).toBe(Event.PresetEvent.USER_ENGAGEMENT);
+		const engageTime =
+			allEvents[1].attributes[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP];
+		expect(allEvents[2].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
+		const pageViewLastEngageTime =
+			allEvents[2].attributes[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP];
+		expect(engageTime).toBe(pageViewLastEngageTime);
 	});
 
 	test('test spa page view', () => {
@@ -101,19 +145,6 @@ describe('PageViewTracker test', () => {
 		expect(trackPageViewForSPAMock).toBeCalled();
 	});
 
-	test('test environment is not supported', () => {
-		const addEventListener = (global as any).window.addEventListener;
-		(global as any).window.addEventListener = undefined;
-		jest.spyOn(BrowserInfo, 'isBrowser').mockImplementationOnce(() => {
-			return false;
-		});
-		pageViewTracker.setUp();
-		(context.configuration as any).pageType = PageType.SPA;
-		pageViewTracker.setUp();
-		expect(recordMethodMock).not.toBeCalled();
-		(global as any).window.addEventListener = addEventListener;
-	});
-
 	test('test environment is not supported for sessionStorage', () => {
 		const sessionStorage = window.sessionStorage;
 		Object.defineProperty(window, 'sessionStorage', {
@@ -121,26 +152,11 @@ describe('PageViewTracker test', () => {
 			value: undefined,
 		});
 		pageViewTracker.setUp();
-		expect(recordMethodMock).not.toBeCalled();
+		expect(recordEventMethodMock).not.toBeCalled();
 		Object.defineProperty(window, 'sessionStorage', {
 			writable: true,
 			value: sessionStorage,
 		});
-	});
-
-	test('test page view in SPA mode', async () => {
-		const pageAppearMock = jest.spyOn(pageViewTracker, 'trackPageView');
-		(context.configuration as any).pageType = PageType.SPA;
-		pageViewTracker.setUp();
-		expect(recordMethodMock).toBeCalledWith({
-			name: Event.PresetEvent.PAGE_VIEW,
-			attributes: {
-				[Event.ReservedAttribute.PAGE_REFERRER]: '',
-				[Event.ReservedAttribute.PAGE_REFERRER_TITLE]: '',
-				[Event.ReservedAttribute.ENTRANCES]: 1,
-			},
-		});
-		expect(pageAppearMock).toBeCalledTimes(1);
 	});
 
 	test('test two page view in SPA mode', async () => {
@@ -168,6 +184,35 @@ describe('PageViewTracker test', () => {
 			attributes[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP]
 		).toBeGreaterThan(0);
 		expect(attributes[Event.ReservedAttribute.ENTRANCES]).toBe(0);
+		const firstPageViewTimestamp = allEvents[0].timestamp;
+		const previousTimestamp =
+			allEvents[1].attributes[Event.ReservedAttribute.PREVIOUS_TIMESTAMP];
+		expect(firstPageViewTimestamp).toBe(previousTimestamp);
+	});
+
+	test('test two same page view', async () => {
+		pageViewTracker.setUp();
+		openPageA();
+		openPageA();
+		await sleep(100);
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		expect(allEvents.length).toBe(2);
+		const pageUrl0 = allEvents[0].attributes[Event.ReservedAttribute.PAGE_URL];
+		const pageUrl1 = allEvents[1].attributes[Event.ReservedAttribute.PAGE_URL];
+		expect(pageUrl0).toBe('https://example.com/index');
+		expect(pageUrl1).toBe('https://example.com/pageA');
+	});
+
+	test('test two different page view with userEngagement disable', async () => {
+		pageViewTracker.setUp();
+		jest.spyOn(pageViewTracker, 'getLastEngageTime').mockReturnValue(1100);
+		provider.configuration.isTrackUserEngagementEvents = false;
+		openPageA();
+		await sleep(100);
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		expect(allEvents.length).toBe(2);
+		expect(allEvents[0].event_type).not.toBe(Event.PresetEvent.USER_ENGAGEMENT);
+		expect(allEvents[1].event_type).not.toBe(Event.PresetEvent.USER_ENGAGEMENT);
 	});
 
 	test('test page view in SPA mode for history state change', async () => {
@@ -180,6 +225,12 @@ describe('PageViewTracker test', () => {
 		expect(allEvents.length).toBe(2);
 	});
 
+	test('test close record search event', async () => {
+		provider.configuration.isTrackSearchEvents = false;
+		pageViewTracker.trackSearchEvents();
+		expect(recordMethodMock).not.toBeCalled();
+	});
+
 	test('test open search result page', async () => {
 		(context.configuration as any).pageType = PageType.SPA;
 		pageViewTracker.setUp();
@@ -190,8 +241,8 @@ describe('PageViewTracker test', () => {
 		expect(allEvents[0].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
 		expect(allEvents[1].event_type).toBe(Event.PresetEvent.PAGE_VIEW);
 		expect(allEvents[2].event_type).toBe(Event.PresetEvent.SEARCH);
-		expect(allEvents[2].attributes._search_key).toBe('keyword');
-		expect(allEvents[2].attributes._search_term).toBe('shose');
+		expect(allEvents[2].attributes['_search_key']).toBe('keyword');
+		expect(allEvents[2].attributes['_search_term']).toBe('shose');
 	});
 
 	test('test open custom search result page', async () => {
@@ -202,8 +253,8 @@ describe('PageViewTracker test', () => {
 		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
 		expect(allEvents.length).toBe(3);
 		expect(allEvents[2].event_type).toBe(Event.PresetEvent.SEARCH);
-		expect(allEvents[2].attributes._search_key).toBe('country');
-		expect(allEvents[2].attributes._search_term).toBe('zh');
+		expect(allEvents[2].attributes['_search_key']).toBe('country');
+		expect(allEvents[2].attributes['_search_term']).toBe('zh');
 	});
 
 	test('test method embed should override method correctly', () => {
@@ -221,6 +272,13 @@ describe('PageViewTracker test', () => {
 		context[methodName](3);
 
 		expect(methodOverrideMock).toHaveBeenCalledWith(4);
+	});
+
+	test('test record user engagement event', () => {
+		pageViewTracker.lastScreenStartTimestamp = new Date().getTime();
+		jest.spyOn(pageViewTracker, 'getLastEngageTime').mockReturnValue(1100);
+		pageViewTracker.recordUserEngagement();
+		expect(recordMethodMock).toBeCalled();
 	});
 
 	function openPageA() {

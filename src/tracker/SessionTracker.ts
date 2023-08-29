@@ -23,7 +23,6 @@ export class SessionTracker extends BaseTracker {
 	hiddenStr: string;
 	visibilityChange: string;
 	session: Session;
-	startEngageTimestamp: number;
 	isWindowClosing = false;
 
 	init() {
@@ -63,9 +62,11 @@ export class SessionTracker extends BaseTracker {
 
 	onPageAppear(isFirstTime = false) {
 		logger.debug('page appear');
-		this.updateEngageTimestamp();
+		const pageViewTracker = this.provider.pageViewTracker;
+		pageViewTracker.updateLastScreenStartTimestamp();
 		this.session = Session.getCurrentSession(this.context);
 		if (this.session.isNewSession()) {
+			pageViewTracker.setIsEntrances();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
 		}
 		this.provider.record({
@@ -86,16 +87,7 @@ export class SessionTracker extends BaseTracker {
 	}
 
 	recordUserEngagement(isImmediate = false) {
-		const engagementTime = new Date().getTime() - this.startEngageTimestamp;
-		if (engagementTime > Constants.minEngagementTime) {
-			this.provider.record({
-				name: Event.PresetEvent.USER_ENGAGEMENT,
-				attributes: {
-					[Event.ReservedAttribute.ENGAGEMENT_TIMESTAMP]: engagementTime,
-				},
-				isImmediate: isImmediate,
-			});
-		}
+		this.provider.pageViewTracker.recordUserEngagement(isImmediate);
 	}
 
 	onBeforeUnload() {
@@ -106,10 +98,6 @@ export class SessionTracker extends BaseTracker {
 	storeSession() {
 		this.session.pause();
 		StorageUtil.saveSession(this.session);
-	}
-
-	updateEngageTimestamp() {
-		this.startEngageTimestamp = new Date().getTime();
 	}
 
 	checkEnv(): boolean {
@@ -132,8 +120,4 @@ export class SessionTracker extends BaseTracker {
 		}
 		return true;
 	}
-}
-
-enum Constants {
-	minEngagementTime = 1000,
 }

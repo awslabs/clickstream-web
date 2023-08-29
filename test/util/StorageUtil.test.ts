@@ -179,7 +179,7 @@ describe('StorageUtil test', () => {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
 		});
-		return await AnalyticsEventBuilder.createEvent(
+		return AnalyticsEventBuilder.createEvent(
 			context,
 			{ name: eventName },
 			{},
