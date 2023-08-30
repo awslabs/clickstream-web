@@ -201,6 +201,8 @@ describe('ClickTracker test', () => {
 
 	test('test add A tag and trigger MutationObserver', async () => {
 		clickTracker.setUp();
+		window.document.dispatchEvent(new window.Event('load'));
+		await sleep(100);
 		const div = document.createElement('div');
 		const aTag = document.createElement('A');
 		div.appendChild(aTag);

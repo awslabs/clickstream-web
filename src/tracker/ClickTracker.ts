@@ -79,7 +79,9 @@ export class ClickTracker extends BaseTracker {
 				}
 			}
 		});
-		observer.observe(document.body, { childList: true, subtree: true });
+		window.onload = function () {
+			observer.observe(document.body, { childList: true, subtree: true });
+		};
 	}
 
 	findATag(element: Element, depth = 0): Element {

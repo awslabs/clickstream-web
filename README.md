@@ -163,7 +163,7 @@ ClickstreamAnalytics.updateConfigure({
 
 ## How to integrate and test locally
 
-**Integrate**
+### Integrate by `.tgz` file
 
 Clone this repository locally, execute the following script to generate `aws-clickstream-web-x.x.x.tgz` zip package, which will be located in the project root folder.
 ```bash
@@ -176,7 +176,28 @@ npm install ./aws-clickstream-web-x.x.x.tgz
 ```
 Note: Please correct the SDK version and change the path to where the `aws-clickstream-web-x.x.x.tgz` file is located.
 
-**Test**
+### Integrate by `clickstream-web.min.js` file
+Execute the following same script to generate `clickstream-web.min.js` which will be located in the `/dist` folder.
+```bash
+cd clickstream-web && npm run pack
+```
+Copy the `clickstream-web.min.js` into your project and add the following initial code into your `index.html`.
+
+```html
+<script src="clickstream-web.min.js"></script>
+<script>
+    window.ClickstreamAnalytics.init({
+        appId: 'your appId',
+        endpoint: 'https://example.com/collect',
+        isLogEvents: true,
+        pageType: window.PageType.SPA, //multiPageApp
+        sendMode: window.SendMode.Batch, //Immediate
+    })
+</script>
+```
+You can also find the `clickstream-web.min.js` file in the [Release](https://github.com/awslabs/clickstream-web/releases) page.
+
+### Test
 
 ```bash
 npm run test
