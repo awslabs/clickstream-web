@@ -16,11 +16,12 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token : ${{ secrets.PROJECT_TOKEN }}
+          token: ${{ secrets.PROJECT_TOKEN }}
       - name: Modify for next release
         run: |
           chmod +x release.sh
           ./release.sh ${{ env.NEW_VERSION }}
+          npm i
           git diff
           git config user.name '${{ vars.USER_NAME }}'
           git config user.email '${{ vars.USER_EMAIL }}'
