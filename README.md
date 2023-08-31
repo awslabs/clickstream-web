@@ -107,7 +107,7 @@ In addition to the required `appId` and `endpoint`, you can configure other info
 ```typescript
 import { ClickstreamAnalytics, EventMode, PageType } from '@aws/clickstream-web';
 
-ClickstreamAnalytics.configure({
+ClickstreamAnalytics.init({
    appId: "your appId",
    endpoint: "https://example.com/collect",
    sendMode: EventMode.Batch,
