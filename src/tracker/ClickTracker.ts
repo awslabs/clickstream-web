@@ -22,6 +22,8 @@ export class ClickTracker extends BaseTracker {
 
 	init() {
 		this.trackClick = this.trackClick.bind(this);
+		this.trackDocumentClick = this.trackDocumentClick.bind(this);
+		document.addEventListener('click', this.trackDocumentClick);
 		const currentDomain = window.location.host;
 		const domainList = this.context.configuration.domainList;
 		if (!domainList.includes(currentDomain)) {
@@ -30,10 +32,24 @@ export class ClickTracker extends BaseTracker {
 		this.addClickListenerForATag();
 	}
 
-	trackClick(event: MouseEvent) {
+	trackDocumentClick(event: MouseEvent) {
 		if (!this.context.configuration.isTrackClickEvents) return;
 		const targetElement = event.target as Element;
 		const element = this.findATag(targetElement);
+		if (!element || this.processedElements.has(element)) return;
+		this.trackClick(event, element);
+	}
+
+	trackClick(
+		event: MouseEvent,
+		documentElement: Element | undefined = undefined
+	) {
+		if (!this.context.configuration.isTrackClickEvents) return;
+		let element = documentElement;
+		if (!element) {
+			const targetElement = event.target as Element;
+			element = this.findATag(targetElement);
+		}
 		if (element !== null) {
 			const linkUrl = element.getAttribute('href');
 			if (linkUrl === null || linkUrl.length === 0) return;
@@ -79,9 +95,10 @@ export class ClickTracker extends BaseTracker {
 				}
 			}
 		});
-		window.onload = function () {
-			observer.observe(document.body, { childList: true, subtree: true });
-		};
+		observer.observe(document.documentElement, {
+			childList: true,
+			subtree: true,
+		});
 	}
 
 	findATag(element: Element, depth = 0): Element {
