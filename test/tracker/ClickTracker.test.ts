@@ -209,6 +209,30 @@ describe('ClickTracker test', () => {
 		expect(clickTracker.processedElements.has(aTag)).toBeTruthy();
 	});
 
+	test('test track click event with document listener', async () => {
+		const trackDocumentClickMethodMock = jest.spyOn(
+			clickTracker,
+			'trackDocumentClick'
+		);
+		const trackClickMethodMock = jest.spyOn(clickTracker, 'trackClick');
+		jest.spyOn(clickTracker.processedElements, 'has').mockReturnValue(false);
+		clickTracker.setUp();
+		const div = document.createElement('div');
+		const aTag = document.createElement('A');
+		aTag.setAttribute('href', 'https://example.com');
+		div.appendChild(aTag);
+		document.body.appendChild(div);
+		const clickEvent = new MouseEvent('click', {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		});
+		aTag.dispatchEvent(clickEvent);
+		expect(trackDocumentClickMethodMock).toBeCalledTimes(1);
+		expect(trackClickMethodMock).toBeCalledTimes(1);
+		expect(recordMethodMock).toBeCalledTimes(1);
+	});
+
 	function getMockMouseEvent(
 		tagName: string,
 		href: string,
