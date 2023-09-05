@@ -6,6 +6,8 @@ Clickstream Web SDK can help you easily collect and report events from browser t
 
 The SDK relies on the Amplify for JS SDK Core Library and is developed according to the Amplify AnalyticsProvider interface. In addition, we've added features that automatically collect common user events and attributes (e.g., page view, first open) to simplify data collection for users.
 
+Visit our [Documentation site](https://awslabs.github.io/clickstream-analytics-on-aws/en/sdk-manual/web/) to learn more about Clickstream Web SDK.
+
 ## Integrate SDK
 
 ### Include SDK
@@ -37,11 +39,18 @@ Add the following code where you need to record event.
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
-ClickstreamAnalytics.record({ name: 'albumVisit' });
+// record event with attributes
 ClickstreamAnalytics.record({
-  name: 'buttonClick',
-  attributes: { _channel: 'SMS', Successful: true }
+  name: 'add_to_cart',
+  attributes: {
+    event_category: 'shoes',
+    currency: 'CNY',
+    value: 279.9,
+  }
 });
+
+//record event with name
+ClickstreamAnalytics.record({ name: 'button_click' });
 ```
 
 #### Login and logout
@@ -72,18 +81,21 @@ Current login user's attributes will be cached in localStorage, so the next time
 You can add the following code to log an event with an item.
 
 ```typescript
-import { ClickstreamAnalytics } from '@aws/clickstream-web';
+import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
 
-const item_product = {
-  id: '1',
+const itemBook: Item = {
+  id: '123',
   name: 'Nature',
   category: 'book',
-  price: 56.5,
+  price: 99,
 };
 ClickstreamAnalytics.record({
-  name: 'buttonClick',
-  attributes: { _channel: 'SMS', Successful: true },
-  items: [item_product],
+  name: 'view_item',
+  attributes: {
+    currency: 'USD',
+    event_category: 'recommended',
+  },
+  items: [itemBook],
 });
 ```
 
@@ -95,8 +107,7 @@ When you are in batch mode, you can still send an event immediately by setting t
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 ClickstreamAnalytics.record({
-  name: 'immediateEvent',
-  attributes: { url: 'https://example.com' },
+  name: 'button_click',
   isImmediate: true,
 });
 ```
