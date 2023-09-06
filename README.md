@@ -41,7 +41,7 @@ import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
 // record event with attributes
 ClickstreamAnalytics.record({
-  name: 'add_to_cart',
+  name: 'button_click',
   attributes: {
     event_category: 'shoes',
     currency: 'CNY',
@@ -74,7 +74,7 @@ ClickstreamAnalytics.setUserAttributes({
 });
 ```
 
-Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
+When opening for the first time after integrating the SDK, you need to manually set the user attributes once, and current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
 #### Record event with items
 

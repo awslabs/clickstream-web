@@ -102,9 +102,13 @@ describe('ClickstreamProvider test', () => {
 	});
 
 	test('test record event with invalid event name', () => {
-		mockCreateEvent = jest.spyOn(AnalyticsEventBuilder, 'createEvent');
+		const mockProviderCreateEvent = jest.spyOn(provider, 'createEvent');
 		provider.record({ name: '01testEvent' });
-		expect(mockCreateEvent).not.toHaveBeenCalled();
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: Event.PresetEvent.CLICKSTREAM_ERROR,
+			})
+		);
 	});
 
 	test('test setUserAttributes reached max number limit', () => {
