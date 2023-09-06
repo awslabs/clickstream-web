@@ -104,9 +104,14 @@ describe('ClickstreamProvider test', () => {
 	test('test record event with invalid event name', () => {
 		const mockProviderCreateEvent = jest.spyOn(provider, 'createEvent');
 		provider.record({ name: '01testEvent' });
+		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
 		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: Event.PresetEvent.CLICKSTREAM_ERROR,
+				attributes: {
+					[ERROR_CODE]: Event.ErrorCode.EVENT_NAME_INVALID,
+					[ERROR_MESSAGE]: expect.anything(),
+				},
 			})
 		);
 	});
