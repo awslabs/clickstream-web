@@ -92,6 +92,8 @@ export interface AnalyticsEvent {
 	locale: string;
 	screen_height: number;
 	screen_width: number;
+	viewport_height: number;
+	viewport_width: number;
 	zone_offset: number;
 	system_language: string;
 	country_code: string;

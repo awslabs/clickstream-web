@@ -28,6 +28,14 @@ describe('AnalyticsEventBuilder test', () => {
 			writable: true,
 			value: referrer,
 		});
+		Object.defineProperty(window.screen, 'width', {
+			writable: true,
+			value: 1920,
+		});
+		Object.defineProperty(window.screen, 'height', {
+			writable: true,
+			value: 1080,
+		});
 		const context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://example.com/collect',
@@ -53,6 +61,8 @@ describe('AnalyticsEventBuilder test', () => {
 		expect(event.sdk_name).toBe('aws-solution-clickstream-sdk');
 		expect(event.screen_height > 0).toBeTruthy();
 		expect(event.screen_width > 0).toBeTruthy();
+		expect(event.viewport_height > 0).toBeTruthy();
+		expect(event.viewport_width > 0).toBeTruthy();
 		expect(event.sdk_version).toBe(version);
 		expect(event.user).toStrictEqual({});
 		expect(Event.ReservedAttribute.PAGE_TITLE in event.attributes);
