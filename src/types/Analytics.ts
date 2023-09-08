@@ -67,11 +67,10 @@ export interface Item {
 	id?: string;
 	location_id?: string;
 	name?: string;
-	price?: Currency;
+	price?: number;
+	currency?: string;
 	quantity?: number;
 }
-
-type Currency = string | number;
 
 export interface ClickstreamEvent {
 	name: string;
