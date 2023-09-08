@@ -118,6 +118,14 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	record(event: ClickstreamEvent) {
 		const result = EventChecker.checkEventName(event.name);
 		if (result.error_code > 0) {
+			const errorEvent = this.createEvent({
+				name: Event.PresetEvent.CLICKSTREAM_ERROR,
+				attributes: {
+					[Event.ReservedAttribute.ERROR_CODE]: result.error_code,
+					[Event.ReservedAttribute.ERROR_MESSAGE]: result.error_message,
+				},
+			});
+			this.recordEvent(errorEvent);
 			logger.error(result.error_message);
 			return;
 		}
