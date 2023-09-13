@@ -33,7 +33,7 @@ export class AnalyticsEventBuilder {
 		context: ClickstreamContext,
 		event: ClickstreamEvent,
 		userAttributes: UserAttribute,
-		globalAttributes: ClickstreamAttribute,
+		globalAttributes = {},
 		session?: Session
 	): AnalyticsEvent {
 		const { browserInfo, configuration } = context;

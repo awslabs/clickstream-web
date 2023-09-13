@@ -29,7 +29,6 @@ describe('ClickstreamAnalytics test', () => {
 			context,
 			{ name: 'testEvent' },
 			{},
-			{},
 			Session.getCurrentSession(context)
 		);
 		eventJson = JSON.stringify([event]);

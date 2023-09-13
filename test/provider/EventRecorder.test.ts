@@ -241,7 +241,6 @@ describe('EventRecorder test', () => {
 			context,
 			{ name: eventName },
 			{},
-			{},
 			Session.getCurrentSession(context)
 		);
 	}
