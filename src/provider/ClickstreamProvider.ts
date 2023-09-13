@@ -28,6 +28,7 @@ import {
 	ClickstreamConfiguration,
 	ClickstreamEvent,
 	Configuration,
+	EventError,
 	PageType,
 	SendMode,
 	UserAttribute,
@@ -40,7 +41,8 @@ const logger = new Logger('ClickstreamProvider');
 export class ClickstreamProvider implements AnalyticsProvider {
 	configuration: ClickstreamConfiguration;
 	eventRecorder: EventRecorder;
-	userAttribute: UserAttribute;
+	userAttributes: UserAttribute;
+	globalAttributes: ClickstreamAttribute;
 	context: ClickstreamContext;
 	sessionTracker: SessionTracker;
 	pageViewTracker: PageViewTracker;
@@ -85,7 +87,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.pageViewTracker.setUp();
 		this.clickTracker.setUp();
 		this.scrollTracker.setUp();
-		this.userAttribute = StorageUtil.getUserAttributes();
+		this.userAttributes = StorageUtil.getUserAttributes();
+		this.globalAttributes = {};
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
 		}
@@ -118,15 +121,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	record(event: ClickstreamEvent) {
 		const result = EventChecker.checkEventName(event.name);
 		if (result.error_code > 0) {
-			const errorEvent = this.createEvent({
-				name: Event.PresetEvent.CLICKSTREAM_ERROR,
-				attributes: {
-					[Event.ReservedAttribute.ERROR_CODE]: result.error_code,
-					[Event.ReservedAttribute.ERROR_MESSAGE]: result.error_message,
-				},
-			});
-			this.recordEvent(errorEvent);
 			logger.error(result.error_message);
+			this.recordClickstreamError(result);
 			return;
 		}
 		const resultEvent = this.createEvent(event);
@@ -137,7 +133,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		return AnalyticsEventBuilder.createEvent(
 			this.context,
 			event,
-			this.userAttribute,
+			this.userAttributes,
+			this.globalAttributes,
 			this.sessionTracker.session
 		);
 	}
@@ -155,12 +152,12 @@ export class ClickstreamProvider implements AnalyticsProvider {
 
 	setUserId(userId: string | null) {
 		let previousUserId = '';
-		if (Event.ReservedAttribute.USER_ID in this.userAttribute) {
+		if (Event.ReservedAttribute.USER_ID in this.userAttributes) {
 			previousUserId =
-				this.userAttribute[Event.ReservedAttribute.USER_ID].value.toString();
+				this.userAttributes[Event.ReservedAttribute.USER_ID].value.toString();
 		}
 		if (userId === null) {
-			delete this.userAttribute[Event.ReservedAttribute.USER_ID];
+			delete this.userAttributes[Event.ReservedAttribute.USER_ID];
 		} else if (userId !== previousUserId) {
 			const userInfo = StorageUtil.getUserInfoFromMapping(userId);
 			const newUserAttribute: UserAttribute = {};
@@ -169,10 +166,10 @@ export class ClickstreamProvider implements AnalyticsProvider {
 				set_timestamp: new Date().getTime(),
 			};
 			Object.assign(newUserAttribute, userInfo);
-			this.userAttribute = newUserAttribute;
+			this.userAttributes = newUserAttribute;
 			this.context.userUniqueId = StorageUtil.getCurrentUserUniqueId();
 		}
-		StorageUtil.updateUserAttributes(this.userAttribute);
+		StorageUtil.updateUserAttributes(this.userAttributes);
 	}
 
 	setUserAttributes(attributes: ClickstreamAttribute) {
@@ -180,29 +177,52 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		for (const key in attributes) {
 			const value = attributes[key];
 			if (value === null) {
-				delete this.userAttribute[key];
+				delete this.userAttributes[key];
 			} else {
-				const currentNumber = Object.keys(this.userAttribute).length;
+				const currentNumber = Object.keys(this.userAttributes).length;
 				const { checkUserAttribute } = EventChecker;
 				const result = checkUserAttribute(currentNumber, key, value);
 				if (result.error_code > 0) {
-					const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
-					this.record({
-						name: Event.PresetEvent.CLICKSTREAM_ERROR,
-						attributes: {
-							[ERROR_CODE]: result.error_code,
-							[ERROR_MESSAGE]: result.error_message,
-						},
-					});
+					this.recordClickstreamError(result);
 				} else {
-					this.userAttribute[key] = {
+					this.userAttributes[key] = {
 						value: value,
 						set_timestamp: timestamp,
 					};
 				}
 			}
 		}
-		StorageUtil.updateUserAttributes(this.userAttribute);
+		StorageUtil.updateUserAttributes(this.userAttributes);
+	}
+
+	setGlobalAttributes(attributes: ClickstreamAttribute) {
+		for (const key in attributes) {
+			const value = attributes[key];
+			if (value === null) {
+				delete this.globalAttributes[key];
+			} else {
+				const currentNumber = Object.keys(this.globalAttributes).length;
+				const { checkAttributes } = EventChecker;
+				const result = checkAttributes(currentNumber, key, value);
+				if (result.error_code > 0) {
+					this.recordClickstreamError(result);
+				} else {
+					this.globalAttributes[key] = value;
+				}
+			}
+		}
+	}
+
+	recordClickstreamError(error: EventError) {
+		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
+		const errorEvent = this.createEvent({
+			name: Event.PresetEvent.CLICKSTREAM_ERROR,
+			attributes: {
+				[ERROR_CODE]: error.error_code,
+				[ERROR_MESSAGE]: error.error_message,
+			},
+		});
+		this.recordEvent(errorEvent);
 	}
 
 	startTimer() {

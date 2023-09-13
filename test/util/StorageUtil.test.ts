@@ -183,6 +183,7 @@ describe('StorageUtil test', () => {
 			context,
 			{ name: eventName },
 			{},
+			{},
 			Session.getCurrentSession(context)
 		);
 	}

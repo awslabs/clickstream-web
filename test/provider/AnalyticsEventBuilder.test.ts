@@ -44,6 +44,7 @@ describe('AnalyticsEventBuilder test', () => {
 			context,
 			{ name: 'testEvent' },
 			{},
+			{},
 			Session.getCurrentSession(context)
 		);
 		expect(event.hashCode.length).toBe(0);

@@ -241,6 +241,7 @@ describe('SessionTracker test', () => {
 			context,
 			{ name: 'testEvent' },
 			{},
+			{},
 			undefined
 		);
 		StorageUtil.saveFailedEvent(event);

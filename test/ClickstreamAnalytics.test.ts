@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 import { ClickstreamAnalytics, SendMode } from '../src';
+import { Item } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { Event } from '../src/provider';
-import { Item } from '../src/types';
 import { StorageUtil } from '../src/util/StorageUtil';
 
 describe('ClickstreamAnalytics test', () => {
@@ -68,6 +68,10 @@ describe('ClickstreamAnalytics test', () => {
 		ClickstreamAnalytics.setUserAttributes({
 			_user_name: 'carl',
 			_user_age: 20,
+		});
+		ClickstreamAnalytics.setGlobalAttributes({
+			brand: 'Samsung',
+			level: 10,
 		});
 		const item: Item = {
 			id: '1',
