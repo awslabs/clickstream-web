@@ -168,6 +168,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			Object.assign(newUserAttribute, userInfo);
 			this.userAttributes = newUserAttribute;
 			this.context.userUniqueId = StorageUtil.getCurrentUserUniqueId();
+			this.recordProfileSet();
 		}
 		StorageUtil.updateUserAttributes(this.userAttributes);
 	}
@@ -193,6 +194,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			}
 		}
 		StorageUtil.updateUserAttributes(this.userAttributes);
+		this.recordProfileSet();
 	}
 
 	setGlobalAttributes(attributes: ClickstreamAttribute) {
@@ -223,6 +225,13 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			},
 		});
 		this.recordEvent(errorEvent);
+	}
+
+	recordProfileSet() {
+		const profileSetEvent = this.createEvent({
+			name: Event.PresetEvent.PROFILE_SET,
+		});
+		this.recordEvent(profileSetEvent);
 	}
 
 	startTimer() {

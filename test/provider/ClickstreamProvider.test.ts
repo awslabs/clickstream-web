@@ -28,6 +28,7 @@ describe('ClickstreamProvider test', () => {
 	let provider: ClickstreamProvider;
 	let mockProviderCreateEvent: any;
 	let mockCreateEvent: any;
+	let mockRecordProfileSet: any;
 	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	beforeEach(() => {
 		localStorage.clear();
@@ -38,6 +39,7 @@ describe('ClickstreamProvider test', () => {
 		});
 		mockProviderCreateEvent = jest.spyOn(provider, 'createEvent');
 		mockCreateEvent = jest.spyOn(AnalyticsEventBuilder, 'createEvent');
+		mockRecordProfileSet = jest.spyOn(provider, 'recordProfileSet');
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
@@ -199,6 +201,7 @@ describe('ClickstreamProvider test', () => {
 			testAttribute: null,
 		});
 		expect('testAttribute' in provider.userAttributes).toBeFalsy();
+		expect(mockRecordProfileSet).toBeCalled();
 	});
 
 	test('test set userId null', () => {
@@ -207,6 +210,7 @@ describe('ClickstreamProvider test', () => {
 		expect(
 			Event.ReservedAttribute.USER_ID in provider.userAttributes
 		).toBeFalsy();
+		expect(mockRecordProfileSet).toBeCalledTimes(1);
 	});
 
 	test('test set userId not null', () => {
@@ -224,6 +228,7 @@ describe('ClickstreamProvider test', () => {
 		).toBe(firstTouchTimeStamp.toString());
 		expect(StorageUtil.getCurrentUserUniqueId()).toBe(userUniqueId);
 		expect(StorageUtil.getUserIdMapping()).not.toBeNull();
+		expect(mockRecordProfileSet).toBeCalled();
 	});
 
 	test('test set userId twice', () => {
