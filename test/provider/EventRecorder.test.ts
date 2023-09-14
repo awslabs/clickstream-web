@@ -88,7 +88,7 @@ describe('EventRecorder test', () => {
 			creative_slot: longValue,
 			location_id: longValue,
 			price: 99.9,
-			currency: "$",
+			currency: '$',
 			quantity: 1000000,
 		};
 		for (let i = 0; i < 100; i++) {

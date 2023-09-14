@@ -33,10 +33,14 @@ export class AnalyticsEventBuilder {
 		context: ClickstreamContext,
 		event: ClickstreamEvent,
 		userAttributes: UserAttribute,
+		globalAttributes = {},
 		session?: Session
 	): AnalyticsEvent {
 		const { browserInfo, configuration } = context;
-		const attributes = this.getEventAttributesWithCheck(event.attributes);
+		const attributes = this.getEventAttributesWithCheck(
+			event.attributes,
+			globalAttributes
+		);
 		if (session !== undefined) {
 			attributes[Event.ReservedAttribute.SESSION_ID] = session.sessionId;
 			attributes[Event.ReservedAttribute.SESSION_START_TIMESTAMP] =
@@ -83,12 +87,13 @@ export class AnalyticsEventBuilder {
 	}
 
 	static getEventAttributesWithCheck(
-		attributes: ClickstreamAttribute
+		eventAttributes: ClickstreamAttribute,
+		globalAttributes = {}
 	): ClickstreamAttribute {
-		const resultAttributes: ClickstreamAttribute = {};
+		const resultAttributes: ClickstreamAttribute = globalAttributes;
 		const { checkAttributes } = EventChecker;
-		for (const key in attributes) {
-			const value = attributes[key];
+		for (const key in eventAttributes) {
+			const value = eventAttributes[key];
 			if (value !== null) {
 				const currentNumber = Object.keys(resultAttributes).length;
 				const result = checkAttributes(currentNumber, key, value);

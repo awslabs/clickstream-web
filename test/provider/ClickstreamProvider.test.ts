@@ -26,8 +26,9 @@ import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('ClickstreamProvider test', () => {
 	let provider: ClickstreamProvider;
-	let mockCallRecord: any;
+	let mockProviderCreateEvent: any;
 	let mockCreateEvent: any;
+	let mockRecordProfileSet: any;
 	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	beforeEach(() => {
 		localStorage.clear();
@@ -36,16 +37,16 @@ describe('ClickstreamProvider test', () => {
 			appId: 'testAppId',
 			endpoint: 'https://example.com/collect',
 		});
-		mockCallRecord = jest.spyOn(provider, 'record');
+		mockProviderCreateEvent = jest.spyOn(provider, 'createEvent');
 		mockCreateEvent = jest.spyOn(AnalyticsEventBuilder, 'createEvent');
+		mockRecordProfileSet = jest.spyOn(provider, 'recordProfileSet');
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
 	afterEach(() => {
 		provider = undefined;
-		mockCallRecord.mockClear();
-		mockCreateEvent.mockClear();
 		jest.restoreAllMocks();
+		jest.clearAllMocks();
 	});
 
 	test('test default value', () => {
@@ -130,7 +131,7 @@ describe('ClickstreamProvider test', () => {
 				[ERROR_MESSAGE]: expect.anything(),
 			},
 		};
-		expect(mockCallRecord).toHaveBeenCalledWith(
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
 			expect.objectContaining(expectedData)
 		);
 	});
@@ -144,7 +145,7 @@ describe('ClickstreamProvider test', () => {
 		clickstreamAttribute[longKey] = 'testValue';
 		provider.setUserAttributes(clickstreamAttribute);
 		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
-		expect(mockCallRecord).toHaveBeenCalledWith(
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: Event.PresetEvent.CLICKSTREAM_ERROR,
 				attributes: {
@@ -160,7 +161,7 @@ describe('ClickstreamProvider test', () => {
 		clickstreamAttribute['3abc'] = 'testValue';
 		provider.setUserAttributes(clickstreamAttribute);
 		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
-		expect(mockCallRecord).toHaveBeenCalledWith(
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: Event.PresetEvent.CLICKSTREAM_ERROR,
 				attributes: {
@@ -180,7 +181,7 @@ describe('ClickstreamProvider test', () => {
 		clickstreamAttribute['testKey'] = longValue;
 		provider.setUserAttributes(clickstreamAttribute);
 		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
-		expect(mockCallRecord).toHaveBeenCalledWith(
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: Event.PresetEvent.CLICKSTREAM_ERROR,
 				attributes: {
@@ -199,32 +200,35 @@ describe('ClickstreamProvider test', () => {
 		provider.setUserAttributes({
 			testAttribute: null,
 		});
-		expect('testAttribute' in provider.userAttribute).toBeFalsy();
+		expect('testAttribute' in provider.userAttributes).toBeFalsy();
+		expect(mockRecordProfileSet).toBeCalled();
 	});
 
 	test('test set userId null', () => {
 		provider.setUserId('232121');
 		provider.setUserId(null);
 		expect(
-			Event.ReservedAttribute.USER_ID in provider.userAttribute
+			Event.ReservedAttribute.USER_ID in provider.userAttributes
 		).toBeFalsy();
+		expect(mockRecordProfileSet).toBeCalledTimes(1);
 	});
 
 	test('test set userId not null', () => {
 		expect(StorageUtil.getUserIdMapping()).toBeNull();
 		const userUniqueId = StorageUtil.getCurrentUserUniqueId();
 		const firstTouchTimeStamp =
-			provider.userAttribute[
+			provider.userAttributes[
 				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
 			];
 		provider.setUserId('113');
 		expect(
-			provider.userAttribute[
+			provider.userAttributes[
 				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
 			].toString()
 		).toBe(firstTouchTimeStamp.toString());
 		expect(StorageUtil.getCurrentUserUniqueId()).toBe(userUniqueId);
 		expect(StorageUtil.getUserIdMapping()).not.toBeNull();
+		expect(mockRecordProfileSet).toBeCalled();
 	});
 
 	test('test set userId twice', () => {
@@ -242,8 +246,9 @@ describe('ClickstreamProvider test', () => {
 	test('test set userId A to B to A', () => {
 		const userUniqueIdNotLogin = provider.context.userUniqueId;
 		const userFirstTouchTimestamp =
-			provider.userAttribute[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]
-				.value;
+			provider.userAttributes[
+				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
+			].value;
 		provider.setUserId('A');
 		const userUniqueIdA = provider.context.userUniqueId;
 		provider.setUserId('B');
@@ -258,8 +263,37 @@ describe('ClickstreamProvider test', () => {
 		expect(userUniqueIdB !== userUniqueIdA).toBeTruthy();
 		expect(userUniqueIdA === userUniqueIdReturnA).toBeTruthy();
 		expect(
-			provider.userAttribute[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]
-				.value
+			provider.userAttributes[
+				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
+			].value
 		).toBe(userFirstTouchTimestamp);
+	});
+
+	test('test add global attribute with invalid name', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		clickstreamAttribute['3abc'] = 'testValue';
+		provider.setGlobalAttributes(clickstreamAttribute);
+		const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
+		expect(mockProviderCreateEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: Event.PresetEvent.CLICKSTREAM_ERROR,
+				attributes: {
+					[ERROR_CODE]: Event.ErrorCode.ATTRIBUTE_NAME_INVALID,
+					[ERROR_MESSAGE]: expect.anything(),
+				},
+			})
+		);
+	});
+
+	test('test delete global attribute', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {
+			_channel: 'SMS',
+		};
+		provider.setGlobalAttributes(clickstreamAttribute);
+		expect(provider.globalAttributes['_channel']).toBe('SMS');
+		provider.setGlobalAttributes({
+			_channel: null,
+		});
+		expect(provider.globalAttributes['_channel']).toBeUndefined();
 	});
 });

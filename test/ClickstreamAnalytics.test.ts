@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 import { ClickstreamAnalytics, SendMode } from '../src';
+import { Item } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { Event } from '../src/provider';
-import { Item } from '../src/types';
 import { StorageUtil } from '../src/util/StorageUtil';
 
 describe('ClickstreamAnalytics test', () => {
@@ -69,6 +69,10 @@ describe('ClickstreamAnalytics test', () => {
 			_user_name: 'carl',
 			_user_age: 20,
 		});
+		ClickstreamAnalytics.setGlobalAttributes({
+			brand: 'Samsung',
+			level: 10,
+		});
 		const item: Item = {
 			id: '1',
 			name: 'Nature',
@@ -110,6 +114,27 @@ describe('ClickstreamAnalytics test', () => {
 		for (const event of eventList) {
 			expect(event.event_type).not.toBe('testEvent');
 		}
+	});
+
+	test('test add global attribute in subsequent event', async () => {
+		ClickstreamAnalytics.init({
+			appId: 'testApp',
+			endpoint: 'https://localhost:8080/collect',
+			sendMode: SendMode.Batch,
+		});
+		ClickstreamAnalytics.setGlobalAttributes({
+			_traffic_source_medium: 'Search engine',
+			_traffic_source_name: 'Summer promotion',
+		});
+		ClickstreamAnalytics.record({ name: 'testEvent' });
+		await sleep(100);
+		const eventList = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
+		const testEvent = eventList[eventList.length - 1];
+		expect(testEvent.event_type).toBe('testEvent');
+		expect(testEvent.attributes._traffic_source_medium).toBe('Search engine');
+		expect(testEvent.attributes._traffic_source_name).toBe('Summer promotion');
 	});
 
 	test('test update configuration', () => {

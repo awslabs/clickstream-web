@@ -53,4 +53,8 @@ export class ClickstreamAnalytics {
 	public static updateConfigure(configure: Configuration) {
 		this.provider.updateConfigure(configure);
 	}
+
+	public static setGlobalAttributes(attributes: ClickstreamAttribute) {
+		this.provider.setGlobalAttributes(attributes);
+	}
 }
