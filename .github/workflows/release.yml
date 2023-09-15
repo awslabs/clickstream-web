@@ -28,3 +28,19 @@ jobs:
           git add .
           git commit -m 'release: clickstream Web ${{ env.NEW_VERSION }}'
           git push
+          git tag v${{ env.NEW_VERSION }}
+          git push origin v${{ env.NEW_VERSION }}
+      - name: Prepare release file
+        run: |
+          npm i
+          npm run pack
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "Clickstream Web ${{ env.NEW_VERSION }}"
+          files: |
+            dist/clickstream-web.min.js
+            dist/clickstream-web.min.js.map
+          tag_name: "v${{ env.NEW_VERSION }}"
+          prerelease: true
+          generate_release_notes: true
