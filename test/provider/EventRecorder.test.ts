@@ -23,7 +23,6 @@ import { AnalyticsEvent, Item, SendMode } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('EventRecorder test', () => {
-	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	let eventRecorder: EventRecorder;
 	let context: ClickstreamContext;
 	beforeEach(() => {
@@ -34,11 +33,13 @@ describe('EventRecorder test', () => {
 			sendMode: SendMode.Batch,
 		});
 		eventRecorder = new EventRecorder(context);
+		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
 	afterEach(() => {
-		mockSendRequest.mockClear();
+		jest.restoreAllMocks();
+		jest.clearAllMocks();
 	});
 
 	test('test getBatchEvents for empty cache', () => {

@@ -17,10 +17,9 @@ import { Event } from '../src/provider';
 import { StorageUtil } from '../src/util/StorageUtil';
 
 describe('ClickstreamAnalytics test', () => {
-	const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
-
 	beforeEach(() => {
 		localStorage.clear();
+		const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementation(mockSendRequestSuccess);
@@ -28,7 +27,8 @@ describe('ClickstreamAnalytics test', () => {
 
 	afterEach(() => {
 		ClickstreamAnalytics['provider'] = undefined;
-		jest.resetAllMocks();
+		jest.restoreAllMocks();
+		jest.clearAllMocks();
 	});
 
 	test('test init sdk', () => {

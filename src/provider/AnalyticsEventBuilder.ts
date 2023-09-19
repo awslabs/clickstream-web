@@ -60,7 +60,6 @@ export class AnalyticsEventBuilder {
 
 		const items = this.getEventItemsWithCheck(event.items, attributes);
 		return {
-			hashCode: '',
 			event_type: event.name,
 			event_id: uuidV4(),
 			device_id: StorageUtil.getDeviceId(),
