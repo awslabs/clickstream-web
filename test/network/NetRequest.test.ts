@@ -16,6 +16,7 @@ import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
 import { AnalyticsEventBuilder, ClickstreamContext } from '../../src/provider';
 import { Session } from '../../src/tracker';
+import { HashUtil } from '../../src/util/HashUtil';
 
 describe('ClickstreamAnalytics test', () => {
 	let context: ClickstreamContext;
@@ -84,5 +85,23 @@ describe('ClickstreamAnalytics test', () => {
 		});
 		const result = await NetRequest.sendRequest(eventJson, context, 1, 1, 200);
 		expect(result).toBeFalsy();
+	});
+
+	test('test request success with hash code', async () => {
+		fetchMock.post('begin:https://localhost:8080/collect', {
+			status: 200,
+			body: [],
+		});
+		const mockFetch = jest.spyOn(global, 'fetch');
+
+		const eventJsonHashCode = await HashUtil.getHashCode(eventJson);
+		const result = await NetRequest.sendRequest(eventJson, context, 1);
+		expect(result).toBeTruthy();
+
+		const [requestUrl] = mockFetch.mock.calls[0];
+		const requestHashCode = new URL(requestUrl.toString()).searchParams.get(
+			'hashCode'
+		);
+		expect(eventJsonHashCode).toBe(requestHashCode);
 	});
 });
