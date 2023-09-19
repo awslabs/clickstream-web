@@ -10,16 +10,16 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { SendMode } from '../../src';
 import { NetRequest } from '../../src/network/NetRequest';
 import { ClickstreamProvider } from '../../src/provider';
-import { SendMode } from '../../src/types';
 
 describe('ClickstreamProvider timer test', () => {
 	let provider: ClickstreamProvider;
-	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	beforeEach(() => {
 		localStorage.clear();
 		provider = new ClickstreamProvider();
+		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 

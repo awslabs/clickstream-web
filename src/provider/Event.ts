@@ -85,7 +85,7 @@ export class Event {
 	static readonly Constants = {
 		PREFIX: '[',
 		SUFFIX: ']',
-		LAST_EVENT_IDENTIFIER: '},{"hashCode":',
+		LAST_EVENT_IDENTIFIER: '},{"event_type":',
 		KEYWORDS: ['q', 's', 'search', 'query', 'keyword'],
 	};
 }

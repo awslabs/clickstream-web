@@ -38,8 +38,6 @@ describe('PageViewTracker test', () => {
 	let sessionTracker: SessionTracker;
 	let context: ClickstreamContext;
 	let eventRecorder: EventRecorder;
-
-	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	let recordMethodMock: any;
 	let recordEventMethodMock: any;
 	let originalLocation: Location;
@@ -68,6 +66,7 @@ describe('PageViewTracker test', () => {
 		provider.sessionTracker = sessionTracker;
 		recordMethodMock = jest.spyOn(provider, 'record');
 		recordEventMethodMock = jest.spyOn(provider, 'recordEvent');
+		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		originalLocation = window.location;
 		setDomUrl('https://example.com/index');

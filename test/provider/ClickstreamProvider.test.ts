@@ -29,9 +29,11 @@ describe('ClickstreamProvider test', () => {
 	let mockProviderCreateEvent: any;
 	let mockCreateEvent: any;
 	let mockRecordProfileSet: any;
-	const mockSendRequest = jest.fn().mockResolvedValue(true);
-	beforeEach(() => {
+
+	beforeEach(async () => {
 		localStorage.clear();
+		const mockSendRequest = jest.fn().mockResolvedValue(true);
+		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		provider = new ClickstreamProvider();
 		provider.configure({
 			appId: 'testAppId',
@@ -40,7 +42,6 @@ describe('ClickstreamProvider test', () => {
 		mockProviderCreateEvent = jest.spyOn(provider, 'createEvent');
 		mockCreateEvent = jest.spyOn(AnalyticsEventBuilder, 'createEvent');
 		mockRecordProfileSet = jest.spyOn(provider, 'recordProfileSet');
-		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
 	afterEach(() => {
@@ -49,7 +50,8 @@ describe('ClickstreamProvider test', () => {
 		jest.clearAllMocks();
 	});
 
-	test('test default value', () => {
+	test('test default value', async () => {
+		await sleep(100);
 		expect(provider.configuration.appId).toBe('testAppId');
 		expect(provider.configuration.endpoint).toBe('https://example.com/collect');
 		expect(provider.configuration.sendMode).toBe(SendMode.Immediate);
@@ -296,4 +298,8 @@ describe('ClickstreamProvider test', () => {
 		});
 		expect(provider.globalAttributes['_channel']).toBeUndefined();
 	});
+
+	function sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 });

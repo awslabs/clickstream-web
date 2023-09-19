@@ -80,7 +80,6 @@ export interface ClickstreamEvent {
 }
 
 export interface AnalyticsEvent {
-	hashCode?: string;
 	unique_id: string;
 	event_type: string;
 	event_id: string;

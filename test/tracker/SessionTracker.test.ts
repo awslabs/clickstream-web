@@ -35,12 +35,12 @@ describe('SessionTracker test', () => {
 	let sessionTracker: SessionTracker;
 	let context: ClickstreamContext;
 	let eventRecorder: EventRecorder;
-
-	const mockSendRequest = jest.fn().mockResolvedValue(true);
 	let recordMethodMock: any;
 
 	beforeEach(() => {
 		localStorage.clear();
+		const mockSendRequest = jest.fn().mockResolvedValue(true);
+		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		provider = new ClickstreamProvider();
 		recordMethodMock = jest.spyOn(provider, 'record');
 		Object.assign(provider.configuration, {
@@ -57,7 +57,6 @@ describe('SessionTracker test', () => {
 		provider.sessionTracker = sessionTracker;
 		provider.eventRecorder = eventRecorder;
 		provider.pageViewTracker = pageViewTracker;
-		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 	});
 
 	afterEach(() => {

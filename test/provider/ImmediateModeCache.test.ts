@@ -12,14 +12,12 @@
  */
 import { ClickstreamAnalytics } from '../../src';
 import { NetRequest } from '../../src/network/NetRequest';
-import { Event } from "../../src/provider";
+import { Event } from '../../src/provider';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('ImmediateModeCache test', () => {
-	const mockSendRequestFail = jest.fn().mockResolvedValue(false);
-	const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
-
 	beforeEach(() => {
+		const mockSendRequestFail = jest.fn().mockResolvedValue(false);
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementation(mockSendRequestFail);
@@ -31,9 +29,6 @@ describe('ImmediateModeCache test', () => {
 	});
 
 	test('test record event failed and stores the event then send the event', async () => {
-		jest
-			.spyOn(NetRequest, 'sendRequest')
-			.mockImplementationOnce(mockSendRequestFail);
 		const sendRequestMock = jest.spyOn(NetRequest, 'sendRequest');
 		ClickstreamAnalytics.init({
 			appId: 'testApp',
@@ -44,8 +39,11 @@ describe('ImmediateModeCache test', () => {
 		});
 		await sleep(100);
 		expect(sendRequestMock).toBeCalled();
-		const failedEvents = JSON.parse(StorageUtil.getFailedEvents() + Event.Constants.SUFFIX);
+		const failedEvents = JSON.parse(
+			StorageUtil.getFailedEvents() + Event.Constants.SUFFIX
+		);
 		expect(failedEvents.length).toBeGreaterThan(4);
+		const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementation(mockSendRequestSuccess);

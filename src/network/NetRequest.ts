@@ -12,6 +12,7 @@
  */
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
 import { ClickstreamContext } from '../provider';
+import { HashUtil } from '../util/HashUtil';
 
 const logger = new Logger('NetRequest');
 
@@ -30,10 +31,12 @@ export class NetRequest {
 		timeout = NetRequest.REQUEST_TIMEOUT
 	): Promise<boolean> {
 		const { configuration, browserInfo } = context;
+		const eventsHash = await HashUtil.getHashCode(eventsJson);
 		const queryParams = new URLSearchParams({
 			platform: 'Web',
 			appId: configuration.appId,
 			event_bundle_sequence_id: bundleSequenceId.toString(),
+			hashCode: eventsHash,
 		});
 		const url = `${configuration.endpoint}?${queryParams.toString()}`;
 

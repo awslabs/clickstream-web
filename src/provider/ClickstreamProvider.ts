@@ -33,7 +33,6 @@ import {
 	SendMode,
 	UserAttribute,
 } from '../types';
-import { HashUtil } from '../util/HashUtil';
 import { StorageUtil } from '../util/StorageUtil';
 
 const logger = new Logger('ClickstreamProvider');
@@ -140,14 +139,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	}
 
 	recordEvent(event: AnalyticsEvent, isImmediate = false) {
-		HashUtil.getHashCode(JSON.stringify(event))
-			.then(hashCode => {
-				event.hashCode = hashCode;
-				this.eventRecorder.record(event, isImmediate);
-			})
-			.catch(error => {
-				logger.error(`Create hash code failed with ${error}`);
-			});
+		this.eventRecorder.record(event, isImmediate);
 	}
 
 	setUserId(userId: string | null) {
