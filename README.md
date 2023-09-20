@@ -187,16 +187,16 @@ ClickstreamAnalytics.updateConfigure({
 
 ### Integrate the `.tgz` file
 
-Clone this repository locally and execute the following script to generate `aws-clickstream-web-0.4.0.tgz` zip package, which will be located in the project root folder.
+Clone this repository locally and execute the following script to generate `aws-clickstream-web-0.5.0.tgz` zip package, which will be located in the project root folder.
 ```bash
 cd clickstream-web && npm i && npm run pack
 ```
 
-Copy the `aws-clickstream-web-0.4.0.tgz` into your project, then execute the script in your project root folder to install the SDK.
+Copy the `aws-clickstream-web-0.5.0.tgz` into your project, then execute the script in your project root folder to install the SDK.
 ```bash
-npm install ./aws-clickstream-web-0.4.0.tgz
+npm install ./aws-clickstream-web-0.5.0.tgz
 ```
-**Note**: Please correct the SDK version and change the path to where the `aws-clickstream-web-0.4.0.tgz` file is located.
+**Note**: Please correct the SDK version and change the path to where the `aws-clickstream-web-0.5.0.tgz` file is located.
 
 ### Integrate the `clickstream-web.min.js` file
 Execute the following script to generate `clickstream-web.min.js`, located in the `/dist` folder.
