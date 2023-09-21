@@ -139,9 +139,14 @@ describe('PageViewTracker test', () => {
 			pageViewTracker,
 			'trackPageViewForSPA'
 		);
+		const userEngagementMock = jest.spyOn(
+			pageViewTracker,
+			'recordUserEngagement'
+		);
 		(context.configuration as any).pageType = PageType.SPA;
 		pageViewTracker.setUp();
 		expect(trackPageViewForSPAMock).toBeCalled();
+		expect(userEngagementMock).not.toBeCalled();
 	});
 
 	test('test environment is not supported for sessionStorage', () => {

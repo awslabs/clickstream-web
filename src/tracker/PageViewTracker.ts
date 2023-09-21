@@ -62,7 +62,9 @@ export class PageViewTracker extends BaseTracker {
 				previousPageTitle !== currentPageTitle
 			) {
 				this.provider.scrollTracker?.enterNewPage();
-				this.recordUserEngagement();
+				if (previousPageUrl !== '') {
+					this.recordUserEngagement();
+				}
 				this.trackPageView(previousPageUrl, previousPageTitle);
 				this.trackSearchEvents();
 
@@ -110,7 +112,6 @@ export class PageViewTracker extends BaseTracker {
 	}
 
 	recordUserEngagement(isImmediate = false) {
-		if (this.lastScreenStartTimestamp === 0) return;
 		this.lastEngageTime = this.getLastEngageTime();
 		if (
 			this.provider.configuration.isTrackUserEngagementEvents &&
