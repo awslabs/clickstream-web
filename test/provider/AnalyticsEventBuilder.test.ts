@@ -186,4 +186,22 @@ describe('AnalyticsEventBuilder test', () => {
 			Event.ErrorCode.ITEM_VALUE_LENGTH_EXCEED
 		);
 	});
+
+	test('test check event attributes will not affect global attributes', () => {
+		const customAttributes: ClickstreamAttribute = {
+			testKey: 'testValue',
+			testKey1: 'testValue1',
+		};
+		const globalAttributes = {
+			level: 5,
+			_traffic_source_medium: 'Search engine',
+		};
+		const resultAttributes = AnalyticsEventBuilder.getEventAttributesWithCheck(
+			customAttributes,
+			globalAttributes
+		);
+		expect('level' in resultAttributes).toBeTruthy();
+		expect('_traffic_source_medium' in resultAttributes).toBeTruthy();
+		expect(Object.keys(globalAttributes).length).toBe(2);
+	});
 });
