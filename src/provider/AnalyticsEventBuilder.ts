@@ -89,23 +89,25 @@ export class AnalyticsEventBuilder {
 		eventAttributes: ClickstreamAttribute,
 		globalAttributes = {}
 	): ClickstreamAttribute {
-		const resultAttributes: ClickstreamAttribute = globalAttributes;
+		const customAttributes: ClickstreamAttribute = {};
 		const { checkAttributes } = EventChecker;
+		const globalAttributesLength = Object.keys(globalAttributes).length;
 		for (const key in eventAttributes) {
 			const value = eventAttributes[key];
 			if (value !== null) {
-				const currentNumber = Object.keys(resultAttributes).length;
+				const currentNumber =
+					Object.keys(customAttributes).length + globalAttributesLength;
 				const result = checkAttributes(currentNumber, key, value);
 				const { ERROR_CODE, ERROR_MESSAGE } = Event.ReservedAttribute;
 				if (result.error_code > 0) {
-					resultAttributes[ERROR_CODE] = result.error_code;
-					resultAttributes[ERROR_MESSAGE] = result.error_message;
+					customAttributes[ERROR_CODE] = result.error_code;
+					customAttributes[ERROR_MESSAGE] = result.error_message;
 				} else {
-					resultAttributes[key] = value;
+					customAttributes[key] = value;
 				}
 			}
 		}
-		return resultAttributes;
+		return Object.assign(customAttributes, globalAttributes);
 	}
 
 	static getEventItemsWithCheck(
