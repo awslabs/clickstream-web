@@ -77,7 +77,7 @@ ClickstreamAnalytics.setUserAttributes({
 When opening for the first time after integrating the SDK, you need to manually set the user attributes once, and current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
 #### Add global attribute
-1. Add global attribute when initialize SDK
+1. Add global attributes when initializing the SDK
 
    ```typescript
    ClickstreamAnalytics.init({
@@ -90,7 +90,7 @@ When opening for the first time after integrating the SDK, you need to manually 
    });
    ```
 
-2. Add global attribute after initialize SDK
+2. Add global attributes after initializing the SDK
 
    ``` typescript
    ClickstreamAnalytics.setGlobalAttributes({
@@ -99,7 +99,7 @@ When opening for the first time after integrating the SDK, you need to manually 
    });
    ```
 
-It is recommended to set global attributes when initialize SDK, global attributes will be included in all events that occur after it is set, you also can remove a global attribute by setting its value to `null`.
+It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events that occur after it is set, you also can remove a global attribute by setting its value to `null`.
 
 #### Record event with items
 
