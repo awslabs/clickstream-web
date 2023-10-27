@@ -20,6 +20,7 @@ export interface ClickstreamConfiguration extends Configuration {
 	readonly sessionTimeoutDuration?: number;
 	readonly searchKeyWords?: string[];
 	readonly domainList?: string[];
+	readonly globalAttributes?: ClickstreamAttribute;
 }
 
 export interface Configuration {

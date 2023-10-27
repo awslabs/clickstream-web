@@ -17,17 +17,17 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
 import { JSDOM } from 'jsdom';
-import { SendMode } from '../../src';
+import { PageType, SendMode } from '../../src';
 import { BrowserInfo } from '../../src/browser';
 import { NetRequest } from '../../src/network/NetRequest';
-import { AnalyticsEventBuilder } from '../../src/provider';
 import {
+	AnalyticsEventBuilder,
 	ClickstreamContext,
 	ClickstreamProvider,
 	Event,
 	EventRecorder,
 } from '../../src/provider';
-import { SessionTracker, PageViewTracker } from '../../src/tracker';
+import { PageViewTracker, SessionTracker } from '../../src/tracker';
 import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('SessionTracker test', () => {
@@ -87,6 +87,33 @@ describe('SessionTracker test', () => {
 		expect(session.sessionIndex).toBe(1);
 		expect(session.sessionId).not.toBeUndefined();
 		expect(session.isNewSession()).toBeTruthy();
+	});
+
+	test('test multi page mode record app start when setUp', () => {
+		Object.assign(provider.configuration, {
+			pageType: PageType.multiPageApp,
+		});
+		sessionTracker.setUp();
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.APP_START,
+			attributes: {
+				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
+			},
+		});
+	});
+
+	test('test multi page mode not record app start when come from the same host name', () => {
+		Object.assign(provider.configuration, {
+			pageType: PageType.multiPageApp,
+		});
+		context.browserInfo.latestReferrerHost = 'localhost';
+		sessionTracker.setUp();
+		expect(recordMethodMock).not.toBeCalledWith({
+			name: Event.PresetEvent.APP_START,
+			attributes: {
+				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
+			},
+		});
 	});
 
 	test('test setUp for unsupported env', () => {
