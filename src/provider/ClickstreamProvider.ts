@@ -64,6 +64,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			sessionTimeoutDuration: 1800000,
 			searchKeyWords: [],
 			domainList: [],
+			globalAttributes: {},
 		};
 	}
 
@@ -78,6 +79,9 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			this.configuration
 		);
 		this.eventRecorder = new EventRecorder(this.context);
+		this.globalAttributes = {};
+		this.setGlobalAttributes(configuration.globalAttributes);
+
 		this.sessionTracker = new SessionTracker(this, this.context);
 		this.pageViewTracker = new PageViewTracker(this, this.context);
 		this.clickTracker = new ClickTracker(this, this.context);
@@ -87,7 +91,6 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.clickTracker.setUp();
 		this.scrollTracker.setUp();
 		this.userAttributes = StorageUtil.getUserAttributes();
-		this.globalAttributes = {};
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
 		}
