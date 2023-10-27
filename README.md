@@ -85,7 +85,7 @@ When opening for the first time after integrating the SDK, you need to manually 
       endpoint: "https://example.com/collect",
       globalAttributes:{
         _traffic_source_medium: "Search engine",
-     	 _traffic_source_name: "Summer promotion",
+        _traffic_source_name: "Summer promotion",
       }
    });
    ```
