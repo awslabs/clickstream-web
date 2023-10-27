@@ -28,5 +28,4 @@ jobs:
             docs
             ci
             tests
-
           requireScope: false
