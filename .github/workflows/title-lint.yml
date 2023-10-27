@@ -6,7 +6,6 @@ on:
 
 jobs:
   title-lint:
-    name: Validate PR title
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
