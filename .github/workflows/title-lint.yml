@@ -1,14 +1,8 @@
 name: Pull Request Title Lint
 
 on:
-  pull_request_target:
-    types:
-      - labeled
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-      - edited
+  pull_request:
+    branches: [ "*" ]
 
 jobs:
   title-lint:
