@@ -1,4 +1,4 @@
-name: Commit Title Lint
+name: Pull Request Title Lint
 
 on:
   pull_request_target:
