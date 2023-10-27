@@ -10,8 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ClickstreamAnalytics, SendMode } from '../src';
-import { Item } from '../src';
+import { ClickstreamAnalytics, Item, SendMode } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { Event } from '../src/provider';
 import { StorageUtil } from '../src/util/StorageUtil';
@@ -42,6 +41,33 @@ describe('ClickstreamAnalytics test', () => {
 			endpoint: 'https://example.com/collect',
 		});
 		expect(result1).toBeFalsy();
+	});
+
+	test('test init sdk with global attributes', async () => {
+		const result = ClickstreamAnalytics.init({
+			appId: 'testApp',
+			endpoint: 'https://example.com/collect',
+			sendMode: SendMode.Batch,
+			globalAttributes: {
+				brand: 'Samsung',
+				level: 10,
+			},
+		});
+		ClickstreamAnalytics.setGlobalAttributes({ brand: null });
+		ClickstreamAnalytics.record({
+			name: 'testEvent',
+		});
+		expect(result).toBeTruthy();
+		await sleep(100);
+		const eventList = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
+		const firstEvent = eventList[0];
+		expect(firstEvent.event_type).toBe(Event.PresetEvent.FIRST_OPEN);
+		expect(firstEvent.attributes.brand).toBe('Samsung');
+		expect(firstEvent.attributes.level).toBe(10);
+		const testEvent = eventList[eventList.length - 1];
+		expect(testEvent.attributes.brand).toBeUndefined();
 	});
 
 	test('test record event with name success', async () => {
