@@ -17,6 +17,8 @@ import { EventError, Item } from '../types';
 const logger = new Logger('ClickstreamProvider');
 
 export class EventChecker {
+	static itemKeySet: Set<string>;
+
 	static checkEventName(eventName: string): EventError {
 		const { EVENT_NAME_INVALID, EVENT_NAME_LENGTH_EXCEED, NO_ERROR } =
 			Event.ErrorCode;
@@ -186,11 +188,25 @@ export class EventChecker {
 	}
 
 	static checkItems(currentNumber: number, item: Item): EventError {
-		const { MAX_NUM_OF_ITEMS, MAX_LENGTH_OF_ITEM_VALUE } = Event.Limit;
-		const { NO_ERROR, ITEM_SIZE_EXCEED, ITEM_VALUE_LENGTH_EXCEED } =
-			Event.ErrorCode;
+		if (EventChecker.itemKeySet === undefined) {
+			EventChecker.initItemKeySet();
+		}
+		const {
+			MAX_NUM_OF_ITEMS,
+			MAX_LENGTH_OF_ITEM_VALUE,
+			MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE,
+			MAX_LENGTH_OF_NAME,
+		} = Event.Limit;
+		const {
+			NO_ERROR,
+			ITEM_SIZE_EXCEED,
+			ITEM_VALUE_LENGTH_EXCEED,
+			ITEM_CUSTOM_ATTRIBUTE_SIZE_EXCEED,
+			ITEM_CUSTOM_ATTRIBUTE_KEY_LENGTH_EXCEED,
+			ITEM_CUSTOM_ATTRIBUTE_KEY_INVALID,
+		} = Event.ErrorCode;
+		const itemKey = JSON.stringify(item);
 		if (currentNumber >= MAX_NUM_OF_ITEMS) {
-			const itemKey = `${item.id}_${item.name}`;
 			const errorMsg =
 				`reached the max number of items limit ${MAX_NUM_OF_ITEMS}. ` +
 				`and the item: ${itemKey} will not be recorded`;
@@ -201,31 +217,80 @@ export class EventChecker {
 				error_code: ITEM_SIZE_EXCEED,
 			};
 		}
-		let hasInvalidValue = false;
-		let invalidKey = '';
-		let invalidValue = '';
+		let customKeyNumber = 0;
 		for (const [key, value] of Object.entries(item)) {
-			if (value && value.toString().length > MAX_LENGTH_OF_ITEM_VALUE) {
-				invalidKey = key;
-				invalidValue = value.toString();
-				hasInvalidValue = true;
-				delete item[key as keyof Item];
+			const valueStr = value.toString();
+			let error: EventError;
+			if (!EventChecker.itemKeySet.has(key)) {
+				customKeyNumber += 1;
+				if (customKeyNumber > MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE) {
+					const errorMsg =
+						`reached the max number of custom item attributes limit (${MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE}` +
+						`). and the item: ${itemKey} will not be recorded`;
+					logger.error(errorMsg);
+					const errorString = `item attribute key: ${key}`;
+					error = {
+						error_message: EventChecker.getLimitString(errorString),
+						error_code: ITEM_CUSTOM_ATTRIBUTE_SIZE_EXCEED,
+					};
+				} else if (key.length > Event.Limit.MAX_LENGTH_OF_NAME) {
+					const errorMsg =
+						`item attribute key: ${key} , reached the max length of item attributes key limit(` +
+						`${MAX_LENGTH_OF_NAME}). current length is:(${key.length}) and the item: ${itemKey} will not be recorded`;
+					logger.error(errorMsg);
+					const errorString = 'item attribute key: ' + key;
+					error = {
+						error_message: EventChecker.getLimitString(errorString),
+						error_code: ITEM_CUSTOM_ATTRIBUTE_KEY_LENGTH_EXCEED,
+					};
+				} else if (!EventChecker.isValidName(key)) {
+					const errorMsg =
+						`item attribute key: ${key}, was not valid, item attribute key can only contains` +
+						' uppercase and lowercase letters, underscores, number, and is not start with a number.' +
+						` so the item: ${itemKey} will not be recorded`;
+					logger.error(errorMsg);
+					error = {
+						error_message: EventChecker.getLimitString(key),
+						error_code: ITEM_CUSTOM_ATTRIBUTE_KEY_INVALID,
+					};
+				}
 			}
-		}
-		if (hasInvalidValue) {
-			const errorMsg =
-				`item attribute : ${invalidKey}, reached the max length of item attribute value limit ` +
-				`(${MAX_LENGTH_OF_ITEM_VALUE}). current length is: (${invalidValue.length}). ` +
-				`and the item attribute will not be recorded, attribute value: ${invalidValue}`;
-			logger.error(errorMsg);
-			const errorString = `item attribute name: ${invalidKey}, item attribute value: ${invalidValue}`;
-			return {
-				error_message: EventChecker.getLimitString(errorString),
-				error_code: ITEM_VALUE_LENGTH_EXCEED,
-			};
+			if (!error && valueStr.length > MAX_LENGTH_OF_ITEM_VALUE) {
+				const errorMsg =
+					`item attribute : ${key}, reached the max length of item attribute value limit ` +
+					`(${MAX_LENGTH_OF_ITEM_VALUE}). current length is: (${valueStr.length}). ` +
+					`and the item: ${itemKey} will not be recorded`;
+				logger.error(errorMsg);
+				const errorString = `item attribute name: ${key}, item attribute value: ${valueStr}`;
+				error = {
+					error_message: EventChecker.getLimitString(errorString),
+					error_code: ITEM_VALUE_LENGTH_EXCEED,
+				};
+			}
+			if (error) {
+				return error;
+			}
 		}
 		return {
 			error_code: NO_ERROR,
 		};
+	}
+
+	static initItemKeySet() {
+		EventChecker.itemKeySet = new Set<string>();
+		EventChecker.itemKeySet.add('id');
+		EventChecker.itemKeySet.add('name');
+		EventChecker.itemKeySet.add('location_id');
+		EventChecker.itemKeySet.add('brand');
+		EventChecker.itemKeySet.add('currency');
+		EventChecker.itemKeySet.add('price');
+		EventChecker.itemKeySet.add('quantity');
+		EventChecker.itemKeySet.add('creative_name');
+		EventChecker.itemKeySet.add('creative_slot');
+		EventChecker.itemKeySet.add('category');
+		EventChecker.itemKeySet.add('category2');
+		EventChecker.itemKeySet.add('category3');
+		EventChecker.itemKeySet.add('category4');
+		EventChecker.itemKeySet.add('category5');
 	}
 }

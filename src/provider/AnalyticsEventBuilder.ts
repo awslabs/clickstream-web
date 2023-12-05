@@ -125,7 +125,7 @@ export class AnalyticsEventBuilder {
 					attributes[ERROR_CODE] = result.error_code;
 					attributes[ERROR_MESSAGE] = result.error_message;
 				}
-				if (result.error_code !== Event.ErrorCode.ITEM_SIZE_EXCEED) {
+				if (result.error_code === Event.ErrorCode.NO_ERROR) {
 					resultItems.push(item);
 				}
 			}

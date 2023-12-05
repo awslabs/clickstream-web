@@ -105,6 +105,7 @@ describe('ClickstreamAnalytics test', () => {
 			name: 'Nature',
 			category: 'book',
 			price: 56.5,
+			customKey: "customValue",
 		};
 		ClickstreamAnalytics.record({
 			name: 'testEvent',
