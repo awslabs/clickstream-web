@@ -64,6 +64,7 @@ describe('ClickstreamAnalytics test', () => {
 		);
 		const firstEvent = eventList[0];
 		expect(firstEvent.event_type).toBe(Event.PresetEvent.FIRST_OPEN);
+		expect(firstEvent.user[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]).not.toBeUndefined()
 		expect(firstEvent.attributes.brand).toBe('Samsung');
 		expect(firstEvent.attributes.level).toBe(10);
 		const testEvent = eventList[eventList.length - 1];

@@ -81,7 +81,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.eventRecorder = new EventRecorder(this.context);
 		this.globalAttributes = {};
 		this.setGlobalAttributes(configuration.globalAttributes);
-
+		this.userAttributes = StorageUtil.getUserAttributes();
 		this.sessionTracker = new SessionTracker(this, this.context);
 		this.pageViewTracker = new PageViewTracker(this, this.context);
 		this.clickTracker = new ClickTracker(this, this.context);
@@ -90,7 +90,6 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.pageViewTracker.setUp();
 		this.clickTracker.setUp();
 		this.scrollTracker.setUp();
-		this.userAttributes = StorageUtil.getUserAttributes();
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
 		}
