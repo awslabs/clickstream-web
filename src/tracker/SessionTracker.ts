@@ -52,6 +52,7 @@ export class SessionTracker extends BaseTracker {
 	}
 
 	handleInit() {
+		this.session = Session.getCurrentSession(this.context);
 		if (StorageUtil.getIsFirstOpen()) {
 			this.provider.record({
 				name: Event.PresetEvent.FIRST_OPEN,
@@ -65,7 +66,6 @@ export class SessionTracker extends BaseTracker {
 		logger.debug('page appear');
 		const pageViewTracker = this.provider.pageViewTracker;
 		pageViewTracker.updateLastScreenStartTimestamp();
-		this.session = Session.getCurrentSession(this.context);
 		if (this.session.isNewSession()) {
 			pageViewTracker.setIsEntrances();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
