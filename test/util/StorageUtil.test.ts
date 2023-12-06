@@ -34,7 +34,7 @@ describe('StorageUtil test', () => {
 	});
 
 	test('test get user Attributes return null object', () => {
-		const userAttribute = StorageUtil.getUserAttributes();
+		const userAttribute = StorageUtil.getAllUserAttributes();
 		expect(JSON.stringify(userAttribute)).toBe('{}');
 	});
 
@@ -42,7 +42,7 @@ describe('StorageUtil test', () => {
 		const userUniqueId = StorageUtil.getCurrentUserUniqueId();
 		expect(userUniqueId).not.toBeNull();
 		expect(userUniqueId.length > 0).toBeTruthy();
-		const userAttribute = StorageUtil.getUserAttributes();
+		const userAttribute = StorageUtil.getAllUserAttributes();
 		expect(userAttribute).not.toBeNull();
 		expect(Object.keys(userAttribute).length > 0).toBeTruthy();
 		expect(
@@ -68,9 +68,34 @@ describe('StorageUtil test', () => {
 				value: 'carl',
 			},
 		});
-		const userAttribute = StorageUtil.getUserAttributes();
+		const userAttribute = StorageUtil.getAllUserAttributes();
 		expect(Object.keys(userAttribute).length).toBe(2);
 		expect(userAttribute['userAge']['value']).toBe(18);
+	});
+
+	test('test get simple user attributes', () => {
+		const userId = Event.ReservedAttribute.USER_ID;
+		const firstTimestamp = Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP;
+		const currentTimeStamp = new Date().getTime();
+		StorageUtil.updateUserAttributes({
+			[userId]: {
+				set_timestamp: currentTimeStamp,
+				value: 1234,
+			},
+			[firstTimestamp]: {
+				set_timestamp: currentTimeStamp,
+				value: currentTimeStamp,
+			},
+			userAge: {
+				set_timestamp: currentTimeStamp,
+				value: 18,
+			},
+		});
+		const simpleUserAttribute = StorageUtil.getSimpleUserAttributes();
+		expect(Object.keys(simpleUserAttribute).length).toBe(2);
+		expect(simpleUserAttribute[userId].value).toBe(1234);
+		expect(simpleUserAttribute[firstTimestamp].value).toBe(currentTimeStamp);
+		expect(simpleUserAttribute['userAge']).toBeUndefined();
 	});
 
 	test('test save and clear failed event', async () => {

@@ -101,7 +101,7 @@ export class StorageUtil {
 					set_timestamp: timestamp,
 				},
 				[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]:
-					StorageUtil.getUserAttributes()[
+					StorageUtil.getAllUserAttributes()[
 						Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
 					],
 			};
@@ -149,10 +149,23 @@ export class StorageUtil {
 		);
 	}
 
-	static getUserAttributes(): UserAttribute {
+	static getAllUserAttributes(): UserAttribute {
 		const userAttributes =
 			localStorage.getItem(StorageUtil.userAttributesKey) ?? '{}';
 		return JSON.parse(userAttributes);
+	}
+
+	static getSimpleUserAttributes(): UserAttribute {
+		const allUserAttributes = StorageUtil.getAllUserAttributes();
+		const simpleUserAttributes: UserAttribute = {
+			[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]:
+				allUserAttributes[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP],
+		};
+		if (allUserAttributes[Event.ReservedAttribute.USER_ID] !== undefined) {
+			simpleUserAttributes[Event.ReservedAttribute.USER_ID] =
+				allUserAttributes[Event.ReservedAttribute.USER_ID];
+		}
+		return simpleUserAttributes;
 	}
 
 	static getFailedEvents(): string {

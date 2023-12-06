@@ -212,7 +212,7 @@ describe('ClickstreamProvider test', () => {
 		expect(
 			Event.ReservedAttribute.USER_ID in provider.userAttributes
 		).toBeFalsy();
-		expect(mockRecordProfileSet).toBeCalledTimes(1);
+		expect(mockRecordProfileSet).toBeCalledTimes(2);
 	});
 
 	test('test set userId not null', () => {
@@ -269,6 +269,23 @@ describe('ClickstreamProvider test', () => {
 				Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP
 			].value
 		).toBe(userFirstTouchTimestamp);
+	});
+
+	test('test custom user attribute not in the subsequent event', async () => {
+		(provider.configuration as any).sendMode = SendMode.Batch;
+		provider.setUserId('123');
+		provider.setUserAttributes({
+			testAttribute: 'testValue',
+		});
+		provider.record({ name: 'testEvent' });
+		await sleep(100);
+		const eventList = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
+		const lastEvent = eventList[eventList.length - 1];
+		expect(lastEvent.event_type).toBe('testEvent');
+		expect(lastEvent.user[Event.ReservedAttribute.USER_ID].value).toBe('123');
+		expect(lastEvent.user.testAttribute).toBeUndefined();
 	});
 
 	test('test add global attribute with invalid name', () => {
