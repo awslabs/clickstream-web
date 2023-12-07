@@ -67,6 +67,10 @@ describe('ClickstreamAnalytics test', () => {
 		expect(firstEvent.user[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]).not.toBeUndefined()
 		expect(firstEvent.attributes.brand).toBe('Samsung');
 		expect(firstEvent.attributes.level).toBe(10);
+		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_ID]).not.toBeUndefined();
+		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_NUMBER]).not.toBeUndefined();
+		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_START_TIMESTAMP]).not.toBeUndefined();
+		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_DURATION]).not.toBeUndefined();
 		const testEvent = eventList[eventList.length - 1];
 		expect(testEvent.attributes.brand).toBeUndefined();
 	});
