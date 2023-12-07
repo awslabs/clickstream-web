@@ -81,7 +81,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.eventRecorder = new EventRecorder(this.context);
 		this.globalAttributes = {};
 		this.setGlobalAttributes(configuration.globalAttributes);
-		this.userAttributes = StorageUtil.getUserAttributes();
+		this.userAttributes = StorageUtil.getSimpleUserAttributes();
 		this.sessionTracker = new SessionTracker(this, this.context);
 		this.pageViewTracker = new PageViewTracker(this, this.context);
 		this.clickTracker = new ClickTracker(this, this.context);
@@ -130,11 +130,14 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.recordEvent(resultEvent, event.isImmediate);
 	}
 
-	createEvent(event: ClickstreamEvent) {
+	createEvent(
+		event: ClickstreamEvent,
+		allUserAttributes: UserAttribute = null
+	) {
 		return AnalyticsEventBuilder.createEvent(
 			this.context,
 			event,
-			this.userAttributes,
+			allUserAttributes === null ? this.userAttributes : allUserAttributes,
 			this.globalAttributes,
 			this.sessionTracker.session
 		);
@@ -155,40 +158,43 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		} else if (userId !== previousUserId) {
 			const userInfo = StorageUtil.getUserInfoFromMapping(userId);
 			const newUserAttribute: UserAttribute = {};
-			userInfo[Event.ReservedAttribute.USER_ID] = {
+			newUserAttribute[Event.ReservedAttribute.USER_ID] = {
 				value: userId,
 				set_timestamp: new Date().getTime(),
 			};
-			Object.assign(newUserAttribute, userInfo);
+			newUserAttribute[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP] =
+				userInfo[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP];
+			StorageUtil.updateUserAttributes(newUserAttribute);
 			this.userAttributes = newUserAttribute;
 			this.context.userUniqueId = StorageUtil.getCurrentUserUniqueId();
-			this.recordProfileSet();
 		}
+		this.recordProfileSet(this.userAttributes);
 		StorageUtil.updateUserAttributes(this.userAttributes);
 	}
 
 	setUserAttributes(attributes: ClickstreamAttribute) {
 		const timestamp = new Date().getTime();
+		const allUserAttributes = StorageUtil.getAllUserAttributes();
 		for (const key in attributes) {
 			const value = attributes[key];
 			if (value === null) {
-				delete this.userAttributes[key];
+				delete allUserAttributes[key];
 			} else {
-				const currentNumber = Object.keys(this.userAttributes).length;
+				const currentNumber = Object.keys(allUserAttributes).length;
 				const { checkUserAttribute } = EventChecker;
 				const result = checkUserAttribute(currentNumber, key, value);
 				if (result.error_code > 0) {
 					this.recordClickstreamError(result);
 				} else {
-					this.userAttributes[key] = {
+					allUserAttributes[key] = {
 						value: value,
 						set_timestamp: timestamp,
 					};
 				}
 			}
 		}
-		StorageUtil.updateUserAttributes(this.userAttributes);
-		this.recordProfileSet();
+		StorageUtil.updateUserAttributes(allUserAttributes);
+		this.recordProfileSet(allUserAttributes);
 	}
 
 	setGlobalAttributes(attributes: ClickstreamAttribute) {
@@ -221,10 +227,11 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.recordEvent(errorEvent);
 	}
 
-	recordProfileSet() {
-		const profileSetEvent = this.createEvent({
-			name: Event.PresetEvent.PROFILE_SET,
-		});
+	recordProfileSet(allUserAttributes: UserAttribute) {
+		const profileSetEvent = this.createEvent(
+			{ name: Event.PresetEvent.PROFILE_SET },
+			allUserAttributes
+		);
 		this.recordEvent(profileSetEvent);
 	}
 
