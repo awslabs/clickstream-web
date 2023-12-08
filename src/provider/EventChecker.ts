@@ -62,52 +62,52 @@ export class EventChecker {
 			ATTRIBUTE_NAME_LENGTH_EXCEED,
 			ATTRIBUTE_VALUE_LENGTH_EXCEED,
 		} = Event.ErrorCode;
+		let error: EventError;
+		let errorMsg;
 		if (currentNumber >= MAX_NUM_OF_ATTRIBUTES) {
-			const errorMsg =
+			errorMsg =
 				`reached the max number of attributes limit ${MAX_NUM_OF_ATTRIBUTES}. ` +
 				`and the attribute: ${key} will not be recorded`;
-			logger.error(errorMsg);
 			const errorString = `attribute name: ${key}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: ATTRIBUTE_SIZE_EXCEED,
 			};
-		}
-		if (key.length > MAX_LENGTH_OF_NAME) {
-			const errorMsg =
+		} else if (key.length > MAX_LENGTH_OF_NAME) {
+			errorMsg =
 				`attribute : ${key}, reached the max length of attributes name ` +
 				`limit(${MAX_LENGTH_OF_NAME}). current length is: (${key.length}) ` +
 				`and the attribute will not be recorded`;
-			logger.error(errorMsg);
 			const errorString = `attribute name length is: (${key.length}) name is: ${key}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: ATTRIBUTE_NAME_LENGTH_EXCEED,
 			};
-		}
-		if (!EventChecker.isValidName(key)) {
-			const errorMsg =
+		} else if (!EventChecker.isValidName(key)) {
+			errorMsg =
 				`attribute : ${key}, was not valid, attribute name can only ` +
 				`contains uppercase and lowercase letters, underscores, number, and is not ` +
 				`start with a number, so the attribute will not be recorded`;
-			logger.error(errorMsg);
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(key),
 				error_code: ATTRIBUTE_NAME_INVALID,
 			};
-		}
-		const valueLength = String(value).length;
-		if (valueLength > MAX_LENGTH_OF_VALUE) {
-			const errorMsg =
+		} else if (String(value).length > MAX_LENGTH_OF_VALUE) {
+			errorMsg =
 				`attribute : ${key}, reached the max length of attributes value limit ` +
-				`(${MAX_LENGTH_OF_VALUE}). current length is: (${valueLength}). ` +
+				`(${MAX_LENGTH_OF_VALUE}). current length is: (${
+					String(value).length
+				}). ` +
 				`and the attribute will not be recorded, attribute value: ${value}`;
-			logger.error(errorMsg);
 			const errorString = `attribute name: ${key}, attribute value: ${value}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: ATTRIBUTE_VALUE_LENGTH_EXCEED,
 			};
+		}
+		if (error) {
+			logger.warn(errorMsg);
+			return error;
 		}
 		return {
 			error_code: NO_ERROR,
@@ -135,52 +135,52 @@ export class EventChecker {
 			USER_ATTRIBUTE_NAME_INVALID,
 			USER_ATTRIBUTE_VALUE_LENGTH_EXCEED,
 		} = Event.ErrorCode;
+		let error: EventError;
+		let errorMsg;
 		if (currentNumber >= MAX_NUM_OF_USER_ATTRIBUTES) {
-			const errorMsg =
+			errorMsg =
 				`reached the max number of user attributes limit (${MAX_NUM_OF_USER_ATTRIBUTES}). ` +
 				`and the user attribute: ${key} will not be recorded`;
-			logger.error(errorMsg);
 			const errorString = `attribute name:${key}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: USER_ATTRIBUTE_SIZE_EXCEED,
 			};
-		}
-		if (key.length > MAX_LENGTH_OF_NAME) {
-			const errorMsg =
+		} else if (key.length > MAX_LENGTH_OF_NAME) {
+			errorMsg =
 				`user attribute : ${key}, reached the max length of attributes name limit ` +
 				`(${MAX_LENGTH_OF_NAME}). current length is: (${key.length}) ` +
 				`and the attribute will not be recorded`;
-			logger.error(errorMsg);
 			const errorString = `user attribute name length is: (${key.length}) name is: ${key}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: USER_ATTRIBUTE_NAME_LENGTH_EXCEED,
 			};
-		}
-		if (!EventChecker.isValidName(key)) {
-			const errorMsg =
+		} else if (!EventChecker.isValidName(key)) {
+			errorMsg =
 				`user attribute : ${key}, was not valid, user attribute name can only ` +
 				`contains uppercase and lowercase letters, underscores, number, and is not ` +
 				`start with a number. so the attribute will not be recorded`;
-			logger.error(errorMsg);
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(key),
 				error_code: USER_ATTRIBUTE_NAME_INVALID,
 			};
-		}
-		const valueLength = String(value).length;
-		if (valueLength > MAX_LENGTH_OF_USER_VALUE) {
-			const errorMsg =
+		} else if (String(value).length > MAX_LENGTH_OF_USER_VALUE) {
+			errorMsg =
 				`user attribute : ${key}, reached the max length of attributes value limit ` +
-				`(${MAX_LENGTH_OF_USER_VALUE}). current length is: (${valueLength}). ` +
+				`(${MAX_LENGTH_OF_USER_VALUE}). current length is: (${
+					String(value).length
+				}). ` +
 				`and the attribute will not be recorded, attribute value: ${value}`;
-			logger.error(errorMsg);
 			const errorString = `attribute name: ${key}, attribute value: ${value}`;
-			return {
+			error = {
 				error_message: EventChecker.getLimitString(errorString),
 				error_code: USER_ATTRIBUTE_VALUE_LENGTH_EXCEED,
 			};
+		}
+		if (error) {
+			logger.warn(errorMsg);
+			return error;
 		}
 		return {
 			error_code: NO_ERROR,
@@ -210,7 +210,7 @@ export class EventChecker {
 			const errorMsg =
 				`reached the max number of items limit ${MAX_NUM_OF_ITEMS}. ` +
 				`and the item: ${itemKey} will not be recorded`;
-			logger.error(errorMsg);
+			logger.warn(errorMsg);
 			const errorString = `item: ${itemKey}`;
 			return {
 				error_message: EventChecker.getLimitString(errorString),
@@ -218,37 +218,35 @@ export class EventChecker {
 			};
 		}
 		let customKeyNumber = 0;
+		let errorMsg;
+		let error: EventError;
 		for (const [key, value] of Object.entries(item)) {
 			const valueStr = value.toString();
-			let error: EventError;
 			if (!EventChecker.itemKeySet.has(key)) {
 				customKeyNumber += 1;
 				if (customKeyNumber > MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE) {
-					const errorMsg =
+					errorMsg =
 						`reached the max number of custom item attributes limit (${MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE}` +
 						`). and the item: ${itemKey} will not be recorded`;
-					logger.error(errorMsg);
 					const errorString = `item attribute key: ${key}`;
 					error = {
 						error_message: EventChecker.getLimitString(errorString),
 						error_code: ITEM_CUSTOM_ATTRIBUTE_SIZE_EXCEED,
 					};
 				} else if (key.length > Event.Limit.MAX_LENGTH_OF_NAME) {
-					const errorMsg =
+					errorMsg =
 						`item attribute key: ${key} , reached the max length of item attributes key limit(` +
 						`${MAX_LENGTH_OF_NAME}). current length is:(${key.length}) and the item: ${itemKey} will not be recorded`;
-					logger.error(errorMsg);
 					const errorString = 'item attribute key: ' + key;
 					error = {
 						error_message: EventChecker.getLimitString(errorString),
 						error_code: ITEM_CUSTOM_ATTRIBUTE_KEY_LENGTH_EXCEED,
 					};
 				} else if (!EventChecker.isValidName(key)) {
-					const errorMsg =
+					errorMsg =
 						`item attribute key: ${key}, was not valid, item attribute key can only contains` +
 						' uppercase and lowercase letters, underscores, number, and is not start with a number.' +
 						` so the item: ${itemKey} will not be recorded`;
-					logger.error(errorMsg);
 					error = {
 						error_message: EventChecker.getLimitString(key),
 						error_code: ITEM_CUSTOM_ATTRIBUTE_KEY_INVALID,
@@ -256,11 +254,10 @@ export class EventChecker {
 				}
 			}
 			if (!error && valueStr.length > MAX_LENGTH_OF_ITEM_VALUE) {
-				const errorMsg =
+				errorMsg =
 					`item attribute : ${key}, reached the max length of item attribute value limit ` +
 					`(${MAX_LENGTH_OF_ITEM_VALUE}). current length is: (${valueStr.length}). ` +
 					`and the item: ${itemKey} will not be recorded`;
-				logger.error(errorMsg);
 				const errorString = `item attribute name: ${key}, item attribute value: ${valueStr}`;
 				error = {
 					error_message: EventChecker.getLimitString(errorString),
@@ -268,6 +265,7 @@ export class EventChecker {
 				};
 			}
 			if (error) {
+				logger.warn(errorMsg);
 				return error;
 			}
 		}
