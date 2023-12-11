@@ -19,7 +19,8 @@
     "lint": "npx eslint src",
     "test": "npm run prebuild && npx jest -w 1 --coverage",
     "clean": "rimraf lib-esm lib dist",
-    "pack": "npm run build && npm pack"
+    "pack": "npm run build && npm pack",
+    "publish": "npm run pack && npm publish"
   },
   "repository": {
     "type": "git",

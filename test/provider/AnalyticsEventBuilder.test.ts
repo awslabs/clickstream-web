@@ -178,12 +178,105 @@ describe('AnalyticsEventBuilder test', () => {
 			items,
 			clickstreamAttribute
 		);
-		expect(resultItems.length).toBe(1);
+		expect(resultItems.length).toBe(0);
 		expect(
 			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
 		).toBeTruthy();
 		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
 			Event.ErrorCode.ITEM_VALUE_LENGTH_EXCEED
+		);
+	});
+
+	test('test add custom item attribute success', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		const item: Item = {
+			id: 'item_1',
+			category: 'category',
+			customAttribute: 'customValue',
+			item_style: 'style',
+			item_type: 'type',
+		};
+		items.push(item);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(1);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeFalsy();
+	});
+
+	test('test add custom item attribute exceed the max custom item attribute limit', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		const item: Item = {
+			id: 'item_1',
+			category: 'category',
+		};
+		for (let i = 0; i < Event.Limit.MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE + 1; i++) {
+			item['custom_attr_' + i] += 'customValue_' + i;
+		}
+		items.push(item);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(0);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeTruthy();
+		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
+			Event.ErrorCode.ITEM_CUSTOM_ATTRIBUTE_SIZE_EXCEED
+		);
+	});
+
+	test('test check item key reached max length limit', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		let longKey = '';
+		for (let i = 0; i < 6; i++) {
+			longKey += 'abcdeabcde';
+		}
+		const item: Item = {
+			id: 'item_1',
+			category: 'category',
+		};
+		item[longKey] = 'testValue';
+		items.push(item);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(0);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeTruthy();
+		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
+			Event.ErrorCode.ITEM_CUSTOM_ATTRIBUTE_KEY_LENGTH_EXCEED
+		);
+	});
+
+	test('test check item key for invalid', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		const item: Item = {
+			id: 'item_1',
+			category: 'category',
+		};
+		item['1_key'] = 'testValue';
+		items.push(item);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(0);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeTruthy();
+		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
+			Event.ErrorCode.ITEM_CUSTOM_ATTRIBUTE_KEY_INVALID
 		);
 	});
 

@@ -57,20 +57,21 @@ export interface UserAttribute {
 }
 
 export interface Item {
+	id?: string;
+	name?: string;
+	location_id?: string;
 	brand?: string;
+	currency?: string;
+	price?: number;
+	quantity?: number;
+	creative_name?: string;
+	creative_slot?: string;
 	category?: string;
 	category2?: string;
 	category3?: string;
 	category4?: string;
 	category5?: string;
-	creative_name?: string;
-	creative_slot?: string;
-	id?: string;
-	location_id?: string;
-	name?: string;
-	price?: number;
-	currency?: string;
-	quantity?: number;
+	[key: string]: string | number | boolean | null;
 }
 
 export interface ClickstreamEvent {
