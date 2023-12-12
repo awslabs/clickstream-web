@@ -6,7 +6,7 @@ Clickstream Web SDK can help you easily collect and report events from browser t
 
 The SDK relies on the Amplify for JS SDK Core Library and is developed according to the Amplify AnalyticsProvider interface. In addition, we've added features that automatically collect common user events and attributes (e.g., page view, first open) to simplify data collection for users.
 
-Visit our [Documentation site](https://awslabs.github.io/clickstream-analytics-on-aws/en/sdk-manual/web/) to learn more about Clickstream Web SDK.
+Visit our [Documentation site](https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/web/) to learn more about Clickstream Web SDK.
 
 ## Integrate SDK
 
