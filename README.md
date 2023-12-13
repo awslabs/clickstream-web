@@ -105,6 +105,8 @@ It is recommended to set global attributes when initializing the SDK, global att
 
 You can add the following code to log an event with an item.
 
+**Note: Only pipelines from version 1.1+ can handle items with custom attribute.**
+
 ```typescript
 import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
 
@@ -113,6 +115,7 @@ const itemBook: Item = {
   name: 'Nature',
   category: 'book',
   price: 99,
+  book_publisher: "Nature Research",
 };
 ClickstreamAnalytics.record({
   name: 'view_item',
