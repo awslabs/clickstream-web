@@ -221,7 +221,7 @@ export class EventChecker {
 		let errorMsg;
 		let error: EventError;
 		for (const [key, value] of Object.entries(item)) {
-			const valueStr = value.toString();
+			const valueStr = String(value);
 			if (!EventChecker.itemKeySet.has(key)) {
 				customKeyNumber += 1;
 				if (customKeyNumber > MAX_NUM_OF_CUSTOM_ITEM_ATTRIBUTE) {

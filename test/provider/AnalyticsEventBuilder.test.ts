@@ -120,6 +120,17 @@ describe('AnalyticsEventBuilder test', () => {
 		);
 	});
 
+	test('test check event attribute with invalid value', () => {
+		let clickstreamAttribute: ClickstreamAttribute = {};
+		clickstreamAttribute['testUndefinedKey'] = undefined;
+		clickstreamAttribute['testNullKey'] = null;
+		clickstreamAttribute =
+			AnalyticsEventBuilder.getEventAttributesWithCheck(clickstreamAttribute);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeFalsy();
+	});
+
 	test('test check event attribute reached max attribute value length', () => {
 		let clickstreamAttribute: ClickstreamAttribute = {};
 		let longValue = '';
@@ -278,6 +289,25 @@ describe('AnalyticsEventBuilder test', () => {
 		expect(clickstreamAttribute[Event.ReservedAttribute.ERROR_CODE]).toBe(
 			Event.ErrorCode.ITEM_CUSTOM_ATTRIBUTE_KEY_INVALID
 		);
+	});
+
+	test('test check item value for undefined or null', () => {
+		const clickstreamAttribute: ClickstreamAttribute = {};
+		const items: Item[] = [];
+		const item: Item = {
+			id: 'item_1',
+			undefinedKey: undefined,
+			nullKey: null,
+		};
+		items.push(item);
+		const resultItems = AnalyticsEventBuilder.getEventItemsWithCheck(
+			items,
+			clickstreamAttribute
+		);
+		expect(resultItems.length).toBe(1);
+		expect(
+			Event.ReservedAttribute.ERROR_CODE in clickstreamAttribute
+		).toBeFalsy();
 	});
 
 	test('test check event attributes will not affect global attributes', () => {
