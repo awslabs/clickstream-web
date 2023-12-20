@@ -156,6 +156,7 @@ ClickstreamAnalytics.init({
    isTrackClickEvents: true,
    isTrackSearchEvents: true,
    isTrackScrollEvents: true,
+   isTrackPageLoadEvents: true,
    pageType: PageType.SPA,
    isLogEvents: false,
    authCookie: "your auth cookie",
@@ -170,13 +171,14 @@ Here is an explanation of each property:
 - **appId (Required)**: the app id of your project in control plane.
 - **endpoint (Required)**: the endpoint path you will upload the event to AWS server.
 - **sendMode**: EventMode.Immediate, EventMode.Batch, default is Immediate mode.
-- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
+- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
 - **isTrackPageViewEvents**: whether auto record page view events in browser, default is `true`
 - **isTrackUserEngagementEvents**: whether auto record user engagement events in browser, default is `true`
 - **isTrackClickEvents**: whether auto record link click events in browser, default is `true`
 - **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
 - **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
-- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`.
+- **isTrackPageLoadEvents**: whether auto record page load performance events in browser, default is `false`
+- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`
 - **isLogEvents**: whether to print out event json for debugging, default is false.
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
 - **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
@@ -197,6 +199,7 @@ ClickstreamAnalytics.updateConfigure({
   isTrackClickEvents: false,
   isTrackScrollEvents: false,
   isTrackSearchEvents: false,
+  isTrackPageLoadEvents: false,
 });
 ```
 
