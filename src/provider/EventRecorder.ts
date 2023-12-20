@@ -35,10 +35,7 @@ export class EventRecorder {
 	record(event: AnalyticsEvent, isImmediate = false) {
 		if (this.context.configuration.isLogEvents) {
 			logger.level = LOG_TYPE.DEBUG;
-			logger.debug(
-				`Logged event ${event.event_type}, event attributes:\n
-				${JSON.stringify(event)}`
-			);
+			logger.debug(`Logged event ${event.event_type}\n`, event);
 		}
 		const currentMode = this.context.configuration.sendMode;
 		if (currentMode === SendMode.Immediate || isImmediate) {

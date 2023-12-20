@@ -14,9 +14,11 @@ import { ClickstreamAnalytics } from '../../src';
 import { NetRequest } from '../../src/network/NetRequest';
 import { Event } from '../../src/provider';
 import { StorageUtil } from '../../src/util/StorageUtil';
+import { setUpBrowserPerformance } from '../browser/BrowserUtil';
 
 describe('ImmediateModeCache test', () => {
 	beforeEach(() => {
+		setUpBrowserPerformance();
 		const mockSendRequestFail = jest.fn().mockResolvedValue(false);
 		jest
 			.spyOn(NetRequest, 'sendRequest')

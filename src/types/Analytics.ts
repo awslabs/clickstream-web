@@ -31,6 +31,7 @@ export interface Configuration {
 	isTrackClickEvents?: boolean;
 	isTrackScrollEvents?: boolean;
 	isTrackSearchEvents?: boolean;
+	isTrackPageLoadEvents?: boolean;
 }
 
 export enum SendMode {

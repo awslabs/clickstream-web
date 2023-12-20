@@ -13,11 +13,13 @@
 import { SendMode } from '../../src';
 import { NetRequest } from '../../src/network/NetRequest';
 import { ClickstreamProvider } from '../../src/provider';
+import { setUpBrowserPerformance } from '../browser/BrowserUtil';
 
 describe('ClickstreamProvider timer test', () => {
 	let provider: ClickstreamProvider;
 	beforeEach(() => {
 		localStorage.clear();
+		setUpBrowserPerformance();
 		provider = new ClickstreamProvider();
 		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);

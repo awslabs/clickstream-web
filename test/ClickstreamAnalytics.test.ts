@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { setUpBrowserPerformance } from "./browser/BrowserUtil";
 import { ClickstreamAnalytics, Item, SendMode } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { Event } from '../src/provider';
@@ -22,6 +23,7 @@ describe('ClickstreamAnalytics test', () => {
 		jest
 			.spyOn(NetRequest, 'sendRequest')
 			.mockImplementation(mockSendRequestSuccess);
+		setUpBrowserPerformance();
 	});
 
 	afterEach(() => {

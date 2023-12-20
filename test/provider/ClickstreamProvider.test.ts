@@ -23,6 +23,7 @@ import {
 	SendMode,
 } from '../../src/types';
 import { StorageUtil } from '../../src/util/StorageUtil';
+import { setUpBrowserPerformance } from '../browser/BrowserUtil';
 
 describe('ClickstreamProvider test', () => {
 	let provider: ClickstreamProvider;
@@ -32,6 +33,7 @@ describe('ClickstreamProvider test', () => {
 
 	beforeEach(async () => {
 		localStorage.clear();
+		setUpBrowserPerformance();
 		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		provider = new ClickstreamProvider();

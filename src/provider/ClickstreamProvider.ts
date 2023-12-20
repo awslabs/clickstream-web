@@ -20,6 +20,7 @@ import { EventRecorder } from './EventRecorder';
 import { BrowserInfo } from '../browser';
 import { PageViewTracker, SessionTracker } from '../tracker';
 import { ClickTracker } from '../tracker/ClickTracker';
+import { PageLoadTracker } from '../tracker/PageLoadTracker';
 import { ScrollTracker } from '../tracker/ScrollTracker';
 import {
 	AnalyticsEvent,
@@ -47,6 +48,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 	pageViewTracker: PageViewTracker;
 	clickTracker: ClickTracker;
 	scrollTracker: ScrollTracker;
+	pageLoadTracker: PageLoadTracker;
 
 	constructor() {
 		this.configuration = {
@@ -59,6 +61,7 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			isTrackClickEvents: true,
 			isTrackSearchEvents: true,
 			isTrackScrollEvents: true,
+			isTrackPageLoadEvents: false,
 			pageType: PageType.SPA,
 			isLogEvents: false,
 			sessionTimeoutDuration: 1800000,
@@ -86,10 +89,12 @@ export class ClickstreamProvider implements AnalyticsProvider {
 		this.pageViewTracker = new PageViewTracker(this, this.context);
 		this.clickTracker = new ClickTracker(this, this.context);
 		this.scrollTracker = new ScrollTracker(this, this.context);
+		this.pageLoadTracker = new PageLoadTracker(this, this.context);
 		this.sessionTracker.setUp();
 		this.pageViewTracker.setUp();
 		this.clickTracker.setUp();
 		this.scrollTracker.setUp();
+		this.pageLoadTracker.setUp();
 		if (configuration.sendMode === SendMode.Batch) {
 			this.startTimer();
 		}
