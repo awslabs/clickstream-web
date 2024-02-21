@@ -53,6 +53,7 @@ export class SessionTracker extends BaseTracker {
 
 	handleInit() {
 		this.session = Session.getCurrentSession(this.context);
+		StorageUtil.clearPageInfo()
 		if (StorageUtil.getIsFirstOpen()) {
 			this.provider.record({
 				name: Event.PresetEvent.FIRST_OPEN,

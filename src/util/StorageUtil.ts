@@ -255,6 +255,11 @@ export class StorageUtil {
 		localStorage.setItem(StorageUtil.isFirstOpenKey, '0');
 	}
 
+	static clearPageInfo() {
+		sessionStorage.setItem(StorageUtil.previousPageUrlKey, '');
+		sessionStorage.setItem(StorageUtil.previousPageTitleKey, '');
+	}
+
 	static getPreviousPageUrl(): string {
 		return sessionStorage.getItem(StorageUtil.previousPageUrlKey) ?? '';
 	}
