@@ -203,7 +203,9 @@ ClickstreamAnalytics.updateConfigure({
   isTrackClickEvents: false,
   isTrackScrollEvents: false,
   isTrackSearchEvents: false,
-  isTrackPageLoadEvents: false,
+  isTrackPageLoadEvents: false, 
+  isTrackAppStartEvents: true,
+  isTrackAppStartEvents: true,
 });
 ```
 
