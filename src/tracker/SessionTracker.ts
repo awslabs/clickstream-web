@@ -71,6 +71,7 @@ export class SessionTracker extends BaseTracker {
 			pageViewTracker.setIsEntrances();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
 		}
+		if (!this.provider.configuration.isTrackAppStartEvents) return;
 		if (isFirstTime && this.isFromCurrentHost()) return;
 		if (isFirstTime && BrowserInfo.isFromReload()) return;
 		this.provider.record({
@@ -99,6 +100,7 @@ export class SessionTracker extends BaseTracker {
 	}
 
 	recordAppEnd(isImmediate: boolean) {
+		if (!this.provider.configuration.isTrackAppEndEvents) return;
 		this.provider.record({
 			name: Event.PresetEvent.APP_END,
 			isImmediate: isImmediate,
