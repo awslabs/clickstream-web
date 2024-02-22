@@ -11,15 +11,12 @@
  *  and limitations under the License.
  */
 
-import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
 import { BrowserInfo } from '../browser';
 import { ClickstreamContext, ClickstreamProvider, Event } from '../provider';
 import { PageType } from '../types';
 import { MethodEmbed } from '../util/MethodEmbed';
 import { StorageUtil } from '../util/StorageUtil';
-
-const logger = new Logger('PageViewTracker');
 
 export class PageViewTracker extends BaseTracker {
 	provider: ClickstreamProvider;
@@ -36,7 +33,9 @@ export class PageViewTracker extends BaseTracker {
 		if (this.context.configuration.pageType === PageType.SPA) {
 			this.trackPageViewForSPA();
 		} else {
-			this.onPageChange();
+			if (!BrowserInfo.isFromReload()) {
+				this.onPageChange();
+			}
 		}
 	}
 
@@ -44,14 +43,12 @@ export class PageViewTracker extends BaseTracker {
 		MethodEmbed.add(history, 'pushState', this.onPageChange);
 		MethodEmbed.add(history, 'replaceState', this.onPageChange);
 		window.addEventListener('popstate', this.onPageChange);
-		this.onPageChange();
+		if (!BrowserInfo.isFromReload()) {
+			this.onPageChange();
+		}
 	}
 
 	onPageChange() {
-		if (!window.sessionStorage) {
-			logger.warn('unsupported web environment for sessionStorage');
-			return;
-		}
 		if (this.context.configuration.isTrackPageViewEvents) {
 			const previousPageUrl = StorageUtil.getPreviousPageUrl();
 			const previousPageTitle = StorageUtil.getPreviousPageTitle();

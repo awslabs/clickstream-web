@@ -10,6 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { setPerformanceEntries } from './BrowserUtil';
+import { MockObserver } from './MockObserver';
 import { BrowserInfo } from '../../src/browser';
 
 describe('BrowserInfo test', () => {
@@ -92,5 +94,21 @@ describe('BrowserInfo test', () => {
 	test('test browser type', () => {
 		const isFirefox = BrowserInfo.isFirefox();
 		expect(isFirefox).toBeFalsy();
+	});
+
+	test('test unsupported web environment for performance', () => {
+		expect(BrowserInfo.isFromReload()).toBeFalsy();
+	});
+
+	test('test web page from reload', () => {
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries();
+		expect(BrowserInfo.isFromReload()).toBeFalsy();
+	});
+
+	test('test web page not from reload', () => {
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries(true, true);
+		expect(BrowserInfo.isFromReload()).toBeTruthy();
 	});
 });

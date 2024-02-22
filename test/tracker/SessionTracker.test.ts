@@ -29,6 +29,8 @@ import {
 } from '../../src/provider';
 import { PageViewTracker, SessionTracker } from '../../src/tracker';
 import { StorageUtil } from '../../src/util/StorageUtil';
+import { setPerformanceEntries } from '../browser/BrowserUtil';
+import { MockObserver } from '../browser/MockObserver';
 
 describe('SessionTracker test', () => {
 	let provider: ClickstreamProvider;
@@ -57,6 +59,8 @@ describe('SessionTracker test', () => {
 		provider.sessionTracker = sessionTracker;
 		provider.eventRecorder = eventRecorder;
 		provider.pageViewTracker = pageViewTracker;
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries();
 	});
 
 	afterEach(() => {
@@ -122,6 +126,31 @@ describe('SessionTracker test', () => {
 			pageType: PageType.multiPageApp,
 		});
 		context.browserInfo.latestReferrerHost = 'localhost';
+		sessionTracker.setUp();
+		expect(recordMethodMock).not.toBeCalledWith({
+			name: Event.PresetEvent.APP_START,
+			attributes: {
+				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
+			},
+		});
+	});
+
+	test('test spa mode not record app start when come from the same host name', () => {
+		Object.assign(provider.configuration, {
+			pageType: PageType.SPA,
+		});
+		context.browserInfo.latestReferrerHost = 'localhost';
+		sessionTracker.setUp();
+		expect(recordMethodMock).not.toBeCalledWith({
+			name: Event.PresetEvent.APP_START,
+			attributes: {
+				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
+			},
+		});
+	});
+
+	test('test not record app start when browser is from reload', () => {
+		setPerformanceEntries(true, true);
 		sessionTracker.setUp();
 		expect(recordMethodMock).not.toBeCalledWith({
 			name: Event.PresetEvent.APP_START,
