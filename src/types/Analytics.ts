@@ -72,6 +72,7 @@ export interface Item {
 	category3?: string;
 	category4?: string;
 	category5?: string;
+
 	[key: string]: string | number | boolean | null;
 }
 

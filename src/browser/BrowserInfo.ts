@@ -78,4 +78,17 @@ export class BrowserInfo {
 		if (!BrowserInfo.isBrowser()) return '';
 		return window.document.title ?? '';
 	}
+
+	static isFromReload() {
+		if (performance && performance.getEntriesByType) {
+			const performanceEntries = performance.getEntriesByType('navigation');
+			if (performanceEntries && performanceEntries.length > 0) {
+				const type = (performanceEntries[0] as any)['type'];
+				return type === 'reload';
+			}
+		} else {
+			logger.warn('unsupported web environment for performance');
+		}
+		return false;
+	}
 }

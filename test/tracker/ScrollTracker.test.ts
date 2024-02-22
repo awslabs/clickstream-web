@@ -28,7 +28,6 @@ describe('ScrollTracker test', () => {
 
 	beforeEach(() => {
 		localStorage.clear();
-		sessionStorage.clear();
 		provider = new ClickstreamProvider();
 
 		Object.assign(provider.configuration, {

@@ -256,24 +256,24 @@ export class StorageUtil {
 	}
 
 	static clearPageInfo() {
-		sessionStorage.setItem(StorageUtil.previousPageUrlKey, '');
-		sessionStorage.setItem(StorageUtil.previousPageTitleKey, '');
+		localStorage.setItem(StorageUtil.previousPageUrlKey, '');
+		localStorage.setItem(StorageUtil.previousPageTitleKey, '');
 	}
 
 	static getPreviousPageUrl(): string {
-		return sessionStorage.getItem(StorageUtil.previousPageUrlKey) ?? '';
+		return localStorage.getItem(StorageUtil.previousPageUrlKey) ?? '';
 	}
 
 	static savePreviousPageUrl(url: string) {
-		sessionStorage.setItem(StorageUtil.previousPageUrlKey, url);
+		localStorage.setItem(StorageUtil.previousPageUrlKey, url);
 	}
 
 	static getPreviousPageTitle(): string {
-		return sessionStorage.getItem(StorageUtil.previousPageTitleKey) ?? '';
+		return localStorage.getItem(StorageUtil.previousPageTitleKey) ?? '';
 	}
 
 	static savePreviousPageTitle(title: string) {
-		sessionStorage.setItem(StorageUtil.previousPageTitleKey, title);
+		localStorage.setItem(StorageUtil.previousPageTitleKey, title);
 	}
 
 	static getPreviousPageStartTime(): number {

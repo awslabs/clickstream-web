@@ -15,7 +15,6 @@ import { BaseTracker } from './BaseTracker';
 import { Session } from './Session';
 import { BrowserInfo } from '../browser';
 import { Event } from '../provider';
-import { PageType } from '../types';
 import { StorageUtil } from '../util/StorageUtil';
 
 const logger = new Logger('SessionTracker');
@@ -72,8 +71,8 @@ export class SessionTracker extends BaseTracker {
 			pageViewTracker.setIsEntrances();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
 		}
-		if (isFirstTime && this.isMultiPageApp() && this.isFromCurrentHost())
-			return;
+		if (isFirstTime && this.isFromCurrentHost()) return;
+		if (isFirstTime && BrowserInfo.isFromReload()) return;
 		this.provider.record({
 			name: Event.PresetEvent.APP_START,
 			attributes: {
@@ -84,10 +83,6 @@ export class SessionTracker extends BaseTracker {
 
 	isFromCurrentHost() {
 		return window.location.host === this.context.browserInfo.latestReferrerHost;
-	}
-
-	isMultiPageApp() {
-		return this.context.configuration.pageType === PageType.multiPageApp;
 	}
 
 	onPageHide() {

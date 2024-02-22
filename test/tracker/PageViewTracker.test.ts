@@ -28,6 +28,8 @@ import {
 import { PageViewTracker, Session, SessionTracker } from '../../src/tracker';
 import { MethodEmbed } from '../../src/util/MethodEmbed';
 import { StorageUtil } from '../../src/util/StorageUtil';
+import { setPerformanceEntries } from "../browser/BrowserUtil";
+import { MockObserver } from "../browser/MockObserver";
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
@@ -45,7 +47,6 @@ describe('PageViewTracker test', () => {
 
 	beforeEach(() => {
 		localStorage.clear();
-		sessionStorage.clear();
 		provider = new ClickstreamProvider();
 
 		Object.assign(provider.configuration, {
@@ -74,6 +75,8 @@ describe('PageViewTracker test', () => {
 			writable: true,
 			value: 'index',
 		});
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries()
 	});
 
 	afterEach(() => {
@@ -147,20 +150,6 @@ describe('PageViewTracker test', () => {
 		pageViewTracker.setUp();
 		expect(trackPageViewForSPAMock).toBeCalled();
 		expect(userEngagementMock).not.toBeCalled();
-	});
-
-	test('test environment is not supported for sessionStorage', () => {
-		const sessionStorage = window.sessionStorage;
-		Object.defineProperty(window, 'sessionStorage', {
-			writable: true,
-			value: undefined,
-		});
-		pageViewTracker.setUp();
-		expect(recordEventMethodMock).not.toBeCalled();
-		Object.defineProperty(window, 'sessionStorage', {
-			writable: true,
-			value: sessionStorage,
-		});
 	});
 
 	test('test two page view in SPA mode', async () => {
