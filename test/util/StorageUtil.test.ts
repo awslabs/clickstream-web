@@ -179,6 +179,14 @@ describe('StorageUtil test', () => {
 			});
 	});
 
+	test('test clear page information', () => {
+		StorageUtil.savePreviousPageTitle('pageA');
+		StorageUtil.savePreviousPageUrl('https://example.com/pageA');
+		StorageUtil.clearPageInfo();
+		expect(StorageUtil.getPreviousPageTitle()).toBe('');
+		expect(StorageUtil.getPreviousPageUrl()).toBe('');
+	});
+
 	async function saveEvent() {
 		const event = await getTestEvent();
 		return StorageUtil.saveEvent(event);

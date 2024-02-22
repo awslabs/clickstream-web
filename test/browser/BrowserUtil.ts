@@ -17,14 +17,18 @@ export function setUpBrowserPerformance() {
 	setPerformanceEntries(false);
 }
 
-export function setPerformanceEntries(isLoaded = true) {
+export function setPerformanceEntries(isLoaded = true, isReload = false) {
 	Object.defineProperty(window, 'performance', {
 		writable: true,
 		value: {
 			getEntriesByType: jest
 				.fn()
 				.mockImplementation(
-					isLoaded ? getEntriesByType : getEntriesByTypeUnload
+					isLoaded
+						? isReload
+							? getEntriesByTypeForReload
+							: getEntriesByType
+						: getEntriesByTypeUnload
 				),
 		},
 	});
@@ -78,10 +82,18 @@ function getEntriesByType(): PerformanceEntryList {
 			domComplete: 3440.4000000059605,
 			loadEventStart: 3444.2000000178814,
 			loadEventEnd: 3444.4000000059605,
-			type: 'reload',
+			type: 'navigate',
 			redirectCount: 0,
 			activationStart: 0,
 			criticalCHRestart: 0,
+		},
+	]);
+}
+
+function getEntriesByTypeForReload(): PerformanceEntryList {
+	return <PerformanceEntry[]>(<unknown>[
+		{
+			type: 'reload',
 		},
 	]);
 }

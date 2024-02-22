@@ -28,7 +28,6 @@ describe('ClickTracker test', () => {
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		sessionStorage.clear();
 		localStorage.clear();
 		provider = new ClickstreamProvider();
 		Object.assign(provider.configuration, {
