@@ -157,6 +157,8 @@ ClickstreamAnalytics.init({
    isTrackSearchEvents: true,
    isTrackScrollEvents: true,
    isTrackPageLoadEvents: true,
+   isTrackAppStartEvents: true,
+   isTrackAppEndEvents: true,
    pageType: PageType.SPA,
    isLogEvents: false,
    authCookie: "your auth cookie",
@@ -178,6 +180,8 @@ Here is an explanation of each property:
 - **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
 - **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
 - **isTrackPageLoadEvents**: whether auto record page load performance events in browser, default is `false`
+- **isTrackAppStartEvents**: whether auto record app start events in browser when the page becomes visible, default is `false`
+- **isTrackAppEndEvents**: whether auto record app end events in browser when the page becomes invisible, default is `false`
 - **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`
 - **isLogEvents**: whether to print out event json for debugging, default is false.
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
