@@ -44,7 +44,7 @@ describe('ImmediateModeCache test', () => {
 		const failedEvents = JSON.parse(
 			StorageUtil.getFailedEvents() + Event.Constants.SUFFIX
 		);
-		expect(failedEvents.length).toBeGreaterThan(4);
+		expect(failedEvents.length).toBeGreaterThan(3);
 		const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
 		jest
 			.spyOn(NetRequest, 'sendRequest')

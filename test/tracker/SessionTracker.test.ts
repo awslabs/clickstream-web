@@ -67,6 +67,8 @@ describe('SessionTracker test', () => {
 	test('test initial state for setUp', () => {
 		const pageAppearMock = jest.spyOn(sessionTracker, 'onPageAppear');
 		sessionTracker.setUp();
+		expect(provider.configuration.isTrackAppStartEvents).toBe(false);
+		expect(provider.configuration.isTrackAppEndEvents).toBe(false);
 		expect(StorageUtil.getIsFirstOpen()).toBe(false);
 
 		expect(recordMethodMock).toBeCalledWith({
@@ -76,7 +78,7 @@ describe('SessionTracker test', () => {
 		expect(recordMethodMock).toBeCalledWith({
 			name: Event.PresetEvent.SESSION_START,
 		});
-		expect(recordMethodMock).toBeCalledWith({
+		expect(recordMethodMock).not.toBeCalledWith({
 			name: Event.PresetEvent.APP_START,
 			attributes: {
 				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
@@ -89,7 +91,19 @@ describe('SessionTracker test', () => {
 		expect(session.isNewSession()).toBeTruthy();
 	});
 
+	test('test enable app start', () => {
+		provider.configuration.isTrackAppStartEvents = true;
+		sessionTracker.setUp();
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.APP_START,
+			attributes: {
+				[Event.ReservedAttribute.IS_FIRST_TIME]: true,
+			},
+		});
+	});
+
 	test('test multi page mode record app start when setUp', () => {
+		provider.configuration.isTrackAppStartEvents = true;
 		Object.assign(provider.configuration, {
 			pageType: PageType.multiPageApp,
 		});
@@ -103,6 +117,7 @@ describe('SessionTracker test', () => {
 	});
 
 	test('test multi page mode not record app start when come from the same host name', () => {
+		provider.configuration.isTrackAppStartEvents = true;
 		Object.assign(provider.configuration, {
 			pageType: PageType.multiPageApp,
 		});
@@ -191,6 +206,7 @@ describe('SessionTracker test', () => {
 	});
 
 	test('test send event in batch mode when close window', async () => {
+		provider.configuration.isTrackAppEndEvents = true;
 		const sendEventBackgroundMock = jest.spyOn(
 			eventRecorder,
 			'sendEventsInBackground'
@@ -200,7 +216,6 @@ describe('SessionTracker test', () => {
 			sessionTracker,
 			'recordUserEngagement'
 		);
-		const recordAppEndMock = jest.spyOn(sessionTracker, 'recordAppEnd');
 		sessionTracker.setUp();
 		provider.record({ name: 'testEvent' });
 		await sleep(100);
@@ -209,7 +224,10 @@ describe('SessionTracker test', () => {
 		expect(sendEventBackgroundMock).toBeCalledWith(true);
 		expect(clearAllEventsMock).toBeCalled();
 		expect(recordUserEngagementMock).toBeCalledWith(true);
-		expect(recordAppEndMock).toBeCalledWith(true);
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.APP_END,
+			isImmediate: true,
+		});
 	});
 
 	test('test send event in batch mode when hide window in firefox', async () => {
@@ -238,6 +256,7 @@ describe('SessionTracker test', () => {
 	});
 
 	test('test send event in batch mode when close window in firefox', async () => {
+		provider.configuration.isTrackAppEndEvents = true;
 		const sendEventBackgroundMock = jest.spyOn(
 			eventRecorder,
 			'sendEventsInBackground'
@@ -246,7 +265,6 @@ describe('SessionTracker test', () => {
 			sessionTracker,
 			'recordUserEngagement'
 		);
-		const recordAppEndMock = jest.spyOn(sessionTracker, 'recordAppEnd');
 		Object.defineProperty(navigator, 'userAgent', {
 			writable: true,
 			value: 'firefox',
@@ -258,7 +276,10 @@ describe('SessionTracker test', () => {
 		hidePage();
 		expect(sendEventBackgroundMock).not.toBeCalled();
 		expect(recordUserEngagementMock).toBeCalledWith(false);
-		expect(recordAppEndMock).toBeCalledWith(false);
+		expect(recordMethodMock).not.toBeCalledWith({
+			name: Event.PresetEvent.APP_END,
+			isImmediate: true,
+		});
 	});
 
 	test('test send failed event in immediate mode when hide page', async () => {

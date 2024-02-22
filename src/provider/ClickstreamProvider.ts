@@ -62,6 +62,8 @@ export class ClickstreamProvider implements AnalyticsProvider {
 			isTrackSearchEvents: true,
 			isTrackScrollEvents: true,
 			isTrackPageLoadEvents: false,
+			isTrackAppStartEvents: false,
+			isTrackAppEndEvents: false,
 			pageType: PageType.SPA,
 			isLogEvents: false,
 			sessionTimeoutDuration: 1800000,
