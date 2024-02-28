@@ -25,17 +25,20 @@ export class PageViewTracker extends BaseTracker {
 	searchKeywords = Event.Constants.KEYWORDS;
 	lastEngageTime = 0;
 	lastScreenStartTimestamp = 0;
+	isFirstTime = true;
 
 	init() {
 		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
 		Object.assign(this.searchKeywords, configuredSearchKeywords);
 		this.onPageChange = this.onPageChange.bind(this);
-		if (this.context.configuration.pageType === PageType.SPA) {
-			this.trackPageViewForSPA();
-		} else {
+		if (this.isMultiPageApp()) {
 			if (!BrowserInfo.isFromReload()) {
 				this.onPageChange();
+			} else {
+				this.isFirstTime = false;
 			}
+		} else {
+			this.trackPageViewForSPA();
 		}
 	}
 
@@ -45,6 +48,8 @@ export class PageViewTracker extends BaseTracker {
 		window.addEventListener('popstate', this.onPageChange);
 		if (!BrowserInfo.isFromReload()) {
 			this.onPageChange();
+		} else {
+			this.isFirstTime = false;
 		}
 	}
 
@@ -55,11 +60,17 @@ export class PageViewTracker extends BaseTracker {
 			const currentPageUrl = BrowserInfo.getCurrentPageUrl();
 			const currentPageTitle = BrowserInfo.getCurrentPageTitle();
 			if (
+				this.isFirstTime ||
+				this.isMultiPageApp() ||
 				previousPageUrl !== currentPageUrl ||
 				previousPageTitle !== currentPageTitle
 			) {
 				this.provider.scrollTracker?.enterNewPage();
-				if (previousPageUrl !== '') {
+				if (
+					!this.isMultiPageApp() &&
+					!this.isFirstTime &&
+					previousPageUrl !== ''
+				) {
 					this.recordUserEngagement();
 				}
 				this.trackPageView(previousPageUrl, previousPageTitle);
@@ -67,6 +78,9 @@ export class PageViewTracker extends BaseTracker {
 
 				StorageUtil.savePreviousPageUrl(currentPageUrl);
 				StorageUtil.savePreviousPageTitle(currentPageTitle);
+				if (this.isFirstTime) {
+					this.isFirstTime = false;
+				}
 			}
 		}
 	}
@@ -126,6 +140,10 @@ export class PageViewTracker extends BaseTracker {
 
 	getLastEngageTime() {
 		return new Date().getTime() - this.lastScreenStartTimestamp;
+	}
+
+	isMultiPageApp() {
+		return this.context.configuration.pageType === PageType.multiPageApp;
 	}
 
 	trackSearchEvents() {

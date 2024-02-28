@@ -39,28 +39,39 @@ export class StorageUtil {
 	static readonly previousPageStartTimeKey =
 		this.prefix + 'previousPageStartTimeKey';
 	static readonly userIdMappingKey = this.prefix + 'userIdMappingKey';
+	private static deviceId = '';
+	private static userUniqueId = '';
 
 	static getDeviceId(): string {
-		let deviceId = localStorage.getItem(StorageUtil.deviceIdKey) ?? '';
-		if (deviceId === '') {
+		if (StorageUtil.deviceId !== '') {
+			return StorageUtil.deviceId;
+		}
+		let deviceId = localStorage.getItem(StorageUtil.deviceIdKey);
+		if (deviceId === null) {
 			deviceId = uuidV4();
 			localStorage.setItem(StorageUtil.deviceIdKey, deviceId);
 		}
+		StorageUtil.deviceId = deviceId;
 		return deviceId;
 	}
 
 	static setCurrentUserUniqueId(userUniqueId: string) {
+		StorageUtil.userUniqueId = userUniqueId;
 		localStorage.setItem(StorageUtil.userUniqueIdKey, userUniqueId);
 	}
 
 	static getCurrentUserUniqueId(): string {
-		let userUniqueId = localStorage.getItem(StorageUtil.userUniqueIdKey) ?? '';
-		if (userUniqueId === '') {
+		if (StorageUtil.userUniqueId !== '') {
+			return StorageUtil.userUniqueId;
+		}
+		let userUniqueId = localStorage.getItem(StorageUtil.userUniqueIdKey);
+		if (userUniqueId === null) {
 			userUniqueId = uuidV4();
 			StorageUtil.setCurrentUserUniqueId(userUniqueId);
 			localStorage.setItem(StorageUtil.userUniqueIdKey, userUniqueId);
 			StorageUtil.saveUserFirstTouchTimestamp();
 		}
+		StorageUtil.userUniqueId = userUniqueId;
 		return userUniqueId;
 	}
 
@@ -292,5 +303,41 @@ export class StorageUtil {
 			StorageUtil.previousPageStartTimeKey,
 			timestamp.toString()
 		);
+	}
+
+	static checkDeviceId() {
+		const currentDeviceId = localStorage.getItem(StorageUtil.deviceIdKey) ?? '';
+		if (StorageUtil.deviceId !== '' && currentDeviceId === '') {
+			localStorage.setItem(StorageUtil.deviceIdKey, StorageUtil.deviceId);
+		}
+	}
+
+	static checkUserUniqueId() {
+		const currentUserUniqueId =
+			localStorage.getItem(StorageUtil.userUniqueIdKey) ?? '';
+		if (StorageUtil.userUniqueId !== '' && currentUserUniqueId === '') {
+			localStorage.setItem(
+				StorageUtil.userUniqueIdKey,
+				StorageUtil.userUniqueId
+			);
+		}
+	}
+
+	static checkIsFirstOpen() {
+		if (StorageUtil.getIsFirstOpen()) {
+			StorageUtil.saveIsFirstOpenToFalse();
+		}
+	}
+
+	static checkClickstreamId() {
+		StorageUtil.checkDeviceId();
+		StorageUtil.checkUserUniqueId();
+		StorageUtil.checkIsFirstOpen();
+	}
+
+	static clearAll() {
+		localStorage.clear();
+		(StorageUtil as any).deviceid = '';
+		(StorageUtil as any).userUniqueId = '';
 	}
 }

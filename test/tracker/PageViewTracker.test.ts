@@ -28,8 +28,8 @@ import {
 import { PageViewTracker, Session, SessionTracker } from '../../src/tracker';
 import { MethodEmbed } from '../../src/util/MethodEmbed';
 import { StorageUtil } from '../../src/util/StorageUtil';
-import { setPerformanceEntries } from "../browser/BrowserUtil";
-import { MockObserver } from "../browser/MockObserver";
+import { setPerformanceEntries } from '../browser/BrowserUtil';
+import { MockObserver } from '../browser/MockObserver';
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
@@ -46,7 +46,7 @@ describe('PageViewTracker test', () => {
 	let dom: any;
 
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll();
 		provider = new ClickstreamProvider();
 
 		Object.assign(provider.configuration, {
@@ -76,7 +76,7 @@ describe('PageViewTracker test', () => {
 			value: 'index',
 		});
 		(global as any).PerformanceObserver = MockObserver;
-		setPerformanceEntries()
+		setPerformanceEntries();
 	});
 
 	afterEach(() => {
@@ -93,6 +93,33 @@ describe('PageViewTracker test', () => {
 		const pageAppearMock = jest.spyOn(pageViewTracker, 'onPageChange');
 		pageViewTracker.setUp();
 		expect(pageAppearMock).toBeCalled();
+	});
+
+	test('test multiPageApp do not record page view when browser reload', () => {
+		const pageAppearMock = jest.spyOn(pageViewTracker, 'onPageChange');
+		pageViewTracker.setUp();
+		expect(pageAppearMock).toBeCalled();
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries(true, true);
+		pageViewTracker.setUp();
+		expect(pageAppearMock).toBeCalledTimes(1);
+	});
+
+	test('test isFirstTime to be false when browser reload in SPA mode', () => {
+		(global as any).PerformanceObserver = MockObserver;
+		StorageUtil.savePreviousPageUrl('https://example.com/pageA');
+		setPerformanceEntries(true, true);
+		pageViewTracker.setUp();
+		expect(pageViewTracker.isFirstTime).toBeFalsy();
+	});
+
+	test('test isFirstTime to be false when browser reload in multiPageApp mode', () => {
+		(context.configuration as any).pageType = PageType.multiPageApp;
+		StorageUtil.savePreviousPageUrl('https://example.com/pageA');
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries(true, true);
+		pageViewTracker.setUp();
+		expect(pageViewTracker.isFirstTime).toBeFalsy();
 	});
 
 	test('test environment is not supported', () => {
@@ -117,6 +144,22 @@ describe('PageViewTracker test', () => {
 				event_type: Event.PresetEvent.PAGE_VIEW,
 			})
 		);
+		expect(pageAppearMock).toBeCalledTimes(1);
+	});
+
+	test('reload browser will not record page view in SPA mode', async () => {
+		(context.configuration as any).pageType = PageType.SPA;
+		const pageAppearMock = jest.spyOn(pageViewTracker, 'onPageChange');
+		pageViewTracker.setUp();
+		expect(recordEventMethodMock).toBeCalledWith(
+			expect.objectContaining({
+				event_type: Event.PresetEvent.PAGE_VIEW,
+			})
+		);
+		expect(pageAppearMock).toBeCalledTimes(1);
+		(global as any).PerformanceObserver = MockObserver;
+		setPerformanceEntries(true, true);
+		pageViewTracker.setUp();
 		expect(pageAppearMock).toBeCalledTimes(1);
 	});
 

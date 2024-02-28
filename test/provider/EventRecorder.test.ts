@@ -26,7 +26,7 @@ describe('EventRecorder test', () => {
 	let eventRecorder: EventRecorder;
 	let context: ClickstreamContext;
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll()
 		context = new ClickstreamContext(new BrowserInfo(), {
 			appId: 'testApp',
 			endpoint: 'https://localhost:8080/collect',

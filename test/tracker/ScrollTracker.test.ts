@@ -19,6 +19,7 @@ import {
 } from '../../src/provider';
 import { Session, SessionTracker } from '../../src/tracker';
 import { ScrollTracker } from '../../src/tracker/ScrollTracker';
+import { StorageUtil } from "../../src/util/StorageUtil";
 
 describe('ScrollTracker test', () => {
 	let provider: ClickstreamProvider;
@@ -27,7 +28,7 @@ describe('ScrollTracker test', () => {
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll()
 		provider = new ClickstreamProvider();
 
 		Object.assign(provider.configuration, {

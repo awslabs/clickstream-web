@@ -20,6 +20,7 @@ import {
 } from '../../src/provider';
 import { Session, SessionTracker } from '../../src/tracker';
 import { ClickTracker } from '../../src/tracker/ClickTracker';
+import { StorageUtil } from "../../src/util/StorageUtil";
 
 describe('ClickTracker test', () => {
 	let provider: ClickstreamProvider;
@@ -28,7 +29,7 @@ describe('ClickTracker test', () => {
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll()
 		provider = new ClickstreamProvider();
 		Object.assign(provider.configuration, {
 			appId: 'testAppId',

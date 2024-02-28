@@ -1,4 +1,5 @@
 import { Logger } from '@aws-amplify/core';
+import { StorageUtil } from '../util/StorageUtil';
 
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -84,7 +85,7 @@ export class BrowserInfo {
 			const performanceEntries = performance.getEntriesByType('navigation');
 			if (performanceEntries && performanceEntries.length > 0) {
 				const type = (performanceEntries[0] as any)['type'];
-				return type === 'reload';
+				return type === 'reload' && StorageUtil.getPreviousPageUrl() !== '';
 			}
 		} else {
 			logger.warn('unsupported web environment for performance');
