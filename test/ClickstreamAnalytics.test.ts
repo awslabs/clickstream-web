@@ -18,7 +18,7 @@ import { StorageUtil } from '../src/util/StorageUtil';
 
 describe('ClickstreamAnalytics test', () => {
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll();
 		const mockSendRequestSuccess = jest.fn().mockResolvedValue(true);
 		jest
 			.spyOn(NetRequest, 'sendRequest')

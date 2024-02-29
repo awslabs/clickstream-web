@@ -21,6 +21,7 @@ import { Session, SessionTracker } from '../../src/tracker';
 import { PageLoadTracker } from '../../src/tracker/PageLoadTracker';
 import { setPerformanceEntries } from '../browser/BrowserUtil';
 import { MockObserver } from '../browser/MockObserver';
+import { StorageUtil } from "../../src/util/StorageUtil";
 
 describe('PageLoadTracker test', () => {
 	let provider: ClickstreamProvider;
@@ -29,7 +30,7 @@ describe('PageLoadTracker test', () => {
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll()
 		provider = new ClickstreamProvider();
 		Object.assign(provider.configuration, {
 			appId: 'testAppId',

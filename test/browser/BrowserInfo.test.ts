@@ -13,6 +13,7 @@
 import { setPerformanceEntries } from './BrowserUtil';
 import { MockObserver } from './MockObserver';
 import { BrowserInfo } from '../../src/browser';
+import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('BrowserInfo test', () => {
 	afterEach(() => {
@@ -20,6 +21,7 @@ describe('BrowserInfo test', () => {
 		jest.resetAllMocks();
 	});
 	test('test create BrowserInfo', () => {
+		StorageUtil.clearAllEvents()
 		const referrer = 'https://example.com/collect';
 		Object.defineProperty(window.document, 'referrer', {
 			writable: true,
@@ -109,6 +111,7 @@ describe('BrowserInfo test', () => {
 	test('test web page not from reload', () => {
 		(global as any).PerformanceObserver = MockObserver;
 		setPerformanceEntries(true, true);
+		StorageUtil.savePreviousPageUrl("http://localhost:8080")
 		expect(BrowserInfo.isFromReload()).toBeTruthy();
 	});
 });

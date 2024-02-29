@@ -52,7 +52,6 @@ export class SessionTracker extends BaseTracker {
 
 	handleInit() {
 		this.session = Session.getCurrentSession(this.context);
-		StorageUtil.clearPageInfo();
 		if (StorageUtil.getIsFirstOpen()) {
 			this.provider.record({
 				name: Event.PresetEvent.FIRST_OPEN,
@@ -69,7 +68,11 @@ export class SessionTracker extends BaseTracker {
 		this.session = Session.getCurrentSession(this.context);
 		if (this.session.isNewSession()) {
 			pageViewTracker.setIsEntrances();
+			StorageUtil.clearPageInfo();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
+			if (!isFirstTime) {
+				pageViewTracker.onPageChange();
+			}
 		}
 		if (!this.provider.configuration.isTrackAppStartEvents) return;
 		if (isFirstTime && this.isFromCurrentHost()) return;
@@ -89,6 +92,7 @@ export class SessionTracker extends BaseTracker {
 	onPageHide() {
 		logger.debug('page hide');
 		this.storeSession();
+		StorageUtil.checkClickstreamId();
 		const isImmediate = !(this.isWindowClosing && BrowserInfo.isFirefox());
 		this.recordUserEngagement(isImmediate);
 		this.recordAppEnd(isImmediate);

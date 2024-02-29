@@ -35,12 +35,13 @@ import { MockObserver } from '../browser/MockObserver';
 describe('SessionTracker test', () => {
 	let provider: ClickstreamProvider;
 	let sessionTracker: SessionTracker;
+	let pageViewTracker: PageViewTracker;
 	let context: ClickstreamContext;
 	let eventRecorder: EventRecorder;
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll();
 		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);
 		provider = new ClickstreamProvider();
@@ -54,7 +55,7 @@ describe('SessionTracker test', () => {
 
 		eventRecorder = new EventRecorder(context);
 		sessionTracker = new SessionTracker(provider, context);
-		const pageViewTracker = new PageViewTracker(provider, context);
+		pageViewTracker = new PageViewTracker(provider, context);
 		provider.context = context;
 		provider.sessionTracker = sessionTracker;
 		provider.eventRecorder = eventRecorder;
@@ -150,6 +151,8 @@ describe('SessionTracker test', () => {
 	});
 
 	test('test not record app start when browser is from reload', () => {
+		provider.configuration.isTrackAppStartEvents = true;
+		jest.spyOn(BrowserInfo, 'isFromReload').mockReturnValue(true);
 		setPerformanceEntries(true, true);
 		sessionTracker.setUp();
 		expect(recordMethodMock).not.toBeCalledWith({
@@ -208,13 +211,28 @@ describe('SessionTracker test', () => {
 		expect(sessionTracker.session.sessionIndex).toBe(1);
 	});
 
-	test('test session timeout', async () => {
+	test('test hide page when localStorage cleared', () => {
+		const onPageHideMock = jest.spyOn(sessionTracker, 'onPageHide');
+		sessionTracker.setUp();
+		const originDeviceId = StorageUtil.getDeviceId();
+		const originUserUniqueId = StorageUtil.getCurrentUserUniqueId();
+		localStorage.clear();
+		hidePage();
+		expect(onPageHideMock).toBeCalled();
+		expect(StorageUtil.getDeviceId()).toBe(originDeviceId);
+		expect(StorageUtil.getCurrentUserUniqueId()).toBe(originUserUniqueId);
+		expect(StorageUtil.getIsFirstOpen()).toBe(false);
+	});
+
+	test('test session timeout and reopen the page will record page view', async () => {
+		const trackPageViewMock = jest.spyOn(pageViewTracker, 'trackPageView');
 		(provider.configuration as any).sessionTimeoutDuration = 0;
 		sessionTracker.setUp();
 		hidePage();
 		await sleep(100);
 		showPage();
 		expect(sessionTracker.session.sessionIndex).toBe(2);
+		expect(trackPageViewMock).toBeCalled();
 	});
 
 	test('test send event in batch mode when hide page', async () => {
@@ -280,8 +298,8 @@ describe('SessionTracker test', () => {
 		hidePage();
 		expect(sendEventBackgroundMock).toBeCalledWith(false);
 		expect(flushEventMock).toBeCalled();
-		expect(clearAllEventsMock).not.toBeCalled();
 		expect(recordUserEngagementMock).toBeCalledWith(true);
+		expect(clearAllEventsMock).not.toBeCalled();
 	});
 
 	test('test send event in batch mode when close window in firefox', async () => {

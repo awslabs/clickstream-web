@@ -32,7 +32,7 @@ describe('ClickstreamProvider test', () => {
 	let mockRecordProfileSet: any;
 
 	beforeEach(async () => {
-		localStorage.clear();
+		StorageUtil.clearAll();
 		setUpBrowserPerformance();
 		const mockSendRequest = jest.fn().mockResolvedValue(true);
 		jest.spyOn(NetRequest, 'sendRequest').mockImplementation(mockSendRequest);

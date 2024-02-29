@@ -22,7 +22,7 @@ import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('StorageUtil test', () => {
 	beforeEach(() => {
-		localStorage.clear();
+		StorageUtil.clearAll()
 	});
 
 	test('test get device id', () => {
