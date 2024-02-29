@@ -34,12 +34,11 @@ export class PageViewTracker extends BaseTracker {
 		if (this.isMultiPageApp()) {
 			if (!BrowserInfo.isFromReload()) {
 				this.onPageChange();
-			} else {
-				this.isFirstTime = false;
 			}
 		} else {
 			this.trackPageViewForSPA();
 		}
+		this.isFirstTime = false;
 	}
 
 	trackPageViewForSPA() {
@@ -48,8 +47,6 @@ export class PageViewTracker extends BaseTracker {
 		window.addEventListener('popstate', this.onPageChange);
 		if (!BrowserInfo.isFromReload()) {
 			this.onPageChange();
-		} else {
-			this.isFirstTime = false;
 		}
 	}
 
@@ -78,9 +75,6 @@ export class PageViewTracker extends BaseTracker {
 
 				StorageUtil.savePreviousPageUrl(currentPageUrl);
 				StorageUtil.savePreviousPageTitle(currentPageTitle);
-				if (this.isFirstTime) {
-					this.isFirstTime = false;
-				}
 			}
 		}
 	}
