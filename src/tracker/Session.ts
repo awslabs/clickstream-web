@@ -51,25 +51,29 @@ export class Session {
 		this.pauseTime = new Date().getTime();
 	}
 
-	static getCurrentSession(context: ClickstreamContext): Session {
-		const storedSession = StorageUtil.getSession();
-		let sessionIndex = 1;
-		if (storedSession !== null) {
+	static getCurrentSession(
+		context: ClickstreamContext,
+		previousSession: Session = null
+	): Session {
+		let session = previousSession;
+		if (previousSession === null) {
+			session = StorageUtil.getSession();
+		}
+		if (session !== null) {
 			if (
-				new Date().getTime() - storedSession.pauseTime <
+				new Date().getTime() - session.pauseTime <
 				context.configuration.sessionTimeoutDuration
 			) {
-				return new Session(
-					storedSession.sessionId,
-					storedSession.sessionIndex,
-					storedSession.startTime,
-					storedSession.pauseTime
-				);
+				return session;
 			} else {
-				sessionIndex = storedSession.sessionIndex + 1;
+				return Session.createSession(
+					context.userUniqueId,
+					session.sessionIndex + 1
+				);
 			}
+		} else {
+			return Session.createSession(context.userUniqueId, 1);
 		}
-		return Session.createSession(context.userUniqueId, sessionIndex);
 	}
 
 	private static getSessionId(uniqueId: string): string {
