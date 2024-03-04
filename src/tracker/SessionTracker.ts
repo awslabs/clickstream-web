@@ -65,7 +65,9 @@ export class SessionTracker extends BaseTracker {
 		logger.debug('page appear');
 		const pageViewTracker = this.provider.pageViewTracker;
 		pageViewTracker.updateLastScreenStartTimestamp();
-		this.session = Session.getCurrentSession(this.context);
+		if (!isFirstTime) {
+			this.session = Session.getCurrentSession(this.context, this.session);
+		}
 		if (this.session.isNewSession()) {
 			pageViewTracker.setIsEntrances();
 			StorageUtil.clearPageInfo();

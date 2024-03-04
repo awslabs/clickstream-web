@@ -27,7 +27,7 @@ import {
 	Event,
 	EventRecorder,
 } from '../../src/provider';
-import { PageViewTracker, SessionTracker } from '../../src/tracker';
+import { PageViewTracker, SessionTracker, Session } from '../../src/tracker';
 import { StorageUtil } from '../../src/util/StorageUtil';
 import { setPerformanceEntries } from '../browser/BrowserUtil';
 import { MockObserver } from '../browser/MockObserver';
@@ -94,6 +94,16 @@ describe('SessionTracker test', () => {
 		expect(session.sessionIndex).toBe(1);
 		expect(session.sessionId).not.toBeUndefined();
 		expect(session.isNewSession()).toBeTruthy();
+	});
+
+	test('test first open and session start event has the same sessionId', () => {
+		sessionTracker.setUp();
+		const allEvents = JSON.parse(StorageUtil.getAllEvents() + ']');
+		const firstOpenEvent = allEvents[0];
+		const sessionStartEvent = allEvents[1];
+		expect(
+			firstOpenEvent.sessionId === sessionStartEvent.sessionId
+		).toBeTruthy();
 	});
 
 	test('test enable app start', () => {
@@ -233,6 +243,18 @@ describe('SessionTracker test', () => {
 		showPage();
 		expect(sessionTracker.session.sessionIndex).toBe(2);
 		expect(trackPageViewMock).toBeCalled();
+	});
+
+	test('test launch the app use the stored session', () => {
+		const session = Session.createSession(context.userUniqueId, 2);
+		session.pauseTime = new Date().getTime() - 1100;
+		StorageUtil.saveSession(session);
+		sessionTracker.setUp();
+		expect(sessionTracker.session.startTime).toBe(session.startTime);
+		expect(sessionTracker.session.sessionId).toBe(session.sessionId);
+		expect(sessionTracker.session.sessionIndex).toBe(session.sessionIndex);
+		expect(sessionTracker.session.pauseTime > 1000).toBeTruthy();
+		expect(sessionTracker.session.isNewSession()).toBeFalsy();
 	});
 
 	test('test send event in batch mode when hide page', async () => {

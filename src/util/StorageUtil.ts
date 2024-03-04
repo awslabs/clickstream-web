@@ -255,7 +255,13 @@ export class StorageUtil {
 		if (sessionStr === null) {
 			return null;
 		}
-		return JSON.parse(sessionStr) as Session;
+		const sessionObject = JSON.parse(sessionStr);
+		return new Session(
+			sessionObject.sessionId,
+			sessionObject.sessionIndex,
+			sessionObject.startTime,
+			sessionObject.pauseTime
+		);
 	}
 
 	static getIsFirstOpen(): boolean {
