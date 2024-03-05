@@ -209,6 +209,19 @@ ClickstreamAnalytics.updateConfigure({
 });
 ```
 
+## Implementing Clickstream Web SDK in Google Tag Manager Using Template
+
+1. Download the Clickstream SDK template file (.tpl) from the [SDK Release Page](https://github.com/awslabs/clickstream-web/releases).
+2. Refer to the Google Tag Manager [Import Guide](https://developers.google.com/tag-platform/tag-manager/templates#export_and_import) for instructions on importing the .tpl file as a custom template in your tag manager console.
+3. Refer to the [Use your new tag](https://developers.google.com/tag-platform/tag-manager/templates#use_your_new_tag) to add ClickstreamAnalytics tag to your container.
+4. The ClickstreamAnalytics tag currently supports four tag types:
+   * Initialize SDK
+   * Record Custom Event
+   * Set User ID
+   * Set User Attribute
+
+   Note: Ensure that you initialize the SDK tag first before use other ClickstreamAnalytics tag types.
+
 ## How to integrate and test locally
 
 ### Integrate the `.tgz` file
