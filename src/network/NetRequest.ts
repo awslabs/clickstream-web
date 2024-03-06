@@ -36,6 +36,7 @@ export class NetRequest {
 			platform: 'Web',
 			appId: configuration.appId,
 			event_bundle_sequence_id: bundleSequenceId.toString(),
+			upload_timestamp: new Date().getTime().toString(),
 			hashCode: eventsHash,
 		});
 		const url = `${configuration.endpoint}?${queryParams.toString()}`;
