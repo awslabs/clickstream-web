@@ -104,4 +104,21 @@ describe('ClickstreamAnalytics test', () => {
 		);
 		expect(eventJsonHashCode).toBe(requestHashCode);
 	});
+
+	test('test request success with upload timestamp', async () => {
+		fetchMock.post('begin:https://localhost:8080/collect', {
+			status: 200,
+			body: [],
+		});
+		const mockFetch = jest.spyOn(global, 'fetch');
+
+		const result = await NetRequest.sendRequest(eventJson, context, 1);
+		expect(result).toBeTruthy();
+
+		const [requestUrl] = mockFetch.mock.calls[0];
+		const uploadTimestamp = new URL(requestUrl.toString()).searchParams.get(
+			'upload_timestamp'
+		);
+		expect(uploadTimestamp).not.toBeNull();
+	});
 });
