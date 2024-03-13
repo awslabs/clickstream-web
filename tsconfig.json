@@ -12,7 +12,6 @@
     "moduleResolution": "node",
     "declaration": true,
     "noEmitOnError": false,
-    "incremental": true,
     "importHelpers": true,
     "outDir": "lib",
     "resolveJsonModule": true
