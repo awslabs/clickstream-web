@@ -3,7 +3,7 @@
   "version": "0.10.0",
   "description": "ClickstreamAnalytics Web SDK",
   "license": "Apache-2.0",
-  "main": "./lib/index.ts",
+  "main": "./lib/index.js",
   "module": "./lib-esm/index.js",
   "typings": "./lib-esm/index.d.ts",
   "publishConfig": {
