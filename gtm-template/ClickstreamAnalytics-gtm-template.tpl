@@ -390,7 +390,7 @@ const onLoadClickstreamSuccess = function () {
   });
 };
 
-const url = "https://github.com/awslabs/clickstream-web/releases/download/v0.10.0/clickstream-web.min.js";
+const url = "https://github.com/awslabs/clickstream-web/releases/download/v0.10.1/clickstream-web.min.js";
 injectScript(url, onLoadClickstreamSuccess, data.gtmOnFailure, 'ClickstreamAnalytics-web');
 
 

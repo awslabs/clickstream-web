@@ -1,6 +1,6 @@
 {
   "name": "@aws/clickstream-web",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "ClickstreamAnalytics Web SDK",
   "license": "Apache-2.0",
   "main": "./lib/index.js",
