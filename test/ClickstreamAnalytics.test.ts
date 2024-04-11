@@ -10,8 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { setUpBrowserPerformance } from "./browser/BrowserUtil";
-import { ClickstreamAnalytics, Item, SendMode } from '../src';
+import { setUpBrowserPerformance } from './browser/BrowserUtil';
+import { ClickstreamAnalytics, Item, SendMode, Attr } from '../src';
 import { NetRequest } from '../src/network/NetRequest';
 import { Event } from '../src/provider';
 import { StorageUtil } from '../src/util/StorageUtil';
@@ -66,15 +66,70 @@ describe('ClickstreamAnalytics test', () => {
 		);
 		const firstEvent = eventList[0];
 		expect(firstEvent.event_type).toBe(Event.PresetEvent.FIRST_OPEN);
-		expect(firstEvent.user[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]).not.toBeUndefined()
+		expect(
+			firstEvent.user[Event.ReservedAttribute.USER_FIRST_TOUCH_TIMESTAMP]
+		).not.toBeUndefined();
 		expect(firstEvent.attributes.brand).toBe('Samsung');
 		expect(firstEvent.attributes.level).toBe(10);
-		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_ID]).not.toBeUndefined();
-		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_NUMBER]).not.toBeUndefined();
-		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_START_TIMESTAMP]).not.toBeUndefined();
-		expect(firstEvent.attributes[Event.ReservedAttribute.SESSION_DURATION]).not.toBeUndefined();
+		expect(
+			firstEvent.attributes[Event.ReservedAttribute.SESSION_ID]
+		).not.toBeUndefined();
+		expect(
+			firstEvent.attributes[Event.ReservedAttribute.SESSION_NUMBER]
+		).not.toBeUndefined();
+		expect(
+			firstEvent.attributes[Event.ReservedAttribute.SESSION_START_TIMESTAMP]
+		).not.toBeUndefined();
+		expect(
+			firstEvent.attributes[Event.ReservedAttribute.SESSION_DURATION]
+		).not.toBeUndefined();
 		const testEvent = eventList[eventList.length - 1];
 		expect(testEvent.attributes.brand).toBeUndefined();
+	});
+
+	test('test init sdk with traffic source global attributes', async () => {
+		const result = ClickstreamAnalytics.init({
+			appId: 'testApp',
+			endpoint: 'https://example.com/collect',
+			sendMode: SendMode.Batch,
+			globalAttributes: {
+				[Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+				[Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+				[Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+				[Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+				[Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+				[Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+				[Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+				[Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+			},
+		});
+		expect(result).toBeTruthy();
+		await sleep(100);
+		const eventList = JSON.parse(
+			StorageUtil.getAllEvents() + Event.Constants.SUFFIX
+		);
+		const firstEvent = eventList[0];
+		expect(firstEvent.event_type).toBe(Event.PresetEvent.FIRST_OPEN);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_SOURCE]).toBe('amazon');
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_MEDIUM]).toBe('cpc');
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_CAMPAIGN]).toBe(
+			'summer_promotion'
+		);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]).toBe(
+			'summer_promotion_01'
+		);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_TERM]).toBe(
+			'running_shoes'
+		);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_CONTENT]).toBe(
+			'banner_ad_1'
+		);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_CLID]).toBe(
+			'amazon_ad_123'
+		);
+		expect(firstEvent.attributes[Attr.TRAFFIC_SOURCE_CLID_PLATFORM]).toBe(
+			'amazon_ads'
+		);
 	});
 
 	test('test record event with name success', async () => {
@@ -111,7 +166,7 @@ describe('ClickstreamAnalytics test', () => {
 			name: 'Nature',
 			category: 'book',
 			price: 56.5,
-			customKey: "customValue",
+			customKey: 'customValue',
 		};
 		ClickstreamAnalytics.record({
 			name: 'testEvent',
@@ -120,6 +175,8 @@ describe('ClickstreamAnalytics test', () => {
 				longValue: 4232032890992380000,
 				isNew: true,
 				score: 85.22,
+				[Attr.VALUE]: 56.5,
+				[Attr.CURRENCY]: 'USD',
 			},
 			items: [item],
 		});
