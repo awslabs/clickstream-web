@@ -46,7 +46,31 @@ export enum PageType {
 	multiPageApp = 'multiPageApp',
 }
 
+export enum Attr {
+	TRAFFIC_SOURCE_SOURCE = '_traffic_source_source',
+	TRAFFIC_SOURCE_MEDIUM = '_traffic_source_medium',
+	TRAFFIC_SOURCE_CAMPAIGN = '_traffic_source_campaign',
+	TRAFFIC_SOURCE_CAMPAIGN_ID = '_traffic_source_campaign_id',
+	TRAFFIC_SOURCE_TERM = '_traffic_source_term',
+	TRAFFIC_SOURCE_CONTENT = '_traffic_source_content',
+	TRAFFIC_SOURCE_CLID = '_traffic_source_clid',
+	TRAFFIC_SOURCE_CLID_PLATFORM = '_traffic_source_clid_platform',
+	VALUE = '_value',
+	CURRENCY = '_currency',
+}
+
 export interface ClickstreamAttribute {
+	[Attr.TRAFFIC_SOURCE_SOURCE]?: string;
+	[Attr.TRAFFIC_SOURCE_MEDIUM]?: string;
+	[Attr.TRAFFIC_SOURCE_CAMPAIGN]?: string;
+	[Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]?: string;
+	[Attr.TRAFFIC_SOURCE_TERM]?: string;
+	[Attr.TRAFFIC_SOURCE_CONTENT]?: string;
+	[Attr.TRAFFIC_SOURCE_CLID]?: string;
+	[Attr.TRAFFIC_SOURCE_CLID_PLATFORM]?: string;
+	[Attr.VALUE]?: number;
+	[Attr.CURRENCY]?: string;
+
 	[key: string]: string | number | boolean | null;
 }
 

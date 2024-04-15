@@ -79,13 +79,23 @@ When opening for the first time after integrating the SDK, you need to manually 
 #### Add global attribute
 1. Add global attributes when initializing the SDK
 
+   The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+
    ```typescript
+   import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+   
    ClickstreamAnalytics.init({
       appId: "your appId",
       endpoint: "https://example.com/collect",
       globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
+        [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+        [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+        [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+        [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+        [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+        [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+        [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+        [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
       }
    });
    ```
@@ -93,8 +103,10 @@ When opening for the first time after integrating the SDK, you need to manually 
 2. Add global attributes after initializing the SDK
 
    ``` typescript
+   import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+   
    ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
+     [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
      level: 10,
    });
    ```
@@ -108,7 +120,7 @@ You can add the following code to log an event with an item.
 **Note: Only pipelines from version 1.1+ can handle items with custom attribute.**
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-web';
 
 const itemBook: Item = {
   id: '123',
@@ -120,7 +132,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.CURRENCY]: 'USD', 
+    [Attr.VALUE]: 99,
     event_category: 'recommended',
   },
   items: [itemBook],
