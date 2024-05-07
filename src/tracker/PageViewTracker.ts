@@ -26,8 +26,14 @@ export class PageViewTracker extends BaseTracker {
 	lastEngageTime = 0;
 	lastScreenStartTimestamp = 0;
 	isFirstTime = true;
+	static lastActiveTimestamp = 0;
+	static idleDuration = 0;
+	private static idleTimeoutDuration = 0;
 
 	init() {
+		PageViewTracker.lastActiveTimestamp = new Date().getTime();
+		PageViewTracker.idleTimeoutDuration =
+			this.provider.configuration.idleTimeoutDuration;
 		const configuredSearchKeywords = this.provider.configuration.searchKeyWords;
 		Object.assign(this.searchKeywords, configuredSearchKeywords);
 		this.onPageChange = this.onPageChange.bind(this);
@@ -51,6 +57,7 @@ export class PageViewTracker extends BaseTracker {
 	}
 
 	onPageChange() {
+		PageViewTracker.updateIdleDuration();
 		if (this.context.configuration.isTrackPageViewEvents) {
 			const previousPageUrl = StorageUtil.getPreviousPageUrl();
 			const previousPageTitle = StorageUtil.getPreviousPageTitle();
@@ -114,6 +121,8 @@ export class PageViewTracker extends BaseTracker {
 
 	updateLastScreenStartTimestamp() {
 		this.lastScreenStartTimestamp = new Date().getTime();
+		PageViewTracker.idleDuration = 0;
+		PageViewTracker.lastActiveTimestamp = this.lastScreenStartTimestamp;
 	}
 
 	recordUserEngagement(isImmediate = false) {
@@ -133,7 +142,10 @@ export class PageViewTracker extends BaseTracker {
 	}
 
 	getLastEngageTime() {
-		return new Date().getTime() - this.lastScreenStartTimestamp;
+		const duration = new Date().getTime() - this.lastScreenStartTimestamp;
+		const engageTime = duration - PageViewTracker.idleDuration;
+		PageViewTracker.idleDuration = 0;
+		return engageTime;
 	}
 
 	isMultiPageApp() {
@@ -159,8 +171,17 @@ export class PageViewTracker extends BaseTracker {
 			}
 		}
 	}
+
+	static updateIdleDuration() {
+		const currentTimestamp = new Date().getTime();
+		const idleDuration = currentTimestamp - PageViewTracker.lastActiveTimestamp;
+		if (idleDuration > PageViewTracker.idleTimeoutDuration) {
+			PageViewTracker.idleDuration += idleDuration;
+		}
+		PageViewTracker.lastActiveTimestamp = currentTimestamp;
+	}
 }
 
-enum Constants {
+export enum Constants {
 	minEngagementTime = 1000,
 }

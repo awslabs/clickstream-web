@@ -317,6 +317,19 @@ describe('PageViewTracker test', () => {
 		expect(recordMethodMock).toBeCalled();
 	});
 
+	test('test get engagement time with idle time', async () => {
+		pageViewTracker.lastScreenStartTimestamp = new Date().getTime();
+		(provider.configuration as any).idleTimeoutDuration = 100;
+		pageViewTracker.setUp();
+		await sleep(110);
+		PageViewTracker.updateIdleDuration();
+		await sleep(100);
+		expect(PageViewTracker.idleDuration > 0).toBeTruthy();
+		const lastEngageTime = pageViewTracker.getLastEngageTime();
+		console.log(lastEngageTime)
+		expect(lastEngageTime < 150).toBeTruthy();
+	});
+
 	function openPageA() {
 		Object.defineProperty(window.document, 'title', {
 			writable: true,

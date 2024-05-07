@@ -17,9 +17,9 @@ import {
 	ClickstreamProvider,
 	EventRecorder,
 } from '../../src/provider';
-import { Session, SessionTracker } from '../../src/tracker';
+import { Session, SessionTracker, PageViewTracker } from '../../src/tracker';
 import { ScrollTracker } from '../../src/tracker/ScrollTracker';
-import { StorageUtil } from "../../src/util/StorageUtil";
+import { StorageUtil } from '../../src/util/StorageUtil';
 
 describe('ScrollTracker test', () => {
 	let provider: ClickstreamProvider;
@@ -28,7 +28,7 @@ describe('ScrollTracker test', () => {
 	let recordMethodMock: any;
 
 	beforeEach(() => {
-		StorageUtil.clearAll()
+		StorageUtil.clearAll();
 		provider = new ClickstreamProvider();
 
 		Object.assign(provider.configuration, {
@@ -63,27 +63,29 @@ describe('ScrollTracker test', () => {
 		expect(scrollTracker.isFirstTime).toBeTruthy();
 	});
 
-	test('test scroll for not reach ninety percent', () => {
+	test('test scroll for not reach ninety percent', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
 		setScrollHeight(2000);
 		(window as any).innerHeight = 1000;
 		setScrollY(100);
 		window.document.dispatchEvent(new window.Event('scroll'));
+		await sleep(110);
 		expect(recordMethodMock).not.toBeCalled();
 		expect(trackScrollMock).toBeCalled();
 	});
 
-	test('test scroll for reached ninety percent', () => {
+	test('test scroll for reached ninety percent', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-		performScrollToBottom();
+		await performScrollToBottom();
+		await sleep(110);
 		expect(recordMethodMock).toBeCalled();
 		expect(trackScrollMock).toBeCalled();
 		expect(scrollTracker.isFirstTime).toBeFalsy();
 	});
 
-	test('test window scroll for reached ninety percent using scrollTop api', () => {
+	test('test window scroll for reached ninety percent using scrollTop api', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
 		Object.defineProperty(window, 'scrollY', {
@@ -97,46 +99,59 @@ describe('ScrollTracker test', () => {
 			value: 150,
 		});
 		window.document.dispatchEvent(new window.Event('scroll'));
+		await sleep(110);
 		expect(trackScrollMock).toBeCalled();
 		expect(recordMethodMock).toBeCalled();
 	});
 
-	test('test scroll for reached ninety percent and scroll event is disabled', () => {
+	test('test scroll for reached ninety percent and scroll event is disabled', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		provider.configuration.isTrackScrollEvents = false;
 		scrollTracker.setUp();
-		performScrollToBottom();
+		await performScrollToBottom();
 		expect(trackScrollMock).toBeCalled();
 		expect(recordMethodMock).not.toBeCalled();
 	});
 
-	test('test scroll for reached ninety percent twice', () => {
+	test('test scroll for reached ninety percent twice', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-		performScrollToBottom();
+		await performScrollToBottom();
 		window.document.dispatchEvent(new window.Event('scroll'));
+		await sleep(110);
 		expect(recordMethodMock).toBeCalledTimes(1);
 		expect(trackScrollMock).toBeCalledTimes(2);
 		expect(scrollTracker.isFirstTime).toBeFalsy();
 	});
 
-	test('test scroll for enter new page', () => {
+	test('test scroll for enter new page', async () => {
 		const trackScrollMock = jest.spyOn(scrollTracker, 'trackScroll');
 		scrollTracker.setUp();
-		performScrollToBottom();
+		await performScrollToBottom();
 		scrollTracker.enterNewPage();
 		expect(scrollTracker.isFirstTime).toBeTruthy();
 		window.document.dispatchEvent(new window.Event('scroll'));
+		await sleep(110);
 		expect(recordMethodMock).toBeCalledTimes(2);
 		expect(trackScrollMock).toBeCalledTimes(2);
 		expect(scrollTracker.isFirstTime).toBeFalsy();
 	});
 
-	function performScrollToBottom() {
+	test('test mouse move will update the idle duration', async () => {
+		const onMouseMoveMock = jest.spyOn(scrollTracker, 'onMouseMove');
+		scrollTracker.setUp();
+		window.document.dispatchEvent(new window.Event('mousemove'));
+		await sleep(110);
+		expect(onMouseMoveMock).toBeCalled();
+		expect(PageViewTracker.lastActiveTimestamp > 0).toBeTruthy();
+	});
+
+	async function performScrollToBottom() {
 		setScrollHeight(1000);
 		(window as any).innerHeight = 800;
 		setScrollY(150);
 		window.document.dispatchEvent(new window.Event('scroll'));
+		await sleep(110);
 	}
 
 	function setScrollHeight(height: number) {
@@ -151,5 +166,9 @@ describe('ScrollTracker test', () => {
 			writable: true,
 			value: height,
 		});
+	}
+
+	function sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 });

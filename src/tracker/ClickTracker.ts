@@ -13,6 +13,7 @@
 
 import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
+import { PageViewTracker } from './PageViewTracker';
 import { Event } from '../provider';
 
 const logger = new Logger('ClickTracker');
@@ -33,6 +34,7 @@ export class ClickTracker extends BaseTracker {
 	}
 
 	trackDocumentClick(event: MouseEvent) {
+		PageViewTracker.updateIdleDuration();
 		if (!this.context.configuration.isTrackClickEvents) return;
 		const targetElement = event.target as Element;
 		const element = this.findATag(targetElement);
