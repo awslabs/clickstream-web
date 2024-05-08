@@ -93,7 +93,31 @@ describe('SessionTracker test', () => {
 		const session = sessionTracker.session;
 		expect(session.sessionIndex).toBe(1);
 		expect(session.sessionId).not.toBeUndefined();
-		expect(session.isNewSession()).toBeTruthy();
+		expect(session.isNewSession()).toBeFalsy();
+	});
+
+	test('test page appear without page hide will not record session start twice', () => {
+		const pageAppearMock = jest.spyOn(sessionTracker, 'onPageAppear');
+		sessionTracker.setUp();
+		expect(pageAppearMock).toBeCalledWith(true);
+		expect(recordMethodMock).toBeCalledWith({
+			name: Event.PresetEvent.SESSION_START,
+		});
+		const session = sessionTracker.session;
+		expect(session.sessionIndex).toBe(1);
+		expect(session.sessionId).not.toBeUndefined();
+		expect(session.isRecorded).toBeTruthy();
+		expect(session.isNewSession()).toBeFalsy();
+
+		sessionTracker.onPageAppear(false);
+		sessionTracker.onPageAppear(false);
+		expect(pageAppearMock).toBeCalledWith(false);
+		const allCalls = recordMethodMock.mock.calls;
+		const sessionStartCalls = allCalls.filter((call: [any]) => {
+			const [arg] = call;
+			return arg && arg.name === Event.PresetEvent.SESSION_START;
+		});
+		expect(sessionStartCalls.length).toBe(1);
 	});
 
 	test('test first open and session start event has the same sessionId', () => {

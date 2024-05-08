@@ -18,6 +18,7 @@ export class Session {
 	startTime: number;
 	sessionIndex: number;
 	pauseTime: number;
+	isRecorded = false;
 
 	static createSession(uniqueId: string, sessionIndex: number): Session {
 		return new Session(
@@ -40,7 +41,7 @@ export class Session {
 	}
 
 	isNewSession(): boolean {
-		return this.pauseTime === undefined;
+		return this.pauseTime === undefined && !this.isRecorded;
 	}
 
 	getDuration(): number {
@@ -61,8 +62,9 @@ export class Session {
 		}
 		if (session !== null) {
 			if (
+				session.pauseTime === undefined ||
 				new Date().getTime() - session.pauseTime <
-				context.configuration.sessionTimeoutDuration
+					context.configuration.sessionTimeoutDuration
 			) {
 				return session;
 			} else {

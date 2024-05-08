@@ -72,6 +72,7 @@ export class SessionTracker extends BaseTracker {
 			pageViewTracker.setIsEntrances();
 			StorageUtil.clearPageInfo();
 			this.provider.record({ name: Event.PresetEvent.SESSION_START });
+			this.session.isRecorded = true;
 			if (!isFirstTime) {
 				pageViewTracker.onPageChange();
 			}
