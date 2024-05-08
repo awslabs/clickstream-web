@@ -176,6 +176,7 @@ ClickstreamAnalytics.init({
    isLogEvents: false,
    authCookie: "your auth cookie",
    sessionTimeoutDuration: 1800000,
+   idleTimeoutDuration: 120000,
    searchKeyWords: ['product', 'class'],
    domainList: ['example1.com', 'example2.com'],
 });
@@ -199,6 +200,7 @@ Here is an explanation of each property:
 - **isLogEvents**: whether to print out event json for debugging, default is false.
 - **authCookie**: your auth cookie for AWS application load balancer auth cookie.
 - **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
+- **idleTimeoutDuration**: the maximum duration of user inactivity before triggering an idle state, default is 120000 millisecond, Any idle duration exceeding this threshold will be removed in the user_engagement events on the current page.
 - **searchKeyWords**: the customized Keywords for trigger the `_search` event, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters.
 - **domainList**: if your website cross multiple domain, you can customize the domain list. The `_outbound` attribute of the `_click` event will be true when a link leads to a website that's not a part of your configured domain.  
 
@@ -218,7 +220,7 @@ ClickstreamAnalytics.updateConfigure({
   isTrackSearchEvents: false,
   isTrackPageLoadEvents: false,
   isTrackAppStartEvents: true,
-  isTrackAppStartEvents: true,
+  isTrackAppEndEvents: true,
 });
 ```
 

@@ -18,6 +18,7 @@ export interface ClickstreamConfiguration extends Configuration {
 	readonly sendEventsInterval?: number;
 	readonly pageType?: PageType;
 	readonly sessionTimeoutDuration?: number;
+	readonly idleTimeoutDuration?: number;
 	readonly searchKeyWords?: string[];
 	readonly domainList?: string[];
 	readonly globalAttributes?: ClickstreamAttribute;
