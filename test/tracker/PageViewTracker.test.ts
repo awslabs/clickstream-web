@@ -326,7 +326,6 @@ describe('PageViewTracker test', () => {
 		await sleep(100);
 		expect(PageViewTracker.idleDuration > 0).toBeTruthy();
 		const lastEngageTime = pageViewTracker.getLastEngageTime();
-		console.log(lastEngageTime)
 		expect(lastEngageTime < 150).toBeTruthy();
 	});
 
