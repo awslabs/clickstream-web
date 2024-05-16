@@ -397,6 +397,16 @@ describe('SessionTracker test', () => {
 		expect(clearFailedEventsMock).not.toBeCalled();
 	});
 
+	test('test hide page view update lastActiveTimestamp', async () => {
+		sessionTracker.setUp();
+		const startTimestamp = PageViewTracker.lastActiveTimestamp;
+		await sleep(110);
+		hidePage();
+		expect(
+			PageViewTracker.lastActiveTimestamp - startTimestamp > 100
+		).toBeTruthy();
+	});
+
 	function hidePage() {
 		Object.defineProperty(window.document, 'hidden', {
 			writable: true,
