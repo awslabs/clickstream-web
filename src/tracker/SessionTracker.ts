@@ -12,7 +12,7 @@
  */
 import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
-import { PageViewTracker } from "./PageViewTracker";
+import { PageViewTracker } from './PageViewTracker';
 import { Session } from './Session';
 import { BrowserInfo } from '../browser';
 import { Event } from '../provider';
