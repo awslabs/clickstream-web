@@ -12,6 +12,7 @@
  */
 import { Logger } from '@aws-amplify/core';
 import { BaseTracker } from './BaseTracker';
+import { PageViewTracker } from './PageViewTracker';
 import { Session } from './Session';
 import { BrowserInfo } from '../browser';
 import { Event } from '../provider';
@@ -103,6 +104,7 @@ export class SessionTracker extends BaseTracker {
 	}
 
 	recordUserEngagement(isImmediate: boolean) {
+		PageViewTracker.updateIdleDuration();
 		this.provider.pageViewTracker.recordUserEngagement(isImmediate);
 	}
 
