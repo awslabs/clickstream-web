@@ -397,7 +397,7 @@ describe('SessionTracker test', () => {
 		expect(clearFailedEventsMock).not.toBeCalled();
 	});
 
-	test('test hide page view update lastActiveTimestamp', async () => {
+	test('test hide page will update lastActiveTimestamp', async () => {
 		sessionTracker.setUp();
 		const startTimestamp = PageViewTracker.lastActiveTimestamp;
 		await sleep(110);
