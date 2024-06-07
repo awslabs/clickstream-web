@@ -81,6 +81,7 @@ describe('PageViewTracker test', () => {
 
 	afterEach(() => {
 		jest.restoreAllMocks();
+		jest.resetAllMocks();
 		jest.clearAllMocks();
 		provider = undefined;
 		Object.defineProperty(window, 'location', {
