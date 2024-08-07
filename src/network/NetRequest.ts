@@ -55,6 +55,7 @@ export class NetRequest {
 				cookie: configuration.authCookie,
 				'User-Agent': browserInfo.userAgent,
 			},
+			credentials: 'include',
 			body: eventsJson,
 			keepalive: isKeepAlive,
 		};
