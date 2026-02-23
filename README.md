@@ -243,7 +243,7 @@ ClickstreamAnalytics.updateConfigure({
 
 Clone this repository locally and execute the following script to generate `aws-clickstream-web-0.12.6.tgz` zip package, which will be located in the project root folder.
 ```bash
-$ cd clickstream-web && npm i && npm run pack
+$ npm i && npm run pack
 ```
 
 Copy the `aws-clickstream-web-0.12.6.tgz` into your project, then execute the script in your project root folder to install the SDK.
@@ -255,7 +255,7 @@ $ npm install ./aws-clickstream-web-0.12.6.tgz
 ### Integrate the `clickstream-web.min.js` file
 Execute the following script to generate `clickstream-web.min.js`, located in the `/dist` folder.
 ```bash
-$ cd clickstream-web && npm i && npm run pack
+$ npm i && npm run pack
 ```
 Copy the `clickstream-web.min.js` into your project and add the following initial code into your `index.html`.
 
